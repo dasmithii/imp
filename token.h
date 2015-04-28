@@ -1,6 +1,7 @@
 #ifndef IMP_TOKEN_H_
 #define IMP_TOKEN_H_
 #include "assert.h"
+#include "stdbool.h"
 
 
 typedef enum {
@@ -45,5 +46,10 @@ void Token_clean(Token *token);
 void Token_print(Token *token);
 void Token_printType(Token *token);
 void Token_printVerbose(Token *token);
+
+bool Token_isOpen(Token *self);
+bool Token_isClosed(Token *self);
+bool Token_isGrouping(Token *self);
+bool Token_isUnary(Token *self);
 
 #endif

@@ -1,9 +1,10 @@
 #include "stdio.h"
-#include "lexer.h"
+#include "parser.h"
 
 int main(int argc, char **argv){
-	Tokenization t = lex("(add 5 -5 'adam')");
-	Tokenization_print(&t);
+	ParseTree tree;
+	ParseTree_init(&tree, "(print -'tom') \n(add 5 -5 'adam')");
+	ParseTree_print(&tree);
 	// switch(argc){
 	// case 1:
 	// 	printf("%s\n", "repl");

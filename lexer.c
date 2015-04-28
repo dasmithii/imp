@@ -5,12 +5,18 @@
 #include "stdlib.h"
 #include "string.h"
 #include "token.h"
+#include "stdio.h"
 
 
 int Tokenization_init(Tokenization *tokenization, char *code){
 	assert(tokenization);
 	assert(code);
 	Vector_init(&tokenization->tokens, sizeof(Token));
+
+	// prefix with '('
+	const Token beginToken = {.type = TOKEN_SOFT_OPEN};
+	Vector_append(&tokenization->tokens, &beginToken);
+
 	Token token;
 	bool afterSpace;
 	while(*code){
@@ -118,6 +124,9 @@ int Tokenization_init(Tokenization *tokenization, char *code){
 		afterSpace = false;
 		Vector_append(&tokenization->tokens, &token);
 	}
+
+	const Token endToken = {.type = TOKEN_SOFT_CLOSE};
+	Vector_append(&tokenization->tokens, &endToken);
 	return 0; // TODO: handle errors
 }
 
@@ -154,4 +163,12 @@ void Tokenization_print(Tokenization *tokenization){
 	assert(tokenization);
 	assert(!tokenization->error);
 	Vector_each(&tokenization->tokens, printToken);
+}
+
+Token *Tokenization_begin(Tokenization *self){
+	return (Token*) self->tokens.buffer.data;
+}
+
+Token *Tokenization_end(Tokenization *self){
+	return ((Token*) self->tokens.buffer.data) + self->tokens.size;
 }

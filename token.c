@@ -119,3 +119,45 @@ void Token_printVerbose(Token *token){
 	   Token_print(token);
 	}
 }
+
+
+bool Token_isOpen(Token *self){
+	if(!self){
+		return false;
+	}
+	return self->type == TOKEN_SOFT_OPEN  || 
+	       self->type == TOKEN_HARD_OPEN  ||
+	       self->type == TOKEN_CURLY_OPEN;
+}
+
+bool Token_isClosed(Token *self){
+	if(!self){
+		return false;
+	}
+	return self->type == TOKEN_SOFT_CLOSE  || 
+	       self->type == TOKEN_HARD_CLOSE  ||
+	       self->type == TOKEN_CURLY_CLOSE;
+}
+
+bool Token_isGrouping(Token *self){
+	return Token_isOpen(self) || Token_isClosed(self);
+}
+
+bool Token_isUnary(Token *self){
+	if(!self){
+		return false;
+	}
+	return self->type == TOKEN_NOT       ||
+		   self->type == TOKEN_AT        ||
+		   self->type == TOKEN_HASH      ||
+		   self->type == TOKEN_DOLLAR    ||
+		   self->type == TOKEN_PERCENT   ||
+		   self->type == TOKEN_CARROT    ||
+		   self->type == TOKEN_AMP       ||
+		   self->type == TOKEN_STAR      ||
+		   self->type == TOKEN_PLUS      ||
+		   self->type == TOKEN_QUESTION  ||
+		   self->type == TOKEN_COLON     ||
+		   self->type == TOKEN_SEMI      ||
+		   self->type == TOKEN_DASH;
+}
