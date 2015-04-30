@@ -1,7 +1,7 @@
 #include "token.h"
-#include "string.h"
-#include "stdlib.h"
-#include "stdio.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 void Token_clean(Token *token) {
 	assert(token);

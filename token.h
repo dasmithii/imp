@@ -1,7 +1,7 @@
 #ifndef IMP_TOKEN_H_
 #define IMP_TOKEN_H_
-#include "assert.h"
-#include "stdbool.h"
+#include <assert.h>
+#include <stdbool.h>
 
 
 typedef enum {

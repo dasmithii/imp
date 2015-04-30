@@ -1,7 +1,7 @@
 #include "parser.h"
-#include "assert.h"
-#include "string.h"
-#include "stdlib.h"
+#include <assert.h>
+#include <string.h>
+#include <stdlib.h>
 
 
 static int ParseNode_init(ParseNode *node, Token *begin, Token *end){

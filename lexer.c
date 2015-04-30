@@ -1,11 +1,12 @@
 #include "lexer.h"
-#include "assert.h"
-#include "ctype.h"
-#include "stdbool.h"
-#include "stdlib.h"
-#include "string.h"
 #include "token.h"
-#include "stdio.h"
+
+#include <assert.h>
+#include <ctype.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 
 int Tokenization_init(Tokenization *tokenization, char *code){

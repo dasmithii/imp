@@ -1,7 +1,7 @@
-#include "stdio.h"
+#include <stdio.h>
 #include "parser.h"
-#include "string.h"
-#include "stdlib.h"
+#include <string.h>
+#include <stdlib.h>
 
 
 static const char *const usage = 
