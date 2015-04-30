@@ -1,3 +1,178 @@
-// #include "object.h"
+#include "object.h"
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+
+
+void *Slot_data(Slot *self){
+	assert(Slot_isPrimitive(self));
+	return self->data;
+}
+
+Object *Slot_object(Slot *self){
+	assert(!Slot_isPrimitive(self));
+	return (Object*) self->data;
+}
+
+bool Slot_isPrimitive(Slot *self){
+	return 0 == strncmp("__", self->key, 2);
+}
+
+void Slot_clean(Slot *self){
+	if(Slot_isPrimitive(self)){
+		free(self->data);
+	}
+	free(self->key);
+}
+
+
+static int Slot_compare(Slot *self, Slot *other){
+	return strcmp(self->key, other->key);
+}
+
+static int Slot_compare_generic(const void *self, const void *other){
+	return Slot_compare((Slot*) self, (Slot*) other);
+}
+
+Slot *Object_getSlotShallow(Object *self, char *key){
+	Slot skey = {.key = key};
+	return bsearch(&skey
+		         , (void*) self->slots
+		         , self->slotCount
+		         , sizeof(Slot)
+		         , Slot_compare_generic);
+}
+
+
+Slot *Object_getSlotDeep(Object *self, char *key){
+	Slot *shallow = Object_getSlotShallow(self, key);
+	if(shallow){
+		return shallow;
+	}
+	Object *prototype = Object_getShallow(self, "_prototype");
+	if(!prototype){
+		return NULL;
+	}
+	return Object_getSlotDeep(prototype, key);
+}
+
+
+Object *Object_getShallow(Object *self, char *key){
+	Slot *slot = Object_getSlotShallow(self, key);
+	if(slot){
+		return Slot_object(slot);
+	}
+	return NULL;
+}
+
+Object *Object_getDeep(Object *self, char *key){
+	Slot *slot = Object_getSlotDeep(self, key);
+	if(!slot){
+		return NULL;
+	}
+	assert(!Slot_isPrimitive(slot));
+	return Slot_object(slot);
+}
+
+
+bool Object_hasKeyShallow(Object *self, char *key){
+	return Object_getSlotShallow(self, key) != NULL;
+}
+
+
+bool Object_hasKeyDeep(Object *self, char *key){
+	return Object_getDeep(self, key) != NULL;
+}
+
+
+void Object_putShallow(Object *self, char *key, Object *value){
+	Slot *existing = Object_getSlotShallow(self, key);
+	if(existing){
+		existing->data = value;
+		return;
+	}
+
+	self->slots = realloc(self->slots, (self->slotCount + 1) * sizeof(Slot)); // TODO: check return
+	self->slots[self->slotCount].key = strdup(key);
+	self->slots[self->slotCount].data = (void*) value;
+	self->slotCount += 1;
+	qsort(self->slots
+		, self->slotCount
+		, sizeof(Slot)
+		, Slot_compare_generic);
+}
+
+
+void Object_putDeep(Object *self, char *key, Object *value){
+	Object *object = self;
+	while(object && !Object_hasKeyShallow(object, key)){
+		object = Object_getShallow(object, "_prototype");
+	}
+	if(object && Object_hasKeyShallow(object, key)){
+		Object_putShallow(object, key, value);
+	} else {
+		Object_putShallow(self, key, value);
+	}
+}
+
+
+void Object_remShallow(Object *self, char *key){
+	Slot *slot = Object_getSlotShallow(self, key);
+	if(!slot){
+		return;
+	}
+	Slot_clean(slot);
+	int index = (slot - self->slots) / sizeof(Slot);
+	for(int i = index; i < self->slotCount - 1; i++){
+		self->slots[i] = self->slots[i+1];
+	}
+	self->slotCount -= 1;
+	// TODO: realloc to be smaller, maybe?
+}
+
+
+
+
+void Object_mark(Object *self){
+	self->gc_mark = true;
+}
+
+
+void Object_unmark(Object *self){
+	self->gc_mark = false;
+}
+
+
+void Object_markRecursive(Object *self){
+	Object_mark(self);
+	for(int i = 0; i < self->slotCount; i++){
+		Slot *slot = self->slots + i;
+		if(!Slot_isPrimitive(slot)){
+			Object_markRecursive(Slot_object(slot));
+		}
+	}
+}
+
+
+
+void Object_clean(Object *self){
+	// TODO: check for C object data and programmer-specified 
+	// clean up functions.
+
+	for(int i = 0; i < self->slotCount; i++){
+		Slot_clean(self->slots + i);
+	}
+	free(self->slots);
+	self->slotCount = 0;
+}
+
+
+void Object_free(Object *self){
+	Object_clean(self);
+	free(self);
+}
+
+
 
 
