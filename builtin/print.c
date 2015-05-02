@@ -27,6 +27,7 @@ static Object *ImpPrinter_activate_internal(Runtime *runtime
 			printf(" ");
 		}
 	}
+	printf("\n");
 	return NULL;
 }
 
