@@ -1,0 +1,12 @@
+ + Make it so Runtime_clone checks for special and internal
+   methods.
+
+ + Include __mark magic method for mark and sweep
+   collection of internal objects.
+
+ + Finish builtins: (1) vector, (2) closure, (3) hashmap
+
+ + Make it so garbage collection actually happens, and that
+   cleanup functions are called.
+
+ + Make printer check special and internal toString and toNumber methods

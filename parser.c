@@ -2,6 +2,8 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include "toolbox/vector.h"
 
 
 static int ParseNode_init(ParseNode *node, Token *begin, Token *end){
@@ -100,7 +102,7 @@ static int ParseNode_init(ParseNode *node, Token *begin, Token *end){
 	ParseNode_init(&final, prev, it);
 	Vector_append(&subs, &final);
 	node->contents.non_leaf.argc = subs.size;
-	node->contents.non_leaf.argv = subs.buffer.data;
+	node->contents.non_leaf.argv = (void*)subs.buffer.data;
 	return 0;
 }
 
@@ -122,7 +124,7 @@ static void ParseNode_clean(ParseNode *node){
 		const size_t argc = node->contents.non_leaf.argc;
 		if(argc > 0){
 			for(int i = 0; i < argc; ++i){
-				ParseTree_clean(node->contents.non_leaf.argc + i);
+				ParseNode_clean(node->contents.non_leaf.argv + i);
 			}
 			free(node->contents.non_leaf.argv);
 		}
@@ -141,7 +143,7 @@ void ParseTree_clean(ParseTree *tree){
 }
 
 
-static void ParseNode_print(ParseNode *self){
+void ParseNode_print(ParseNode *self){
 	switch(self->type){
 	case CALL_NODE:
 		printf("(");
@@ -182,6 +184,64 @@ static void ParseNode_print(ParseNode *self){
 
 void ParseTree_print(ParseTree *self){
 	ParseNode_print(&self->root);
+}
+
+// typedef enum {
+// 	CALL_NODE,
+// 	MACRO_NODE,
+// 	CLOSURE_NODE,
+// 	LEAF_NODE
+// } ParseNodeType;
+
+
+// typedef struct ParseNode {
+// 	ParseNodeType type;
+// 	union {
+// 		Token *token;
+// 		struct {
+// 			size_t argc;
+// 			struct ParseNode *argv;
+// 		} non_leaf;
+// 	} contents;
+// } ParseNode;
+
+// typedef struct {
+// 	Tokenization tokenization;
+// 	ParseNode root;
+// 	char *error;
+// } ParseTree;
+
+
+ParseNode ParseNode_deepCopy(ParseNode *self){
+	ParseNode r;
+	r.type = self->type;
+	if(r.type == LEAF_NODE){
+		r.contents.token = malloc(sizeof(Token));
+		*r.contents.token = *self->contents.token;
+	} else {
+		size_t argc = self->contents.non_leaf.argc;
+		r.contents.non_leaf.argc = self->contents.non_leaf.argc;
+		r.contents.non_leaf.argv = malloc(argc * sizeof(ParseNode));
+		for(int i = 0; i < argc; i++){
+			r.contents.non_leaf.argv[i] = ParseNode_deepCopy(self->contents.non_leaf.argv + i);
+		}
+	}
+	return r;
+}
+
+
+void ParseNode_deepClean(ParseNode *self){
+	if(self->type == LEAF_NODE){
+		free(self->contents.token);
+		self->contents.token = NULL;
+	} else {
+		size_t argc = self->contents.non_leaf.argc;
+		for(int i = 0; i < argc; i++){
+			ParseNode_deepClean(self->contents.non_leaf.argv + i);
+		}
+		free(self->contents.non_leaf.argv);
+		self->contents.non_leaf.argc = 0;
+	}
 }
 
 

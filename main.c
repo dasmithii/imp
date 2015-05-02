@@ -2,6 +2,7 @@
 #include "parser.h"
 #include <string.h>
 #include <stdlib.h>
+#include "runtime.h"
 
 
 static const char *const usage = 
@@ -40,7 +41,9 @@ int main(int argc, char **argv){
 				printf("Failed to read file.\n");
 				return -1;
 			}
-			printf("%s\n", code);
+			Runtime runtime;
+			Runtime_init(&runtime);
+			Runtime_execute(&runtime, code);
 		}
 	} else{
 		printf("%s", usage);

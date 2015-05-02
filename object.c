@@ -4,6 +4,12 @@
 #include <assert.h>
 
 
+void Object_init(Object *self){
+	self->slotCount = 0;
+	self->slots = NULL;
+	self->gc_mark = false;
+}
+
 
 void *Slot_data(Slot *self){
 	assert(Slot_isPrimitive(self));
@@ -35,7 +41,12 @@ static int Slot_compare_generic(const void *self, const void *other){
 	return Slot_compare((Slot*) self, (Slot*) other);
 }
 
+
+
 Slot *Object_getSlotShallow(Object *self, char *key){
+	if(!self || self->slotCount == 0){
+		return NULL;
+	}
 	Slot skey = {.key = key};
 	return bsearch(&skey
 		         , (void*) self->slots
@@ -80,22 +91,43 @@ bool Object_hasKeyShallow(Object *self, char *key){
 	return Object_getSlotShallow(self, key) != NULL;
 }
 
+void *Object_getDataShallow(Object *self, char *key){
+	Slot *slot = Object_getSlotShallow(self, key);
+	if(!slot){
+		return NULL;
+	}
+	assert(Slot_isPrimitive(slot));
+	return slot->data;
+}
+
+
+void *Object_getDataDeep(Object *self, char *key){
+	Slot *slot = Object_getSlotDeep(self, key);
+	if(!slot){
+		return NULL;
+	}
+	assert(Slot_isPrimitive(slot));
+	return slot->data;
+}
+
+
+
 
 bool Object_hasKeyDeep(Object *self, char *key){
 	return Object_getDeep(self, key) != NULL;
 }
 
 
-void Object_putShallow(Object *self, char *key, Object *value){
+static void Object_insertShallow(Object *self, char *key, void *data){
 	Slot *existing = Object_getSlotShallow(self, key);
 	if(existing){
-		existing->data = value;
+		existing->data = data;
 		return;
 	}
 
 	self->slots = realloc(self->slots, (self->slotCount + 1) * sizeof(Slot)); // TODO: check return
 	self->slots[self->slotCount].key = strdup(key);
-	self->slots[self->slotCount].data = (void*) value;
+	self->slots[self->slotCount].data = data;
 	self->slotCount += 1;
 	qsort(self->slots
 		, self->slotCount
@@ -103,17 +135,42 @@ void Object_putShallow(Object *self, char *key, Object *value){
 		, Slot_compare_generic);
 }
 
-
-void Object_putDeep(Object *self, char *key, Object *value){
+static void Object_insertDeep(Object *self, char *key, void *data){
 	Object *object = self;
 	while(object && !Object_hasKeyShallow(object, key)){
 		object = Object_getShallow(object, "_prototype");
 	}
 	if(object && Object_hasKeyShallow(object, key)){
-		Object_putShallow(object, key, value);
+		Object_insertShallow(object, key, data);
 	} else {
-		Object_putShallow(self, key, value);
+		Object_insertShallow(self, key, data);
 	}
+}
+
+
+
+void Object_putDataShallow(Object *self, char *key, void *data){
+	// TODO: ensure <key> is prefixed with '__'
+	Object_insertShallow(self, key, data);
+}
+
+
+void Object_putDataDeep(Object *self, char *key, void *data){
+	// TODO: ensure <key> is prefixed with '__'
+	Object_insertDeep(self, key, data);
+}
+
+
+
+void Object_putShallow(Object *self, char *key, Object *value){
+	// TODO: ensure that <key> isn't prefixed with '__'
+	Object_insertShallow(self, key, (void*) value);
+}
+
+
+void Object_putDeep(Object *self, char *key, Object *value){
+	// TODO: ensure that <key> isn't prefixed with '__'
+	Object_insertDeep(self, key, (void*) value);
 }
 
 

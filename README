@@ -1,8 +1,59 @@
 Overview
 
+    Imp is a little scripting language I'm working on for fun
+    and nothing more. It is prototype-based, duck-typed, and 
+    excessively parenthesized.
 
 
 
-Macro Expansion: {}
-Function Call:   ()
-Function Closure: {}
+
+Special Slots
+
+    Fields prefixed with an underscore are considered 'special'
+    and should be handled with care (if at all). These include
+    the following:
+
+      +  _prototype
+      +  _cleanup
+      +  _activate
+
+
+
+
+Internal Slots
+
+    A double underscore prefix is indicative of internal data, 
+    which is especially special and required by built-in or 
+    library-provided data structures. Avoid mucking with these
+    unless you absolutely must (or are curious).
+
+    Commonly slots for housing internals include:
+
+      +  __data
+      +  __init
+      +  __cleanup
+      +  __activate
+
+
+
+
+Object Activation
+
+    The process of object activation, whether in a function call
+    or macro expansion, is as follows:
+
+      1. If object has an '_activate' field of built-in type 
+         closure, said closure is executed in the object's scope
+         and with its arguments.
+
+      2. If object has an '__activate' (double underscore)
+         internal field, it is assumed that this field points to
+         a C function, which is executed with the arguments: (1)
+         runtime, (2) context, (3) calling object, (4) argc, and
+         (5) argv.
+
+      3. An error is thrown. Object cannot be activated.
+ 
+
+
+

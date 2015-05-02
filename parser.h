@@ -34,4 +34,11 @@ int ParseTree_init(ParseTree *tree, char *code);
 void ParseTree_clean(ParseTree *tree);
 void ParseTree_print(ParseTree *self);
 
+void ParseNode_print(ParseNode *self);
+
+// note: do not use unless you are adam.
+ParseNode ParseNode_deepCopy(ParseNode *self);
+void ParseNode_deepClean(ParseNode *self);
+
+
 #endif

@@ -12,6 +12,7 @@
 int Tokenization_init(Tokenization *tokenization, char *code){
 	assert(tokenization);
 	assert(code);
+	tokenization->error = NULL;
 	Vector_init(&tokenization->tokens, sizeof(Token));
 
 	// prefix with '('
