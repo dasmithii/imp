@@ -23,6 +23,9 @@ static Object *ImpPrinter_activate_internal(Runtime *runtime
 			// TODO
 			break;
 		}
+		if(argc > 1 && i < argc - 1){
+			printf(" ");
+		}
 	}
 	return NULL;
 }
