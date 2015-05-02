@@ -17,7 +17,7 @@ static Object *ImpPrinter_activate_internal(Runtime *runtime
 			printf("%s", (char*) Object_getDataDeep(argv[i], "__data"));
 			break;
 		case BUILTIN_NUMBER:
-			printf("%s", *((double*) Object_getDataDeep(argv[i], "__data")));
+			printf("%f", *((double*) Object_getDataDeep(argv[i], "__data")));
 			break;
 		default:
 			// TODO

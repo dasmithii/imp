@@ -53,7 +53,11 @@ static Object *ImpAtom_activate_internal(Runtime *runtime
 	char *raw = ImpAtom_getRaw(caller);
 	Object *obj = Object_getDeep(context, raw);
 	// TODO: check for null
-	return Runtime_activate(runtime, obj, context, argc, argv);
+	if(argc == 0){
+		return obj;
+	}
+
+	return Runtime_activate(runtime, context, obj, argc, argv);
 }
 
 void ImpAtom_init(Object *self){

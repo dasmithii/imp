@@ -6,6 +6,7 @@
 #include "builtin/atom.h"
 #include "builtin/number.h"
 #include "builtin/string.h"
+#include "builtin/print.h"
 #include "c.h"
 
 
@@ -55,6 +56,50 @@ Object *Runtime_rawObject(Runtime *self){
 }
 
 
+static Object *Runtime_activateOn(Runtime *runtime
+	                            , Object *context
+	                            , Object *object
+	                            , int argc
+	                            , Object **argv
+	                            , Object *origin){
+
+	Object *special = Object_getDeep(argv[0], "_activate");
+	if(special){
+		return Runtime_activateOn(runtime 
+			                    , context
+			                    , special
+			                    , argc
+			                    , argv
+			                    , origin);
+	}
+
+
+	void *internal = Object_getDataDeep(object, "__activate");
+	if(internal){
+		CFunction cf = *((CFunction*) internal);
+		return cf(runtime, context, origin, argc, argv);
+	}
+
+	// TODO: throw error - uncallable
+	return NULL;
+}
+
+Object *Runtime_activate(Runtime *runtime
+	                   , Object *context
+	                   , Object *object
+	                   , int argc
+	                   , Object **argv){
+	return Runtime_activateOn(runtime 
+			                , context
+			                , object
+			                , argc
+			                , argv
+			                , object);
+}
+
+
+
+
 
 
 void Runtime_init(Runtime *self){
@@ -75,10 +120,34 @@ void Runtime_init(Runtime *self){
 	Object *a = Runtime_rawObject(self);
 	ImpAtom_init(a);
 	Object_putShallow(self->root_scope, "atom", a);
+
+	Object *p = Runtime_rawObject(self);
+	ImpPrinter_init(p);
+	Object_putShallow(self->root_scope, "print", p);
 }
 
 
 static Object *Runtime_clone(Runtime *runtime, Object *object){
+	// TODO: check for special and internal methods
+	Object *special = Object_getDeep(object, "_clone");
+	if(special){
+		return Runtime_activateOn(runtime 
+			                    , NULL
+			                    , special
+			                    , 0
+			                    , NULL
+			                    , object);
+	}
+
+
+	void *internal = Object_getDataDeep(object, "__clone");
+	if(internal){
+		CFunction cf = *((CFunction*) internal);
+		return cf(runtime, NULL, object, 0, NULL);
+	}
+
+	printf("no");
+
 	Object *raw = Runtime_rawObject(runtime);
 	Object_putShallow(raw, "_prototype", object);
 	return raw;
@@ -170,8 +239,8 @@ static Object *Runtime_executeInContext(Runtime *runtime
 					                             , node.contents.non_leaf.argv[i]);
 			}
 			r = Runtime_activate(runtime
-				               , subs[0]
 				               , context
+				               , subs[0]
 				               , node.contents.non_leaf.argc - 1
 				               , subs + 1);
 			free(subs);
@@ -195,48 +264,6 @@ Object *Runtime_execute(Runtime *self, char *code){
 	Object *r = Runtime_executeInContext(self, self->root_scope, tree.root);
 	ParseTree_clean(&tree);
 	return r;
-}
-
-
-static Object *Runtime_activateOn(Runtime *runtime
-	                            , Object *context
-	                            , Object *object
-	                            , int argc
-	                            , Object **argv
-	                            , Object *origin){
-
-	Object *special = Object_getDeep(argv[0], "_activate");
-	if(special){
-		return Runtime_activateOn(runtime 
-			                    , special
-			                    , context
-			                    , argc
-			                    , argv
-			                    , origin);
-	}
-
-
-	void *internal = Object_getDataDeep(object, "__activate");
-	if(internal){
-		CFunction cf = *((CFunction*) internal);
-		return cf(runtime, context, origin, argc, argv);
-	}
-
-	// TODO: throw error - uncallable
-	return NULL;
-}
-
-Object *Runtime_activate(Runtime *runtime
-	                   , Object *object
-	                   , Object *context
-	                   , int argc
-	                   , Object **argv){
-	return Runtime_activateOn(runtime 
-			                , context
-			                , object
-			                , argc
-			                , argv
-			                , object);
 }
 
 

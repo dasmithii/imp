@@ -40,7 +40,7 @@ static Object *ImpString_clone_internal(Runtime *runtime
 	Object *r = Runtime_rawObject(runtime);
 	Object_putDataShallow(r, "_prototype", caller);
 	Object_putDataShallow(r, "__data", strdup(ImpString_getRaw(caller)));
-	return caller;	
+	return r;	
 }
 
 
