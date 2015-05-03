@@ -10,3 +10,6 @@
    cleanup functions are called.
 
  + Make printer check special and internal toString and toNumber methods
+
+ + Include support for ':' operator. Update def and set builtins
+   accordingly, so fields of objects can ....

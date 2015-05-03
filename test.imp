@@ -2,3 +2,8 @@
 
 
 (print 'jeff')
+
+(set five 5)
+(set ten 10)
+(print 'five is: ' five)
+(print 'ten is: ' ten)

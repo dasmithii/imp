@@ -7,6 +7,8 @@
 #include "builtin/number.h"
 #include "builtin/string.h"
 #include "builtin/print.h"
+#include "builtin/def.h"
+#include "builtin/set.h"
 #include "c.h"
 
 
@@ -124,6 +126,14 @@ void Runtime_init(Runtime *self){
 	Object *p = Runtime_rawObject(self);
 	ImpPrinter_init(p);
 	Object_putShallow(self->root_scope, "print", p);
+
+	Object *setter = Runtime_rawObject(self);
+	ImpSet_init(setter);
+	Object_putShallow(self->root_scope, "set", setter);
+
+	Object *definer = Runtime_rawObject(self);
+	ImpDef_init(definer);
+	Object_putShallow(self->root_scope, "def", definer);
 }
 
 
