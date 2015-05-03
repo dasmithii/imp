@@ -1,5 +1,6 @@
 #include "print.h"
 #include "general.h"
+#include "atom.h"
 
 
 static void print(Runtime *runtime
@@ -11,18 +12,14 @@ static void print(Runtime *runtime
 	}
 
 	switch(BuiltIn_protoId(object)){
+	case BUILTIN_ATOM:
+		print(runtime, context, Object_getDeep(context, ImpAtom_getRaw(object)));
+		break;
 	case BUILTIN_STRING:
 		printf("%s", (char*) Object_getDataDeep(object, "__data"));
 		break;
 	case BUILTIN_NUMBER:
 		printf("%f", *((double*) Object_getDataDeep(object, "__data")));
-		break;
-	case BUILTIN_ATOM:
-		{
-			char *field = ImpAtom_getRaw(object);
-			Object *mapping = Object_getDeep(context, field);
-			print(runtime, context, mapping);
-		}
 		break;
 	default:
 		// TODO
