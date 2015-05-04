@@ -1,6 +1,0 @@
-(set text 'I AM TEXT')
-
-(set printSomething {print text})
-
-
-(printSomething)
