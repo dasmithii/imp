@@ -1,4 +1,6 @@
-(set printSomething {print 'THIS IS IT'})
+(set text 'I AM TEXT')
+
+(set printSomething {print text})
 
 
 (printSomething)

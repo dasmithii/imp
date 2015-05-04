@@ -2,3 +2,4 @@ bin
 build
 .release_time
 imp
+test.imp
