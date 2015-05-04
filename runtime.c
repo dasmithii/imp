@@ -1,6 +1,7 @@
 #include "runtime.h"
 #include "parser.h"
 #include <string.h>
+#include <stdio.h>
 
 #include "builtin/general.h"
 #include "builtin/atom.h"
@@ -9,6 +10,7 @@
 #include "builtin/print.h"
 #include "builtin/def.h"
 #include "builtin/set.h"
+#include "builtin/closure.h"
 #include "c.h"
 
 
@@ -82,6 +84,8 @@ static Object *Runtime_activateOn(Runtime *runtime
 		return cf(runtime, context, origin, argc, argv);
 	}
 
+
+
 	// TODO: throw error - uncallable
 	return NULL;
 }
@@ -123,9 +127,9 @@ void Runtime_init(Runtime *self){
 	ImpAtom_init(a);
 	Object_putShallow(self->root_scope, "atom", a);
 
-	Object *p = Runtime_rawObject(self);
-	ImpPrinter_init(p);
-	Object_putShallow(self->root_scope, "print", p);
+	Object *printer = Runtime_rawObject(self);
+	ImpPrinter_init(printer);
+	Object_putShallow(self->root_scope, "print", printer);
 
 	Object *setter = Runtime_rawObject(self);
 	ImpSet_init(setter);
@@ -134,10 +138,15 @@ void Runtime_init(Runtime *self){
 	Object *definer = Runtime_rawObject(self);
 	ImpDef_init(definer);
 	Object_putShallow(self->root_scope, "def", definer);
+
+	Object *closure = Runtime_rawObject(self);
+	ImpClosure_init(closure);
+	Object_putShallow(self->root_scope, "closure", closure);
 }
 
 
 static Object *Runtime_clone(Runtime *runtime, Object *object){
+
 	// TODO: check for special and internal methods
 	Object *special = Object_getDeep(object, "_clone");
 	if(special){
@@ -155,9 +164,6 @@ static Object *Runtime_clone(Runtime *runtime, Object *object){
 		CFunction cf = *((CFunction*) internal);
 		return cf(runtime, NULL, object, 0, NULL);
 	}
-
-	printf("no");
-
 	Object *raw = Runtime_rawObject(runtime);
 	Object_putShallow(raw, "_prototype", object);
 	return raw;
@@ -220,7 +226,7 @@ static Object *Runtime_tokenToObject(Runtime *self, Object *scope, Token *token)
 	}
 }
 
-static Object *Runtime_executeInContext(Runtime *runtime
+Object *Runtime_executeInContext(Runtime *runtime
 	                              , Object *context
 	                              , ParseNode node){
 
@@ -260,7 +266,10 @@ static Object *Runtime_executeInContext(Runtime *runtime
 		// TODO: expand and execute macro
 		break;
 	case CLOSURE_NODE:
-		// TODO: compile closure
+		{
+			r = Runtime_cloneField(runtime, "closure");
+			ImpClosure_compile(r, &node, context);
+		}
 		break;
 	}
 
@@ -270,6 +279,7 @@ static Object *Runtime_executeInContext(Runtime *runtime
 Object *Runtime_execute(Runtime *self, char *code){
 	ParseTree tree;
 	ParseTree_init(&tree, code);
+
 	// TODO: check tree.error
 	Object *r = Runtime_executeInContext(self, self->root_scope, tree.root);
 	ParseTree_clean(&tree);

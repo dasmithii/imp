@@ -13,7 +13,7 @@ static Object *ImpSet_activate_internal(Runtime *runtime
 	// should be an atom).
 	char *field = ImpAtom_getRaw(argv[0]);
 	Object_putDeep(context, field, argv[1]);
-	return argv[1];
+	return NULL;
 }
 
 void ImpSet_init(Object *self){
