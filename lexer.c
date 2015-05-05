@@ -150,6 +150,7 @@ void Tokenization_clean(Tokenization *tokenization){
 
 
 Tokenization lex(char *code){
+	assert(code);
 	Tokenization r;
 	Tokenization_init(&r, code);
 	return r;
@@ -157,6 +158,7 @@ Tokenization lex(char *code){
 
 
 static void printToken(void *token){
+	assert(token);
 	Token_printVerbose((Token*) token);
 	printf(" ");
 }
@@ -168,9 +170,11 @@ void Tokenization_print(Tokenization *tokenization){
 }
 
 Token *Tokenization_begin(Tokenization *self){
+	assert(self);
 	return (Token*) self->tokens.buffer.data;
 }
 
 Token *Tokenization_end(Tokenization *self){
+	assert(self);
 	return ((Token*) self->tokens.buffer.data) + self->tokens.size;
 }

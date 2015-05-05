@@ -1,7 +1,8 @@
 #include "print.h"
 #include "general.h"
 #include "atom.h"
-
+#include <stdio.h>
+#include "boolean.h"
 
 static void print(Runtime *runtime
 	            , Object *context

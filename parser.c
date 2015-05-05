@@ -7,6 +7,10 @@
 
 
 static int ParseNode_init(ParseNode *node, Token *begin, Token *end){
+	assert(node);
+	assert(begin);
+	assert(end);
+
 	if(!node || !begin){
 		printf("fuck");
 		exit(1);
@@ -107,6 +111,9 @@ static int ParseNode_init(ParseNode *node, Token *begin, Token *end){
 }
 
 int ParseTree_init(ParseTree *tree, char *code){
+	assert(tree);
+	assert(code);
+
 	int ec = Tokenization_init(&tree->tokenization, code);
 	if(ec){
 		tree->error = strdup(tree->tokenization.error);
@@ -120,6 +127,7 @@ int ParseTree_init(ParseTree *tree, char *code){
 
 static void ParseNode_clean(ParseNode *node){
 	assert(node);
+
 	if(node->type != LEAF_NODE){
 		const size_t argc = node->contents.non_leaf.argc;
 		if(argc > 0){
@@ -134,6 +142,7 @@ static void ParseNode_clean(ParseNode *node){
 
 void ParseTree_clean(ParseTree *tree){
 	assert(tree);
+
 	if(tree->error){
 		free(tree->error);
 		tree->error = NULL;
@@ -144,6 +153,8 @@ void ParseTree_clean(ParseTree *tree){
 
 
 void ParseNode_print(ParseNode *self){
+	assert(self);
+
 	switch(self->type){
 	case CALL_NODE:
 		printf("(");
@@ -183,6 +194,8 @@ void ParseNode_print(ParseNode *self){
 }
 
 void ParseTree_print(ParseTree *self){
+	assert(self);
+
 	ParseNode_print(&self->root);
 }
 
@@ -213,6 +226,8 @@ void ParseTree_print(ParseTree *self){
 
 
 ParseNode ParseNode_deepCopy(ParseNode *self){
+	assert(self);
+
 	ParseNode r;
 	r.type = self->type;
 	if(r.type == LEAF_NODE){
@@ -231,6 +246,8 @@ ParseNode ParseNode_deepCopy(ParseNode *self){
 
 
 void ParseNode_deepClean(ParseNode *self){
+	assert(self);
+
 	if(self->type == LEAF_NODE){
 		free(self->contents.token);
 		self->contents.token = NULL;

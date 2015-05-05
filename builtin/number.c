@@ -1,5 +1,5 @@
 #include "number.h"
-#include "runtime.h"
+#include "../runtime.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

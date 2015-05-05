@@ -18,10 +18,13 @@
 
 
 static void unmark(void *object){
+	assert(object);
 	Object_unmark(*((Object**) object));
 }
 
 static void Runtime_runGC(Runtime *self){
+	assert(self);
+
 	// Unmark all allocations.
 	Vector_each(&self->collectables, unmark); // TODO: check error
 
@@ -53,6 +56,8 @@ static void Runtime_runGC(Runtime *self){
 
 
 Object *Runtime_rawObject(Runtime *self){
+	assert(self);
+
 	Object *r = malloc(sizeof(Object));
 	printf("NEW: %p\n", r);
 	Object_init(r);
@@ -84,6 +89,9 @@ static Object *Runtime_activateOn(Runtime *runtime
 	                            , int argc
 	                            , Object **argv
 	                            , Object *origin){
+	assert(runtime);
+	assert(context);
+	assert(object);
 
 	Object *special = Object_getDeep(object, "_activate");
 	if(special){

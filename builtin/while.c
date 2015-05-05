@@ -2,8 +2,9 @@
 #include "../object.h"
 #include "general.h"
 #include "../c.h"
-#include "runtime.h"
+#include "../runtime.h"
 #include <stdbool.h>
+#include <stdio.h>
 
 static Object *ImpWhile_activate_internal(Runtime *runtime
 	                                    , Object *context
