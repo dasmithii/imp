@@ -38,13 +38,11 @@ static void Runtime_runGC(Runtime *self){
 	for(int i = 0; i < self->collectables.size; i++){
 		Object *item = NULL;
 		Vector_fetch(&self->collectables, i, &item);
-		printf("OLD: %p\n", item);
 		fflush(stdout);
 		if(item->gc_mark){
 			Vector_append(&leftovers, &item);
 		} else {
 			Object_free(item);
-			printf("- collected\n");
 		}
 	}
 
@@ -58,25 +56,23 @@ static void Runtime_runGC(Runtime *self){
 Object *Runtime_rawObject(Runtime *self){
 	assert(self);
 
-	Object *r = malloc(sizeof(Object));
-	printf("NEW: %p\n", r);
-	Object_init(r);
-
-	Vector_append(&self->collectables, &r);
-
-	printf("\n\nGC STATE\n");
-	for(int i = 0; i < self->collectables.size; i++){
-		Object *item = NULL;
-		Vector_fetch(&self->collectables, i, &item);
-		printf("CUR: %p\n", item);
-	}
-		printf("\n\n\n");
-
 
 	if(self->collectables.size >= 100 &&
 	   self->collectables.size % 100 == 0){ // TODO: make better algorithm here
 		Runtime_runGC(self);
 	}
+
+
+	Object *r = malloc(sizeof(Object));
+	Object_init(r);
+
+	Vector_append(&self->collectables, &r);
+
+	for(int i = 0; i < self->collectables.size; i++){
+		Object *item = NULL;
+		Vector_fetch(&self->collectables, i, &item);
+	}
+
 
 
 	return r;

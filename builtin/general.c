@@ -5,11 +5,11 @@
 void BuiltIn_setId(Object *self, BuiltinId id){
 	BuiltinId *data = malloc(sizeof(BuiltinId));
 	*data = id; 
-	Object_putDataShallow(self, "_id", data);
+	Object_putDataShallow(self, "__id", data);
 }
 
 BuiltinId BuiltIn_id(Object *self){
-	BuiltinId *id = Object_getDataShallow(self, "_id");
+	BuiltinId *id = Object_getDataShallow(self, "__id");
 	if(!id){
 		return NOT_BUILTIN;
 	}

@@ -177,10 +177,6 @@ static void Object_insertShallow(Object *self, char *key, void *data){
 	assert(self);
 	assert(validKey(key));
 
-	if(strcmp(key, "") == 0){
-		printf("FUCK!\n");
-		exit(1);
-	}
 	Slot *existing = Object_getSlotShallow(self, key);
 	if(existing){
 		existing->data = data;
