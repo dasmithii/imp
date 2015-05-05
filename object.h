@@ -47,5 +47,7 @@ void Object_clean(Object *self);
 void Object_free(Object *self);
 
 
+Object *Object_rootPrototype(Object *self);
+
 
 #endif

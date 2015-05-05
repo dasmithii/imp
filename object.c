@@ -119,6 +119,10 @@ bool Object_hasKeyDeep(Object *self, char *key){
 
 
 static void Object_insertShallow(Object *self, char *key, void *data){
+	if(strcmp(key, "") == 0){
+		printf("FUCK!\n");
+		exit(1);
+	}
 	Slot *existing = Object_getSlotShallow(self, key);
 	if(existing){
 		existing->data = data;
@@ -230,6 +234,14 @@ void Object_free(Object *self){
 	free(self);
 }
 
+
+Object *Object_rootPrototype(Object *self){
+	Object *proto = Object_getShallow(self, "_prototype");
+	if(!proto){
+		return self;
+	}
+	return Object_rootPrototype(proto);
+}
 
 
 

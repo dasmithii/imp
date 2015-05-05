@@ -11,12 +11,14 @@
 #include "builtin/def.h"
 #include "builtin/set.h"
 #include "builtin/closure.h"
+#include "builtin/boolean.h"
+#include "builtin/while.h"
 #include "c.h"
 
 
 
 static void unmark(void *object){
-	Object_unmark((Object*) object);
+	Object_unmark(*((Object**) object));
 }
 
 static void Runtime_runGC(Runtime *self){
@@ -31,12 +33,15 @@ static void Runtime_runGC(Runtime *self){
 	Vector leftovers;
 	Vector_init(&leftovers, sizeof(Object*));
 	for(int i = 0; i < self->collectables.size; i++){
-		Object *object;
-		Vector_fetch(&self->collectables, i, &object);
-		if(object->gc_mark){
-			Vector_append(&leftovers, &object);
+		Object *item = NULL;
+		Vector_fetch(&self->collectables, i, &item);
+		printf("OLD: %p\n", item);
+		fflush(stdout);
+		if(item->gc_mark){
+			Vector_append(&leftovers, &item);
 		} else {
-			Object_free(object);
+			Object_free(item);
+			printf("- collected\n");
 		}
 	}
 
@@ -49,13 +54,26 @@ static void Runtime_runGC(Runtime *self){
 
 Object *Runtime_rawObject(Runtime *self){
 	Object *r = malloc(sizeof(Object));
+	printf("NEW: %p\n", r);
 	Object_init(r);
 
 	Vector_append(&self->collectables, &r);
-	if(self->collectables.size > 1000 &&
-	   self->collectables.size % 250 == 0){ // TODO: make better algorithm here
+
+	printf("\n\nGC STATE\n");
+	for(int i = 0; i < self->collectables.size; i++){
+		Object *item = NULL;
+		Vector_fetch(&self->collectables, i, &item);
+		printf("CUR: %p\n", item);
+	}
+		printf("\n\n\n");
+
+
+	if(self->collectables.size >= 100 &&
+	   self->collectables.size % 100 == 0){ // TODO: make better algorithm here
 		Runtime_runGC(self);
 	}
+
+
 	return r;
 }
 
@@ -67,7 +85,7 @@ static Object *Runtime_activateOn(Runtime *runtime
 	                            , Object **argv
 	                            , Object *origin){
 
-	Object *special = Object_getDeep(argv[0], "_activate");
+	Object *special = Object_getDeep(object, "_activate");
 	if(special){
 		return Runtime_activateOn(runtime 
 			                    , context
@@ -87,7 +105,7 @@ static Object *Runtime_activateOn(Runtime *runtime
 
 
 	// TODO: throw error - uncallable
-	return NULL;
+	return origin;
 }
 
 Object *Runtime_activate(Runtime *runtime
@@ -142,10 +160,24 @@ void Runtime_init(Runtime *self){
 	Object *closure = Runtime_rawObject(self);
 	ImpClosure_init(closure);
 	Object_putShallow(self->root_scope, "closure", closure);
+
+	Object *tr = Runtime_rawObject(self);
+	ImpBoolean_init(tr);
+	ImpBoolean_setRaw(tr, true);
+	Object_putShallow(self->root_scope, "true", tr);
+
+	Object *fa = Runtime_rawObject(self);
+	ImpBoolean_init(fa);
+	ImpBoolean_setRaw(fa, false);
+	Object_putShallow(self->root_scope, "false", tr);
+
+	Object *whi = Runtime_rawObject(self);
+	ImpWhile_init(whi);
+	Object_putShallow(self->root_scope, "while", whi);
 }
 
 
-static Object *Runtime_clone(Runtime *runtime, Object *object){
+Object *Runtime_clone(Runtime *runtime, Object *object){
 
 	// TODO: check for special and internal methods
 	Object *special = Object_getDeep(object, "_clone");

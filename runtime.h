@@ -16,11 +16,12 @@ typedef struct {
 void Runtime_init(Runtime *self);
 void Runtime_clean(Runtime *self);
 Object *Runtime_execute(Runtime *self, char *code);
-Object *Runtime_rawObject();
+Object *Runtime_rawObject(Runtime *self);
+Object *Runtime_clone(Runtime *self, Object *base);
 
 Object *Runtime_activate(Runtime *runtime
-	                   , Object *object
 	                   , Object *context
+	                   , Object *caller
 	                   , int argc
 	                   , Object **argv);
 

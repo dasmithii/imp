@@ -1,4 +1,4 @@
- + Figure out why closure isn't working.
+ + Make GC not suck/broken.
 
  + Make it so Runtime_clone checks for special and internal
    methods.

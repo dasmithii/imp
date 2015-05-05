@@ -28,8 +28,9 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 	                                      , Object **argv){
 	ImpClosure_internal *internal = Object_getDataDeep(caller, "__data");
 
-
-	// TODO: provide access to arguments
+	// TODO: form new scope with compile-context variables, function 
+	// arguments, and room for local variables.
+ 
 	return Runtime_executeInContext(runtime
 		                          , internal->context
 		                          , *internal->code);
@@ -96,6 +97,9 @@ static Object *ImpClosure_clean_internal(Runtime *runtime
 	raw->context = 0;
 	return NULL;
 }
+
+// TODO: add __unmark and __markRecursive methods, which account for 
+// internal context
 
 
 void ImpClosure_init(Object *self){
