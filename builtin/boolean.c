@@ -15,6 +15,7 @@ static Object *ImpBoolean_clone_internal(Runtime *runtime
 	Object_putDataShallow(r, "_prototype", Object_rootPrototype(caller));
 	Object_putDataShallow(r, "__data", malloc(sizeof(bool)));
 	ImpBoolean_setRaw(r, ImpBoolean_getRaw(caller));
+	printf("NEW BOOLEAN: %p\n", r);
 	return r;	
 }
 

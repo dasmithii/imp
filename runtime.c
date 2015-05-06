@@ -56,24 +56,16 @@ static void Runtime_runGC(Runtime *self){
 Object *Runtime_rawObject(Runtime *self){
 	assert(self);
 
-
+	// check if it's time to run the GC
 	if(self->collectables.size >= 100 &&
 	   self->collectables.size % 100 == 0){ // TODO: make better algorithm here
 		Runtime_runGC(self);
 	}
 
-
+	// allocate record, and return new object
 	Object *r = malloc(sizeof(Object));
 	Object_init(r);
-
 	Vector_append(&self->collectables, &r);
-
-	for(int i = 0; i < self->collectables.size; i++){
-		Object *item = NULL;
-		Vector_fetch(&self->collectables, i, &item);
-	}
-
-
 
 	return r;
 }
