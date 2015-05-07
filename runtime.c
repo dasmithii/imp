@@ -17,60 +17,6 @@
 
 
 
-static void unmark(void *object){
-	assert(object);
-	Object_unmark(*((Object**) object));
-}
-
-static void Runtime_runGC(Runtime *self){
-	assert(self);
-
-	// Unmark all allocations.
-	Vector_each(&self->collectables, unmark); // TODO: check error
-
-	// Mark all accessible allocations.
-	Object_markRecursive(self->root_scope);
-
-	// Move all accessible allocations to a new vector. Clean
-	// the others.
-	Vector leftovers;
-	Vector_init(&leftovers, sizeof(Object*));
-	for(int i = 0; i < self->collectables.size; i++){
-		Object *item = NULL;
-		Vector_fetch(&self->collectables, i, &item);
-		fflush(stdout);
-		if(item->gc_mark){
-			Vector_append(&leftovers, &item);
-		} else {
-			Object_free(item);
-		}
-	}
-
-	// Delete old vector of pointers. Replace it.
-	Vector_clean(&self->collectables);
-	self->collectables = leftovers;
-}
-
-
-
-Object *Runtime_rawObject(Runtime *self){
-	assert(self);
-
-	// check if it's time to run the GC
-	if(self->collectables.size >= 100 &&
-	   self->collectables.size % 100 == 0){ // TODO: make better algorithm here
-		Runtime_runGC(self);
-	}
-
-	// allocate record, and return new object
-	Object *r = malloc(sizeof(Object));
-	Object_init(r);
-	Vector_append(&self->collectables, &r);
-
-	return r;
-}
-
-
 static Object *Runtime_activateOn(Runtime *runtime
 	                            , Object *context
 	                            , Object *object
@@ -101,7 +47,7 @@ static Object *Runtime_activateOn(Runtime *runtime
 
 
 	// TODO: throw error - uncallable
-	return origin;
+	return object;
 }
 
 Object *Runtime_activate(Runtime *runtime
@@ -116,6 +62,118 @@ Object *Runtime_activate(Runtime *runtime
 			                , argv
 			                , object);
 }
+
+
+
+static void unmark(void *object){
+	assert(object);
+	Object_unmark(*((Object**) object));
+}
+
+
+static void Runtime_markRecursiveIfVolatile(Runtime *runtime, Object *object){
+	if(Object_hasKeyShallow(object, "__volatile")){
+		Runtime_markRecursive(runtime, object);
+	}
+}
+
+
+
+static void Runtime_collectOne(Runtime *runtime, Object *object){
+	Object *special = Object_getDeep(object, "_collect");
+	if(special){
+		Runtime_activateOn(runtime 
+			             , NULL
+			             , special
+			             , 0
+			             , NULL
+			             , object);
+	} else {
+		void *internal = Object_getDataDeep(object, "__collect");
+		if(internal){
+			CFunction cf = *((CFunction*) internal);
+			cf(runtime, NULL, object, 0, NULL);
+		}
+	}
+	Object_free(object);
+}
+
+
+void Runtime_markRecursive(Runtime *runtime, Object *object){
+	Object *special = Object_getDeep(object, "_mark");
+	if(special){
+		Runtime_activateOn(runtime 
+			             , NULL
+			             , special
+			             , 0
+			             , NULL
+			             , object);
+	} else {
+		void *internal = Object_getDataDeep(object, "__mark");
+		if(internal){
+			CFunction cf = *((CFunction*) internal);
+			cf(runtime, NULL, object, 0, NULL);
+		}
+	}
+
+	Object_markRecursive(object);
+}
+
+static void Runtime_runGC(Runtime *self){
+	assert(self);
+
+	// Unmark all allocations.
+	Vector_each(&self->collectables, unmark); // TODO: check error
+
+	// mark all volatile 
+	for(int i = 0; i < self->collectables.size; i++){
+		Object *object = *((Object**) Vector_hook(&self->collectables, i));
+		Runtime_markRecursiveIfVolatile(self, object);
+	}
+
+	// Mark all accessible allocations.
+	Runtime_markRecursive(self, self->root_scope);
+
+	// Move all accessible allocations to a new vector. Clean
+	// the others.
+	Vector leftovers;
+	Vector_init(&leftovers, sizeof(Object*));
+	for(int i = 0; i < self->collectables.size; i++){
+		Object *item = NULL;
+		Vector_fetch(&self->collectables, i, &item);
+		
+		if(item->gc_mark){
+			Vector_append(&leftovers, &item);
+		} else { 
+			Runtime_collectOne(self, item);
+		}
+	}
+
+	// Delete old vector of pointers. Replace it.
+	Vector_clean(&self->collectables);
+	self->collectables = leftovers;
+}
+
+
+
+Object *Runtime_rawObject(Runtime *self){
+	assert(self);
+
+	// check if it's time to run the GC
+	if(self->collectables.size >= 100 &&
+	   self->collectables.size % 100 == 0){ // TODO: make better algorithm here
+		Runtime_runGC(self);
+	}
+
+	// allocate record, and return new object
+	Object *r = malloc(sizeof(Object));
+	Object_init(r);
+	Vector_append(&self->collectables, &r);
+
+	return r;
+}
+
+
 
 
 
@@ -192,6 +250,7 @@ Object *Runtime_clone(Runtime *runtime, Object *object){
 		CFunction cf = *((CFunction*) internal);
 		return cf(runtime, NULL, object, 0, NULL);
 	}
+
 	Object *raw = Runtime_rawObject(runtime);
 	Object_putShallow(raw, "_prototype", object);
 	return raw;
@@ -255,12 +314,9 @@ static Object *Runtime_tokenToObject(Runtime *self, Object *scope, Token *token)
 }
 
 Object *Runtime_executeInContext(Runtime *runtime
-	                              , Object *context
+	                              , Object *scope
 	                              , ParseNode node){
 
-	// setup scoping
-	Object *scope = Runtime_rawObject(runtime);
-	Object_putShallow(scope, "_prototype", context);
 
 	// if leaf node, form value
 	if(node.type == LEAF_NODE){
@@ -283,7 +339,7 @@ Object *Runtime_executeInContext(Runtime *runtime
 					                             , node.contents.non_leaf.argv[i]);
 			}
 			r = Runtime_activate(runtime
-				               , context
+				               , scope
 				               , subs[0]
 				               , node.contents.non_leaf.argc - 1
 				               , subs + 1);
@@ -296,7 +352,7 @@ Object *Runtime_executeInContext(Runtime *runtime
 	case CLOSURE_NODE:
 		{
 			r = Runtime_cloneField(runtime, "closure");
-			ImpClosure_compile(r, &node, context);
+			ImpClosure_compile(runtime, r, &node, scope);
 		}
 		break;
 	}

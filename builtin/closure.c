@@ -26,7 +26,7 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 	                                      , Object *caller
 	                                      , int argc
 	                                      , Object **argv){
-	ImpClosure_internal *internal = Object_getDataDeep(caller, "__data");
+	ImpClosure_internal *internal = Object_getDataShallow(caller, "__data");
 
 	// TODO: form new scope with compile-context variables, function 
 	// arguments, and room for local variables.
@@ -39,6 +39,10 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 
 
 static void ParseNode_cacheReferences(ParseNode *node, Object *context, Object *cache){
+	assert(node);
+	assert(context);
+	assert(cache);
+
 	if(node->type == LEAF_NODE){
 		if(node->contents.token->type == TOKEN_ATOM){
 			char *atom = node->contents.token->data.text;
@@ -55,30 +59,28 @@ static void ParseNode_cacheReferences(ParseNode *node, Object *context, Object *
 }
 
 
-// Compiles closure by, firstly, making a deep copy of its
-// parse tree, and secondly, caching all contextual objects
-// that may be referenced to in said parse tree.
-void ImpClosure_compile(Object *self, ParseNode *code, Object *context){
+
+void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object *context){
 	ImpClosure_internal *internal = malloc(sizeof(ImpClosure_internal));
+	internal->context = Runtime_rawObject(runtime);
 	internal->code = malloc(sizeof(ParseNode));
-	internal->context = malloc(sizeof(Object));
+
 	*(internal->code) = ParseNode_deepCopy(code);
 	internal->code->type = CALL_NODE;
-	Object_putDataDeep(self, "__data", internal);
-
+	Object_putDataShallow(self, "__data", internal);
 	ParseNode_cacheReferences(code, context, internal->context);
-
 }
 
 
+// note: compile should be called after clone
 static Object *ImpClosure_clone_internal(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
 	                       , int argc
 	                       , Object **argv){
+
 	Object *r = Runtime_rawObject(runtime);
 	Object_putShallow(r, "_prototype", caller);
-	Object_putDataShallow(r, "__data", malloc(sizeof(ImpClosure_internal)));
 	return r;
 }
 
@@ -87,19 +89,31 @@ static Object *ImpClosure_clean_internal(Runtime *runtime
 	                       , Object *caller
 	                       , int argc
 	                       , Object **argv){
-	ImpClosure_internal *raw = ImpClosure_getRaw(caller);
-	ParseNode_deepClean(raw->code);
-	free(raw->code);
-	raw->code = NULL;
+		printf("clean internal\n");
 
-	Object_clean(raw->context);
-	free(raw->context);
-	raw->context = 0;
+	ImpClosure_internal *raw = ImpClosure_getRaw(caller);
+	if(raw){
+		ParseNode_deepClean(raw->code);
+		free(raw->code);
+		raw->code = NULL;
+		free(raw);
+		Object_remShallow(caller, "__data");
+	}
 	return NULL;
 }
 
-// TODO: add __unmark and __markRecursive methods, which account for 
-// internal context
+
+static Object *ImpClosure_mark_internal(Runtime *runtime
+	                       , Object *context
+	                       , Object *caller
+	                       , int argc
+	                       , Object **argv){
+	printf("Mark internal\n");
+	ImpClosure_internal *raw = ImpClosure_getRaw(caller);
+	if(raw){
+		Runtime_markRecursive(runtime, raw->context);
+	}
+}
 
 
 void ImpClosure_init(Object *self){
@@ -107,4 +121,5 @@ void ImpClosure_init(Object *self){
 	Object_registerCMethod(self, "__activate", ImpClosure_activate_internal);
 	Object_registerCMethod(self, "__clone", ImpClosure_clone_internal);
 	Object_registerCMethod(self, "__clean", ImpClosure_clean_internal);
+	Object_registerCMethod(self, "__mark", ImpClosure_mark_internal);
 }

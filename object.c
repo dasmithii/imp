@@ -272,7 +272,6 @@ void Object_mark(Object *self){
 
 void Object_unmark(Object *self){
 	assert(self);
-
 	self->gc_mark = false;
 }
 
@@ -292,9 +291,6 @@ void Object_markRecursive(Object *self){
 
 
 void Object_clean(Object *self){
-	// TODO: check for C object data and programmer-specified 
-	// clean up functions.
-
 	for(int i = 0; i < self->slotCount; i++){
 		Slot_clean(self->slots + i);
 	}
@@ -317,5 +313,9 @@ Object *Object_rootPrototype(Object *self){
 	return Object_rootPrototype(proto);
 }
 
+
+void Object_putKeyShallow(Object *self, char *key){
+	Object_insertShallow(self, key, NULL);
+}
 
 

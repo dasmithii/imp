@@ -1,11 +1,7 @@
- + Include __mark magic method for mark and sweep
-   collection of internal objects.
-
  + Finish builtins: (1) vector, (2) hashmap
-
- + Make it so GC sweeps call internal cleanup functions.
 
  + Include support for ':' operator. Update def and set builtins
    accordingly, so fields of objects can ....
 
  + Pass arguments to functions.
+

@@ -7,7 +7,7 @@
 
 void ImpClosure_init(Object *self);
 void ImpClosure_print(Object *self);
-void ImpClosure_compile(Object *self, ParseNode *code, Object *context);
+void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object *context);
 
 
 #endif

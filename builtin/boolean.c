@@ -5,6 +5,13 @@
 #include "number.h"
 #include "../runtime.h"
 
+static bool isBoolean(Object *object){
+	if(!object){
+		return false;
+	}
+	return BuiltIn_id(Object_rootPrototype(object)) == BUILTIN_BOOLEAN;
+}
+
 static Object *ImpBoolean_clone_internal(Runtime *runtime
 	                                   , Object *context
 	                                   , Object *caller

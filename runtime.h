@@ -29,5 +29,9 @@ Object *Runtime_executeInContext(Runtime *runtime
 	                              , Object *context
 	                              , ParseNode node);
 
+void Runtime_throw(Runtime *runtime, Object *exception);
+
+void Runtime_markRecursive(Runtime *runtime, Object *object);
+
 
 #endif

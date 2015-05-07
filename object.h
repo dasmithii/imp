@@ -32,6 +32,9 @@ void *Object_getDataShallow(Object *self, char *key);
 void *Object_getDataDeep(Object *self, char *key);
 bool Object_hasKeyShallow(Object *self, char *key);
 bool Object_hasKeyDeep(Object *self, char *key);
+
+void Object_putKeyShallow(Object *self, char *key);
+
 void Object_putShallow(Object *self, char *key, Object *value);
 void Object_putDeep(Object *self, char *key, Object *value);
 void Object_putDataShallow(Object *self, char *key, void *value);
