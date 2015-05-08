@@ -3,6 +3,7 @@
 #include "general.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "../toolbox/vector.h"
 
 typedef struct {
 	ParseNode *code; // closure
@@ -28,12 +29,23 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 	                                      , Object **argv){
 	ImpClosure_internal *internal = Object_getDataShallow(caller, "__data");
 
-	// TODO: form new scope with compile-context variables, function 
-	// arguments, and room for local variables.
+	Object *scope = Runtime_shallowCopy(runtime, internal->context);
+	Object_putKeyShallow(scope, "__volatile");
+
+
+	Object *arguments = Runtime_cloneField(runtime, "vector");
+	Object_putShallow(scope, "arguments", arguments);
+	Vector *raw = ImpVector_getRaw(arguments);
+	for(int i = 0; i < argc; i++){
+		Vector_append(raw, &argv[i]);
+	}
  
-	return Runtime_executeInContext(runtime
-		                          , internal->context
-		                          , *internal->code);
+	Object *r = Runtime_executeInContext(runtime
+		                               , scope
+		                               , *internal->code);
+
+	Object_remShallow(scope, "__volatile");
+	return r;
 }
 
 
@@ -78,19 +90,16 @@ static Object *ImpClosure_clone_internal(Runtime *runtime
 	                       , Object *caller
 	                       , int argc
 	                       , Object **argv){
-
 	Object *r = Runtime_rawObject(runtime);
 	Object_putShallow(r, "_prototype", caller);
 	return r;
 }
 
-static Object *ImpClosure_clean_internal(Runtime *runtime
+static Object *ImpClosure_collect_internal(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
 	                       , int argc
 	                       , Object **argv){
-		printf("clean internal\n");
-
 	ImpClosure_internal *raw = ImpClosure_getRaw(caller);
 	if(raw){
 		ParseNode_deepClean(raw->code);
@@ -108,9 +117,9 @@ static Object *ImpClosure_mark_internal(Runtime *runtime
 	                       , Object *caller
 	                       , int argc
 	                       , Object **argv){
-	printf("Mark internal\n");
 	ImpClosure_internal *raw = ImpClosure_getRaw(caller);
 	if(raw){
+		printf("ImpClosure, mark\n");
 		Runtime_markRecursive(runtime, raw->context);
 	}
 }
@@ -120,6 +129,6 @@ void ImpClosure_init(Object *self){
 	BuiltIn_setId(self, BUILTIN_CLOSURE);
 	Object_registerCMethod(self, "__activate", ImpClosure_activate_internal);
 	Object_registerCMethod(self, "__clone", ImpClosure_clone_internal);
-	Object_registerCMethod(self, "__clean", ImpClosure_clean_internal);
+	Object_registerCMethod(self, "__collect", ImpClosure_collect_internal);
 	Object_registerCMethod(self, "__mark", ImpClosure_mark_internal);
 }

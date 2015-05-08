@@ -13,10 +13,15 @@
 #include "builtin/closure.h"
 #include "builtin/boolean.h"
 #include "builtin/while.h"
+#include "builtin/vector.h"
 #include "c.h"
 
 
 
+
+// Activates <object> with given arguments on the <origin> 
+// object. This is particularly useful for method-type
+// objects.
 static Object *Runtime_activateOn(Runtime *runtime
 	                            , Object *context
 	                            , Object *object
@@ -50,6 +55,8 @@ static Object *Runtime_activateOn(Runtime *runtime
 	return object;
 }
 
+
+
 Object *Runtime_activate(Runtime *runtime
 	                   , Object *context
 	                   , Object *object
@@ -72,6 +79,9 @@ static void unmark(void *object){
 
 
 static void Runtime_markRecursiveIfVolatile(Runtime *runtime, Object *object){
+	assert(runtime);
+	assert(object);
+
 	if(Object_hasKeyShallow(object, "__volatile")){
 		Runtime_markRecursive(runtime, object);
 	}
@@ -80,6 +90,9 @@ static void Runtime_markRecursiveIfVolatile(Runtime *runtime, Object *object){
 
 
 static void Runtime_collectOne(Runtime *runtime, Object *object){
+	assert(runtime);
+	assert(object);
+
 	Object *special = Object_getDeep(object, "_collect");
 	if(special){
 		Runtime_activateOn(runtime 
@@ -100,6 +113,11 @@ static void Runtime_collectOne(Runtime *runtime, Object *object){
 
 
 void Runtime_markRecursive(Runtime *runtime, Object *object){
+	assert(runtime);
+	assert(object);
+
+	Object_markRecursive(object);
+
 	Object *special = Object_getDeep(object, "_mark");
 	if(special){
 		Runtime_activateOn(runtime 
@@ -115,8 +133,6 @@ void Runtime_markRecursive(Runtime *runtime, Object *object){
 			cf(runtime, NULL, object, 0, NULL);
 		}
 	}
-
-	Object_markRecursive(object);
 }
 
 static void Runtime_runGC(Runtime *self){
@@ -159,12 +175,6 @@ static void Runtime_runGC(Runtime *self){
 Object *Runtime_rawObject(Runtime *self){
 	assert(self);
 
-	// check if it's time to run the GC
-	if(self->collectables.size >= 100 &&
-	   self->collectables.size % 100 == 0){ // TODO: make better algorithm here
-		Runtime_runGC(self);
-	}
-
 	// allocate record, and return new object
 	Object *r = malloc(sizeof(Object));
 	Object_init(r);
@@ -181,6 +191,8 @@ Object *Runtime_rawObject(Runtime *self){
 
 
 void Runtime_init(Runtime *self){
+	assert(self);
+
 	self->error = NULL;
 	Vector_init(&self->collectables, sizeof(Object*));
 
@@ -228,10 +240,16 @@ void Runtime_init(Runtime *self){
 	Object *whi = Runtime_rawObject(self);
 	ImpWhile_init(whi);
 	Object_putShallow(self->root_scope, "while", whi);
+
+	Object *vec = Runtime_rawObject(self);
+	ImpVector_init(vec);
+	Object_putShallow(self->root_scope, "vector", vec);
 }
 
 
 Object *Runtime_clone(Runtime *runtime, Object *object){
+	assert(runtime);
+	assert(object);
 
 	// TODO: check for special and internal methods
 	Object *special = Object_getDeep(object, "_clone");
@@ -256,8 +274,17 @@ Object *Runtime_clone(Runtime *runtime, Object *object){
 	return raw;
 }
 
-static Object *Runtime_cloneField(Runtime *runtime, char *field){
+Object *Runtime_cloneField(Runtime *runtime, char *field){
 	return Runtime_clone(runtime, Object_getDeep(runtime->root_scope, field));
+}
+
+
+void Runtime_print(Runtime *runtime, Object *object){
+	Runtime_activate(runtime
+				   , NULL
+				   , Object_getShallow(runtime->root_scope, "print")
+				   , 1
+				   , &object);
 }
 
 
@@ -316,6 +343,14 @@ static Object *Runtime_tokenToObject(Runtime *self, Object *scope, Token *token)
 Object *Runtime_executeInContext(Runtime *runtime
 	                              , Object *scope
 	                              , ParseNode node){
+	assert(runtime);
+	assert(Object_isValid(scope));
+
+	// bool devol = false;
+	// if(Object_hasKeyShallow(scope, "__volatile")){
+	// 	Object_putKeyShallow(scope, "__volatile");
+	// 	devol = true;
+	// }
 
 
 	// if leaf node, form value
@@ -357,6 +392,10 @@ Object *Runtime_executeInContext(Runtime *runtime
 		break;
 	}
 
+	// if(devol){
+	// 	Object_remShallow(scope, "__volatile");
+	// }
+
 	return r;
 }
 
@@ -371,5 +410,17 @@ Object *Runtime_execute(Runtime *self, char *code){
 }
 
 
+
+Object *Runtime_shallowCopy(Runtime *runtime, Object *object){
+	Object *r = Runtime_rawObject(runtime);
+	r->slotCount = object->slotCount;
+	if(r->slotCount > 0){
+		r->slots = malloc(r->slotCount * sizeof(Slot));
+		memcpy(r->slots, object->slots, r->slotCount * sizeof(Slot));
+	} else {
+		r->slots = NULL;
+	}
+	return r;
+}
 
 

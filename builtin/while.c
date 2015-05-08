@@ -21,16 +21,16 @@ static Object *ImpWhile_activate_internal(Runtime *runtime
 	Object_putKeyShallow(condition, "__volatile");
 	Object_putKeyShallow(step, "__volatile");
 
-	printf("BEGIN WHILE\n");
 	while(ImpBoolean_getRaw(Runtime_activate(runtime, context, condition, 0, NULL))){
 		Object *subcontext = Runtime_clone(runtime, context);
+		Object_putKeyShallow(subcontext, "__volatile");
 		Runtime_activate(runtime, subcontext, step, 0, NULL);
+		Object_remShallow(subcontext, "__volatile");
 	}
 
 	Object_remShallow(condition, "__volatile");
 	Object_remShallow(step, "__volatile");
 
-	printf("END WHILE\n");
 	return NULL;
 }
 

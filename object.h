@@ -17,6 +17,8 @@ typedef struct Object {
 } Object;
 
 
+bool Object_isValid(Object *self);
+bool Slot_isValid(Slot *self);
 
 Object *Slot_object(Slot *self);
 void *Slot_data(Slot *self);

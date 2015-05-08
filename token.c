@@ -12,7 +12,6 @@ void Token_clean(Token *token) {
 	}
 }
 
-
 void Token_print(Token *token){
 	switch(token->type){
 	case TOKEN_ATOM:
@@ -43,7 +42,7 @@ void Token_print(Token *token){
 		printf("}");
 		break;
 	case TOKEN_COMMENT:
-		// TODO
+		// TODO: support comments
 		break;
 	case TOKEN_NOT:
 		printf("!");

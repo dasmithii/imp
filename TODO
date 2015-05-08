@@ -1,3 +1,16 @@
+BUG STATUS
+
+  somethings up with slotCount getting set to 1 when it
+  should be 0
+
+
+
+
+
+ + Setup return X in functions.
+
+ + Setup Runtime_throw.
+
  + Finish builtins: (1) vector, (2) hashmap
 
  + Include support for ':' operator. Update def and set builtins
@@ -5,3 +18,11 @@
 
  + Pass arguments to functions.
 
+
+
+ + code Object-specific vector instead of using toolbox/vector
+
+
+
+ Possible memory leaks:
+  - Runtime_activate argument array

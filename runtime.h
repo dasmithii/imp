@@ -18,6 +18,7 @@ void Runtime_clean(Runtime *self);
 Object *Runtime_execute(Runtime *self, char *code);
 Object *Runtime_rawObject(Runtime *self);
 Object *Runtime_clone(Runtime *self, Object *base);
+Object *Runtime_cloneField(Runtime *self, char *name);
 
 Object *Runtime_activate(Runtime *runtime
 	                   , Object *context
@@ -33,5 +34,8 @@ void Runtime_throw(Runtime *runtime, Object *exception);
 
 void Runtime_markRecursive(Runtime *runtime, Object *object);
 
+void Runtime_print(Runtime *runtime, Object *object);
+
+Object *Runtime_shallowCopy(Runtime *runtime, Object *object);
 
 #endif
