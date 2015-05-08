@@ -30,7 +30,7 @@ static Object *Runtime_activateOn(Runtime *runtime
 	                            , Object *origin){
 	assert(runtime);
 	assert(context);
-	assert(object);
+	assert(Object_isValid(object));
 
 	Object *special = Object_getDeep(object, "_activate");
 	if(special){
@@ -49,8 +49,6 @@ static Object *Runtime_activateOn(Runtime *runtime
 		return cf(runtime, context, origin, argc, argv);
 	}
 
-
-
 	// TODO: throw error - uncallable
 	return object;
 }
@@ -62,6 +60,8 @@ Object *Runtime_activate(Runtime *runtime
 	                   , Object *object
 	                   , int argc
 	                   , Object **argv){
+	assert(Object_isValid(object));
+	assert(runtime);
 	return Runtime_activateOn(runtime 
 			                , context
 			                , object
@@ -72,26 +72,33 @@ Object *Runtime_activate(Runtime *runtime
 
 
 
-static void unmark(void *object){
-	assert(object);
-	Object_unmark(*((Object**) object));
+static void unmark(void *addr){
+	assert(addr);
+	Object *obj = *((Object**) addr);
+	assert(Object_isValid(obj));
+
+	Object_unmark(obj);
+
+	assert(Object_isValid(obj));
 }
 
 
 static void Runtime_markRecursiveIfVolatile(Runtime *runtime, Object *object){
 	assert(runtime);
-	assert(object);
+	assert(Object_isValid(object));
 
 	if(Object_hasKeyShallow(object, "__volatile")){
 		Runtime_markRecursive(runtime, object);
 	}
+
+	assert(Object_isValid(object));
 }
 
 
 
 static void Runtime_collectOne(Runtime *runtime, Object *object){
 	assert(runtime);
-	assert(object);
+	assert(Object_isValid(object));
 
 	Object *special = Object_getDeep(object, "_collect");
 	if(special){
@@ -108,15 +115,19 @@ static void Runtime_collectOne(Runtime *runtime, Object *object){
 			cf(runtime, NULL, object, 0, NULL);
 		}
 	}
+	assert(Object_isValid(object));
 	Object_free(object);
 }
 
 
 void Runtime_markRecursive(Runtime *runtime, Object *object){
 	assert(runtime);
-	assert(object);
+	assert(Object_isValid(object));
 
 	Object_markRecursive(object);
+
+	assert(Object_isValid(object));
+
 
 	Object *special = Object_getDeep(object, "_mark");
 	if(special){
@@ -133,15 +144,18 @@ void Runtime_markRecursive(Runtime *runtime, Object *object){
 			cf(runtime, NULL, object, 0, NULL);
 		}
 	}
+
+	assert(Object_isValid(object));
 }
 
 static void Runtime_runGC(Runtime *self){
 	assert(self);
+	assert(self->gc_able);
 
 	// Unmark all allocations.
 	Vector_each(&self->collectables, unmark); // TODO: check error
 
-	// mark all volatile 
+	// mark volatile objects and dependencies
 	for(int i = 0; i < self->collectables.size; i++){
 		Object *object = *((Object**) Vector_hook(&self->collectables, i));
 		Runtime_markRecursiveIfVolatile(self, object);
@@ -155,9 +169,9 @@ static void Runtime_runGC(Runtime *self){
 	Vector leftovers;
 	Vector_init(&leftovers, sizeof(Object*));
 	for(int i = 0; i < self->collectables.size; i++){
-		Object *item = NULL;
-		Vector_fetch(&self->collectables, i, &item);
-		
+		Object *item = *((Object**) Vector_hook(&self->collectables, i));
+		assert(Object_isValid(item));
+
 		if(item->gc_mark){
 			Vector_append(&leftovers, &item);
 		} else { 
@@ -175,9 +189,17 @@ static void Runtime_runGC(Runtime *self){
 Object *Runtime_rawObject(Runtime *self){
 	assert(self);
 
+	int oc = Runtime_objectCount(self);
+
+	if(self->gc_able && oc >= 20 && oc % 20 == 0){
+		Runtime_runGC(self);
+	}
+
+
 	// allocate record, and return new object
 	Object *r = malloc(sizeof(Object));
 	Object_init(r);
+	assert(Object_isValid(r));
 	Vector_append(&self->collectables, &r);
 
 	return r;
@@ -192,6 +214,7 @@ Object *Runtime_rawObject(Runtime *self){
 
 void Runtime_init(Runtime *self){
 	assert(self);
+	self->gc_able = false;
 
 	self->error = NULL;
 	Vector_init(&self->collectables, sizeof(Object*));
@@ -244,12 +267,14 @@ void Runtime_init(Runtime *self){
 	Object *vec = Runtime_rawObject(self);
 	ImpVector_init(vec);
 	Object_putShallow(self->root_scope, "vector", vec);
+
+	self->gc_able = true;
 }
 
 
 Object *Runtime_clone(Runtime *runtime, Object *object){
 	assert(runtime);
-	assert(object);
+	assert(Object_isValid(object));
 
 	// TODO: check for special and internal methods
 	Object *special = Object_getDeep(object, "_clone");
@@ -372,12 +397,22 @@ Object *Runtime_executeInContext(Runtime *runtime
 				subs[i] = Runtime_executeInContext(runtime
 					                             , scope
 					                             , node.contents.non_leaf.argv[i]);
+				if(subs[i]){
+					Object_putKeyShallow(subs[i], "__volatile");
+				}
 			}
 			r = Runtime_activate(runtime
 				               , scope
 				               , subs[0]
 				               , node.contents.non_leaf.argc - 1
 				               , subs + 1);
+
+			for(int i = 0; i < node.contents.non_leaf.argc; i++){
+				if(subs[i]){
+					Object_remShallow(subs[i], "__volatile");
+				}
+			}
+
 			free(subs);
 		}
 		break;
@@ -412,7 +447,11 @@ Object *Runtime_execute(Runtime *self, char *code){
 
 
 Object *Runtime_shallowCopy(Runtime *runtime, Object *object){
+	assert(runtime);
+	assert(Object_isValid(object));
+
 	Object *r = Runtime_rawObject(runtime);
+
 	r->slotCount = object->slotCount;
 	if(r->slotCount > 0){
 		r->slots = malloc(r->slotCount * sizeof(Slot));
@@ -420,7 +459,18 @@ Object *Runtime_shallowCopy(Runtime *runtime, Object *object){
 	} else {
 		r->slots = NULL;
 	}
+
+	assert(Object_isValid(r));
+	assert(Object_isValid(object));
 	return r;
 }
 
 
+int Runtime_objectCount(Runtime *self){
+	return self->collectables.size;
+}
+
+
+void Runtime_throwString(Runtime *runtime, char *exception){
+	printf("Uncaught exception: %s\n", exception);
+}

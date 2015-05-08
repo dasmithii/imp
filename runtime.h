@@ -6,6 +6,8 @@
 
 
 typedef struct {
+	bool gc_able;
+
 	char *error;
 	Object *root_scope;
 
@@ -31,11 +33,13 @@ Object *Runtime_executeInContext(Runtime *runtime
 	                              , ParseNode node);
 
 void Runtime_throw(Runtime *runtime, Object *exception);
-
+void Runtime_throwString(Runtime *runtime, char *exception);
 void Runtime_markRecursive(Runtime *runtime, Object *object);
-
 void Runtime_print(Runtime *runtime, Object *object);
-
 Object *Runtime_shallowCopy(Runtime *runtime, Object *object);
+
+int Runtime_objectCount(Runtime *self);
+
+
 
 #endif

@@ -193,6 +193,9 @@ static void Object_insertShallow(Object *self, char *key, void *data){
 
 	Slot *existing = Object_getSlotShallow(self, key);
 	if(existing){
+		if(Slot_isPrimitive(existing) && existing->data){
+			free(existing->data);
+		}
 		existing->data = data;
 		return;
 	}
@@ -205,6 +208,8 @@ static void Object_insertShallow(Object *self, char *key, void *data){
 		, self->slotCount
 		, sizeof(Slot)
 		, Slot_compare_generic);
+
+	assert(Object_isValid(self));
 }
 
 static void Object_insertDeep(Object *self, char *key, void *data){
@@ -220,6 +225,8 @@ static void Object_insertDeep(Object *self, char *key, void *data){
 	} else {
 		Object_insertShallow(self, key, data);
 	}
+
+	assert(Object_isValid(self));
 }
 
 
@@ -229,6 +236,8 @@ void Object_putDataShallow(Object *self, char *key, void *data){
 	assert(keyForInternal(key));
 
 	Object_insertShallow(self, key, data);
+
+	assert(Object_isValid(self));
 }
 
 
@@ -237,6 +246,8 @@ void Object_putDataDeep(Object *self, char *key, void *data){
 	assert(keyForInternal(key));
 
 	Object_insertDeep(self, key, data);
+
+	assert(Object_isValid(self));
 }
 
 
@@ -247,6 +258,8 @@ void Object_putShallow(Object *self, char *key, Object *value){
 	assert(!keyForInternal(key));
 
 	Object_insertShallow(self, key, value);
+
+	assert(Object_isValid(self));
 }
 
 
@@ -256,6 +269,8 @@ void Object_putDeep(Object *self, char *key, Object *value){
 	assert(!keyForInternal(key));
 
 	Object_insertDeep(self, key, value);
+
+	assert(Object_isValid(self));
 }
 
 
@@ -315,6 +330,8 @@ void Object_markRecursive(Object *self){
 			}
 		}
 	}
+
+	assert(Object_isValid(self));
 }
 
 

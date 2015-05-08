@@ -12,8 +12,3 @@
 
 
  + code Object-specific vector instead of using toolbox/vector
-
-
-
- Possible memory leaks:
-  - Runtime_activate argument array

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "../toolbox/vector.h"
+#include "vector.h"
 
 typedef struct {
 	ParseNode *code; // closure
@@ -11,12 +12,24 @@ typedef struct {
 } ImpClosure_internal;
 
 
+Object *c1 = NULL;
+Object *c2 = NULL;
+
 static ImpClosure_internal *ImpClosure_getRaw(Object *self){
+	assert(Object_isValid(self));
 	return (ImpClosure_internal*) Object_getDataDeep(self, "__data");
 }
 
+static bool validClosure(Object *obj){
+	return Object_isValid(obj)                       &&
+	       BuiltIn_protoId(obj) == BUILTIN_CLOSURE   &&
+	       Object_isValid(ImpClosure_getRaw(obj)->context);
+}
+
+
 
 void ImpClosure_print(Object *self){
+	assert(validClosure(self));
 	ParseNode_print(ImpClosure_getRaw(self)->code);
 	// TODO: print context
 }
@@ -27,24 +40,44 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 	                                      , Object *caller
 	                                      , int argc
 	                                      , Object **argv){
+	assert(runtime);
+	assert(validClosure(caller));
+
 	ImpClosure_internal *internal = Object_getDataShallow(caller, "__data");
 
-	Object *scope = Runtime_shallowCopy(runtime, internal->context);
+	Object *scope = Runtime_clone(runtime, internal->context);
+	assert(Object_isValid(scope));
 	Object_putKeyShallow(scope, "__volatile");
+	assert(Object_isValid(scope));
+
+	assert(validClosure(caller));
 
 
 	Object *arguments = Runtime_cloneField(runtime, "vector");
+	assert(Object_isValid(arguments));
 	Object_putShallow(scope, "arguments", arguments);
+
+	assert(Object_isValid(scope));
 	Vector *raw = ImpVector_getRaw(arguments);
 	for(int i = 0; i < argc; i++){
 		Vector_append(raw, &argv[i]);
 	}
+	assert(Object_isValid(arguments));
+
+	
+	assert(Object_isValid(scope));
  
 	Object *r = Runtime_executeInContext(runtime
 		                               , scope
 		                               , *internal->code);
 
+	assert(Object_isValid(scope));
+
+
 	Object_remShallow(scope, "__volatile");
+	assert(Object_isValid(scope));
+
+
 	return r;
 }
 
@@ -52,8 +85,8 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 
 static void ParseNode_cacheReferences(ParseNode *node, Object *context, Object *cache){
 	assert(node);
-	assert(context);
-	assert(cache);
+	assert(Object_isValid(context));
+	assert(Object_isValid(cache));
 
 	if(node->type == LEAF_NODE){
 		if(node->contents.token->type == TOKEN_ATOM){
@@ -81,6 +114,7 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 	internal->code->type = CALL_NODE;
 	Object_putDataShallow(self, "__data", internal);
 	ParseNode_cacheReferences(code, context, internal->context);
+	assert(Object_isValid(internal->context));
 }
 
 
@@ -91,7 +125,12 @@ static Object *ImpClosure_clone_internal(Runtime *runtime
 	                       , int argc
 	                       , Object **argv){
 	Object *r = Runtime_rawObject(runtime);
-	Object_putShallow(r, "_prototype", caller);
+	Object_putShallow(r, "_prototype", Object_rootPrototype(caller));
+	if(c1){
+		c2 = r;
+	} else {
+		c1 = r;
+	}
 	return r;
 }
 
@@ -100,14 +139,20 @@ static Object *ImpClosure_collect_internal(Runtime *runtime
 	                       , Object *caller
 	                       , int argc
 	                       , Object **argv){
+	assert(runtime);
+	assert(Object_isValid(caller));
+
 	ImpClosure_internal *raw = ImpClosure_getRaw(caller);
-	if(raw){
-		ParseNode_deepClean(raw->code);
-		free(raw->code);
-		raw->code = NULL;
-		free(raw);
-		Object_remShallow(caller, "__data");
-	}
+	assert(Object_isValid(raw->context));
+	ParseNode_deepClean(raw->code);
+	free(raw->code);
+	raw->code = NULL;
+	raw->context = NULL;
+	free(raw);
+	Object_remShallow(caller, "__data");
+
+	assert(Object_isValid(caller));
+
 	return NULL;
 }
 
@@ -117,18 +162,29 @@ static Object *ImpClosure_mark_internal(Runtime *runtime
 	                       , Object *caller
 	                       , int argc
 	                       , Object **argv){
+	assert(runtime);
+	assert(validClosure(caller));
+
 	ImpClosure_internal *raw = ImpClosure_getRaw(caller);
-	if(raw){
-		printf("ImpClosure, mark\n");
-		Runtime_markRecursive(runtime, raw->context);
-	}
+	assert(Object_isValid(raw->context));
+
+	Runtime_markRecursive(runtime, raw->context);
+
+	assert(validClosure(caller));
+	assert(Object_isValid(raw->context));
+
+	return NULL;
 }
 
 
 void ImpClosure_init(Object *self){
+	assert(Object_isValid(self));
+
 	BuiltIn_setId(self, BUILTIN_CLOSURE);
 	Object_registerCMethod(self, "__activate", ImpClosure_activate_internal);
 	Object_registerCMethod(self, "__clone", ImpClosure_clone_internal);
 	Object_registerCMethod(self, "__collect", ImpClosure_collect_internal);
 	Object_registerCMethod(self, "__mark", ImpClosure_mark_internal);
+
+	assert(Object_isValid(self));
 }
