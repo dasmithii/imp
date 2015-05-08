@@ -446,26 +446,6 @@ Object *Runtime_execute(Runtime *self, char *code){
 
 
 
-Object *Runtime_shallowCopy(Runtime *runtime, Object *object){
-	assert(runtime);
-	assert(Object_isValid(object));
-
-	Object *r = Runtime_rawObject(runtime);
-
-	r->slotCount = object->slotCount;
-	if(r->slotCount > 0){
-		r->slots = malloc(r->slotCount * sizeof(Slot));
-		memcpy(r->slots, object->slots, r->slotCount * sizeof(Slot));
-	} else {
-		r->slots = NULL;
-	}
-
-	assert(Object_isValid(r));
-	assert(Object_isValid(object));
-	return r;
-}
-
-
 int Runtime_objectCount(Runtime *self){
 	return self->collectables.size;
 }
