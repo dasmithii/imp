@@ -1,51 +1,109 @@
 #include <stdio.h>
-#include "parser.h"
 #include <string.h>
-#include <stdlib.h>
-#include "runtime.h"
+#include "commands.h"
 
+
+
+static const char *const intro = 
+"Imp - the programming language.";
 
 static const char *const usage = 
   "\tusage:"
-"\n\t  imp <file> ---------------- Interpret file."
-"\n\t  imp help ------------------ Display this message.\0";
+"\n\t  imp [repl] --------------- Launch REPL."
+"\n\t  imp <path> --------------- Interpret file."
+"\n\t  imp execute <code> ------- Interpret string."
+"\n\t  imp fetch <url> ---------- Download remote package to local registry."
+"\n\t  imp index <path> <name> -- Include package in local registry."
+"\n\t  imp remove <package> ----- Remove package from local registry."
+"\n\t  imp update <package> ----- Git pull package in local registry."
+"\n\t  imp install <project> ---- Install project globally."
+"\n\t  imp environment ---------- Print configuration."
+"\n\t  imp help ----------------- Display more information.";
+
+static const char *const options = 
+  "\toptions:"
+"\n\t  -root <path> ------------- Specify local package registry."
+"\n\t  -debug ------------------- Run in debug mode.";
 
 
-char *readFile(char *path){
-	FILE *stream;
-	char *contents;
-	size_t fileSize = 0;
-	stream = fopen(path, "rb");
-	if(!stream){
-		return NULL;
-	}
-	fseek(stream, 0L, SEEK_END);
-	fileSize = ftell(stream);
-	fseek(stream, 0L, SEEK_SET);
-	contents = malloc(fileSize+1);
-	size_t size=fread(contents,1,fileSize,stream);
-	contents[size]=0; 
-	fclose(stream);
-	return contents;
+
+
+void print_usage(){
+	printf("%s\n\n%s\n\n%s\n\n", intro, usage, options);
 }
 
 
+void invalid_args(char *message){
+	printf("Invalid arguments: %s\n", message);
+	printf("\n");
+	print_usage();
+	exit(1);
+}
+
 
 int main(int argc, char **argv){
-	if(argc == 2){
-		if(strcmp(argv[1], "help") == 0){
-			printf("%s", usage);
-		} else{
-			char *code = readFile(argv[1]);
-			if(!code){
-				printf("Failed to read file.\n");
-				return -1;
-			}
-			Runtime runtime;
-			Runtime_init(&runtime);
-			Runtime_execute(&runtime, code);
+	printf("argc: %d\n", argc);
+	if(argc == 1){
+		Imp_launchREPL();
+	} else if(strcmp(argv[1], "execute") == 0){
+		if(argc == 2){
+			Imp_executeString(argv[2]);
+		} else {
+			invalid_args("'execute' accepts exactly one parameter.");
 		}
-	} else{
-		printf("%s", usage);
+	} else if(strcmp(argv[1], "repl") == 0){
+		if(argc == 2){
+			Imp_launchREPL();
+		} else {
+			invalid_args("'repl' doesn't accept parameters.");
+		}
+	} else if(strcmp(argv[1], "fetch") == 0){
+		if(argc == 3){
+			Imp_fetchPackage(argv[2]);
+		} else {
+			invalid_args("'fetch' accepts exactly one parameter.");
+		}
+	} else if(strcmp(argv[1], "index") == 0){
+		if(argc == 4){
+			Imp_indexPackage(argv[2], argv[3]);
+		} else {
+			invalid_args("'index' accepts exactly two parameters.");
+		}
+	} else if(strcmp(argv[1], "remove") == 0){
+		if(argc == 3){
+			Imp_removePackage(argv[2]);
+		} else {
+			invalid_args("'remove' accepts exactly one parameter.");
+		}
+	} else if(strcmp(argv[1], "update") == 0){
+		if(argc == 3){
+			Imp_fetchPackage(argv[2]);
+		} else {
+			invalid_args("'update' accepts exactly one parameter.");
+		}
+	} else if(strcmp(argv[1], "install") == 0){
+		if(argc == 3){
+			Imp_installProject(argv[2]);
+		} else {
+			invalid_args("'install' accepts exactly one parameter.");
+		}
+	} else if(strcmp(argv[1], "environment") == 0){
+		if(argc != 2){
+			invalid_args("'environment' does not accept parameters.");
+		} else{
+			Imp_printEnvironment();
+		}
+	} else if(strcmp(argv[1], "help") == 0){
+		if(argc == 2){
+			print_usage();
+		} else if (argc == 3){
+			invalid_args("'help' accepts no arguments.");
+		}
+	} else {
+		if(argc == 2){
+			Imp_executeFile(argv[1]);
+		} else {
+			invalid_args("!!!");
+		}
 	}
 }
