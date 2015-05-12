@@ -1,14 +1,6 @@
- + Setup return X in functions.
-
  + Setup Runtime_throw.
 
- + Finish builtins: (1) vector, (2) hashmap
+ + Finish builtins: (1) hashmap
 
  + Include support for ':' operator. Update def and set builtins
    accordingly, so fields of objects can ....
-
- + Pass arguments to functions.
-
-
-
- + code Object-specific vector instead of using toolbox/vector
