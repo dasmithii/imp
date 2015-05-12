@@ -4,6 +4,9 @@
 #include "general.h"
 #include <ctype.h>
 
+
+
+
 char *ImpAtom_getRaw(Object *self){
 	assert(Object_isValid(self));
 	return (char*) Object_getDataDeep(self, "__data");
@@ -93,4 +96,10 @@ void ImpAtom_init(Object *self){
 	Object_registerCMethod(self, "__clone", ImpAtom_clone_internal);
 	Object_registerCMethod(self, "__activate", ImpAtom_activate_internal);
 	ImpAtom_setRaw(self, "defaultAtom");
+}
+
+
+Object *ImpAtom_mapping(Object *self, Object *context){
+	assert(Object_isValid(self));
+	return Object_getDeep(context, ImpAtom_getRaw(self));
 }

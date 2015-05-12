@@ -47,7 +47,7 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 
 	Object *scope = Runtime_clone(runtime, internal->context);
 	assert(Object_isValid(scope));
-	Object_putKeyShallow(scope, "__volatile");
+	Object_reference(scope);
 	assert(Object_isValid(scope));
 
 	assert(validClosure(caller));
@@ -74,7 +74,7 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 	assert(Object_isValid(scope));
 
 
-	Object_remShallow(scope, "__volatile");
+	Object_unreference(scope);
 	assert(Object_isValid(scope));
 
 
@@ -111,7 +111,7 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 	internal->code = malloc(sizeof(ParseNode));
 
 	*(internal->code) = ParseNode_deepCopy(code);
-	internal->code->type = CALL_NODE;
+	internal->code->type = BLOCK_NODE;
 	Object_putDataShallow(self, "__data", internal);
 	ParseNode_cacheReferences(code, context, internal->context);
 	assert(Object_isValid(internal->context));

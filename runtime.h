@@ -12,6 +12,8 @@ typedef struct {
 	Object *root_scope;
 
 	Vector collectables;  // TODO: use queue or something lockless instead of vector
+
+	Object *lastReturnValue; // TODO: track return values for each coroutine
 } Runtime;
 
 
@@ -39,6 +41,10 @@ void Runtime_print(Runtime *runtime, Object *object);
 Object *Runtime_shallowCopy(Runtime *runtime, Object *object);
 
 int Runtime_objectCount(Runtime *self);
+
+void Runtime_setReturnValue(Runtime *self, Object *value);
+void Runtime_clearReturnValue(Runtime *self);
+Object *Runtime_returnValue(Runtime *self);
 
 
 

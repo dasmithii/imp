@@ -10,5 +10,7 @@ char *ImpAtom_getRaw(Object *self);
 void ImpAtom_setRaw(Object *self, char *text);
 void ImpAtom_set(Object *self, Object *other);
 
+Object *ImpAtom_mapping(Object *self, Object *context);
+
 
 #endif

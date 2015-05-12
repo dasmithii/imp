@@ -16,8 +16,8 @@ int Tokenization_init(Tokenization *tokenization, char *code){
 	Vector_init(&tokenization->tokens, sizeof(Token));
 
 	// prefix with '('
-	const Token beginToken = {.type = TOKEN_SOFT_OPEN};
-	Vector_append(&tokenization->tokens, &beginToken);
+	Token tmp = {.type = TOKEN_SOFT_OPEN};
+	Vector_append(&tokenization->tokens, &tmp);
 
 	Token token;
 	bool afterSpace;
@@ -127,8 +127,8 @@ int Tokenization_init(Tokenization *tokenization, char *code){
 		Vector_append(&tokenization->tokens, &token);
 	}
 
-	const Token endToken = {.type = TOKEN_SOFT_CLOSE};
-	Vector_append(&tokenization->tokens, &endToken);
+	tmp.type = TOKEN_SOFT_CLOSE;
+	Vector_append(&tokenization->tokens, &tmp);
 	return 0; // TODO: handle errors
 }
 

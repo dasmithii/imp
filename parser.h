@@ -5,6 +5,7 @@
 
 
 typedef enum {
+	BLOCK_NODE,
 	CALL_NODE,
 	MACRO_NODE,
 	CLOSURE_NODE,

@@ -1,6 +1,6 @@
 #include "commands.h"
 #include "runtime.h"
-
+#include <stdlib.h>
 #include <stdio.h>
 
 static char *readFile(char *path){
@@ -28,6 +28,7 @@ void Imp_launchREPL(){
 	Runtime_init(&runtime);
 	for(;;){
 		char code[164];
+		printf(" > ");
 		fgets(code, 164, stdin);
 		Runtime_execute(&runtime, code);
 	}
@@ -78,8 +79,8 @@ void Imp_installProject(char *root){
 
 void Imp_printEnvironment(){
 	printf("\n\tImp environment:"
-		 "\n\n\t\troot:     /usr/local/imp"
-	     "\n\n\t\tversion:  0.0.1"
+	     "\n\t\troot:     /usr/local/imp"
+	     "\n\t\tversion:  0.0.1"
 	     "\n\n");
 }
 

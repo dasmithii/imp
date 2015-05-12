@@ -54,5 +54,10 @@ void Object_free(Object *self);
 
 Object *Object_rootPrototype(Object *self);
 
+void Object_reference(Object *self);
+void Object_unreference(Object *self);
+int Object_referenceCount(Object *self);
+
+
 
 #endif

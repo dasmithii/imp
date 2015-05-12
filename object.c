@@ -217,16 +217,15 @@ static void Object_insertDeep(Object *self, char *key, void *data){
 	assert(validKey(key));
 
 	Object *object = self;
-	while(object && !Object_hasKeyShallow(object, key)){
+	while(object){
+		if(Object_hasKeyShallow(object, key)){
+			Object_insertShallow(object, key, data);
+			return;
+		}
 		object = Object_getShallow(object, "_prototype");
-	}
-	if(object && Object_hasKeyShallow(object, key)){
-		Object_insertShallow(object, key, data);
-	} else {
-		Object_insertShallow(self, key, data);
-	}
+	} 
 
-	assert(Object_isValid(self));
+	Object_insertShallow(self, key, data);
 }
 
 
@@ -399,5 +398,39 @@ bool Object_isValid(Object *self){
 		}
 	}
 	return true;
+}
+
+
+void Object_reference(Object *self){
+	assert(Object_isValid(self));
+
+	if(!Object_hasKeyShallow(self, "__referenceCount")){
+		int *data = malloc(sizeof(int));
+		*data = 1;
+		Object_putDataShallow(self, "__referenceCount", data);
+	} else {
+		int *data = Object_getDataShallow(self, "__referenceCount");
+		*data += 1;
+	}
+}
+
+void Object_unreference(Object *self){
+	assert(Object_isValid(self));
+	assert(Object_hasKeyShallow(self, "__referenceCount"));
+
+	int *data = Object_getDataShallow(self, "__referenceCount");
+	*data -= 1;
+	assert((*data) >= 0);
+	if(*data == 0){
+		Object_remShallow(self, "__referenceCount");
+	}
+}
+
+int Object_referenceCount(Object *self){
+	assert(Object_isValid(self));
+	if(!Object_hasKeyShallow(self, "__referenceCount")){
+		return 0;
+	}
+	return *((int*) Object_getDataShallow(self, "__referenceCount"));
 }
 

@@ -87,7 +87,7 @@ static void Runtime_markRecursiveIfVolatile(Runtime *runtime, Object *object){
 	assert(runtime);
 	assert(Object_isValid(object));
 
-	if(Object_hasKeyShallow(object, "__volatile")){
+	if(Object_referenceCount(object) > 0){  // some internal objects are reference counted / volatile 
 		Runtime_markRecursive(runtime, object);
 	}
 
@@ -268,6 +268,10 @@ void Runtime_init(Runtime *self){
 	ImpVector_init(vec);
 	Object_putShallow(self->root_scope, "vector", vec);
 
+	Object *returner = Runtime_rawObject(self);
+	ImpReturn_init(returner);
+	Object_putShallow(self->root_scope, "return", returner);
+
 	self->gc_able = true;
 }
 
@@ -365,30 +369,51 @@ static Object *Runtime_tokenToObject(Runtime *self, Object *scope, Token *token)
 	}
 }
 
+
+void Runtime_setReturnValue(Runtime *self, Object *value){
+	self->lastReturnValue = value;
+}
+
+void Runtime_clearReturnValue(Runtime *self){
+	Runtime_setReturnValue(self, NULL);
+}
+
+Object *Runtime_returnValue(Runtime *self){
+	return self->lastReturnValue;
+}
+
+
 Object *Runtime_executeInContext(Runtime *runtime
 	                              , Object *scope
 	                              , ParseNode node){
 	assert(runtime);
 	assert(Object_isValid(scope));
+	Object *r = NULL;
 
-	// bool devol = false;
-	// if(Object_hasKeyShallow(scope, "__volatile")){
-	// 	Object_putKeyShallow(scope, "__volatile");
-	// 	devol = true;
-	// }
 
+	Object_reference(scope);
 
 	// if leaf node, form value
 	if(node.type == LEAF_NODE){
-		return Runtime_tokenToObject(runtime, scope, node.contents.token);
+		r = Runtime_tokenToObject(runtime, scope, node.contents.token);
 	}
 
 
 	// TODO: check that first sub is function type?
 
 
-	Object *r = NULL;
 	switch(node.type){
+	case BLOCK_NODE:
+		{
+			Runtime_clearReturnValue(runtime);
+			for(int i = 0; i < node.contents.non_leaf.argc; i++){
+				Runtime_executeInContext(runtime
+					                   , scope
+					                   , node.contents.non_leaf.argv[i]);
+			}
+			r = Runtime_returnValue(runtime);
+		}
+		break;
 	case CALL_NODE:
 		{
 			// iterate through parse node... TODO: mark these in collection
@@ -397,8 +422,9 @@ Object *Runtime_executeInContext(Runtime *runtime
 				subs[i] = Runtime_executeInContext(runtime
 					                             , scope
 					                             , node.contents.non_leaf.argv[i]);
+
 				if(subs[i]){
-					Object_putKeyShallow(subs[i], "__volatile");
+					Object_reference(subs[i]);
 				}
 			}
 			r = Runtime_activate(runtime
@@ -409,7 +435,7 @@ Object *Runtime_executeInContext(Runtime *runtime
 
 			for(int i = 0; i < node.contents.non_leaf.argc; i++){
 				if(subs[i]){
-					Object_remShallow(subs[i], "__volatile");
+					Object_unreference(subs[i]);
 				}
 			}
 
@@ -427,9 +453,7 @@ Object *Runtime_executeInContext(Runtime *runtime
 		break;
 	}
 
-	// if(devol){
-	// 	Object_remShallow(scope, "__volatile");
-	// }
+	Object_unreference(scope);
 
 	return r;
 }

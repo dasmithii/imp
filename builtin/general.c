@@ -9,7 +9,7 @@ void BuiltIn_setId(Object *self, BuiltinId id){
 }
 
 BuiltinId BuiltIn_id(Object *self){
-	BuiltinId *id = Object_getDataShallow(self, "__id");
+	BuiltinId *id = Object_getDataDeep(self, "__id");
 	if(!id){
 		return NOT_BUILTIN;
 	}

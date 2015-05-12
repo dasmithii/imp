@@ -5,7 +5,7 @@
 
 
 static const char *const intro = 
-"Imp - the programming language.";
+"\tImp - the programming language.";
 
 static const char *const usage = 
   "\tusage:"
@@ -29,7 +29,7 @@ static const char *const options =
 
 
 void print_usage(){
-	printf("%s\n\n%s\n\n%s\n\n", intro, usage, options);
+	printf("\n%s\n\n%s\n\n%s\n\n", intro, usage, options);
 }
 
 
@@ -42,7 +42,6 @@ void invalid_args(char *message){
 
 
 int main(int argc, char **argv){
-	printf("argc: %d\n", argc);
 	if(argc == 1){
 		Imp_launchREPL();
 	} else if(strcmp(argv[1], "execute") == 0){

@@ -119,9 +119,11 @@ int ParseTree_init(ParseTree *tree, char *code){
 		tree->error = strdup(tree->tokenization.error);
 		return ec;
 	}
-	return ParseNode_init(&tree->root
+	int rc = ParseNode_init(&tree->root
 		                , Tokenization_begin(&tree->tokenization)
 		                , Tokenization_end(&tree->tokenization));
+	tree->root.type = BLOCK_NODE;
+	return rc;
 }
 
 
@@ -260,5 +262,6 @@ void ParseNode_deepClean(ParseNode *self){
 		self->contents.non_leaf.argc = 0;
 	}
 }
+
 
 

@@ -18,18 +18,27 @@ static Object *ImpWhile_activate_internal(Runtime *runtime
 	// TODO: check arguments
 	Object *condition = argv[0];
 	Object *step = argv[1];
-	Object_putKeyShallow(condition, "__volatile");
-	Object_putKeyShallow(step, "__volatile");
+	Object_reference(condition);
+	Object_reference(step);
 
-	while(ImpBoolean_getRaw(Runtime_activate(runtime, context, condition, 0, NULL))){
+	for(;;){
+		// check condition
+		Runtime_activate(runtime, context, condition, 0, NULL);
+		if(Runtime_returnValue(runtime) == NULL                              ||
+		   BuiltIn_id(Runtime_returnValue(runtime)) != BUILTIN_BOOLEAN  ||
+		   ImpBoolean_getRaw(Runtime_returnValue(runtime)) == false){
+			break;
+		}
+
+		// execute block
 		Object *subcontext = Runtime_clone(runtime, context);
-		Object_putKeyShallow(subcontext, "__volatile");
+		Object_reference(subcontext);
 		Runtime_activate(runtime, subcontext, step, 0, NULL);
-		Object_remShallow(subcontext, "__volatile");
+		Object_unreference(subcontext);
 	}
 
-	Object_remShallow(condition, "__volatile");
-	Object_remShallow(step, "__volatile");
+	Object_unreference(condition);
+	Object_unreference(step);
 
 	return NULL;
 }
