@@ -42,6 +42,32 @@ void invalid_args(char *message){
 
 
 int main(int argc, char **argv){
+	for(int i = 1; i < argc; i++){
+		if(argv[i][0] == '-'){
+			if(strcmp(argv[i], "-root") == 0){
+				if(i == argc - 1){
+					invalid_args("root not specified.");
+				}
+				Imp_useRoot(argv[i + 1]);
+				for(int j = i; j < argc - 1; j++){
+					argv[j] = argv[j+1];
+				}
+				for(int j = i; j < argc - 1; j++){
+					argv[j] = argv[j+1];
+				}
+				argc -= 2;
+			} else if(strcmp(argv[i], "-debug") == 0){
+				Imp_debugMode(true);
+				for(int j = i; j < argc - 1; j++){
+					argv[j] = argv[j+1];
+				}
+				argc--;
+			} else {
+				invalid_args("invalid option.");
+			}
+		}
+	}
+
 	if(argc == 1){
 		Imp_launchREPL();
 	} else if(strcmp(argv[1], "execute") == 0){

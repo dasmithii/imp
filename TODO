@@ -1,3 +1,5 @@
+ + Check for mismatched grouping operators and such
+
  + Setup Runtime_throw.
 
  + Finish builtins: (1) hashmap

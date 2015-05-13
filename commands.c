@@ -3,6 +3,22 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
+static char *root = "/usr/local/imp";
+
+void Imp_debugMode(bool status){
+
+}
+
+void Imp_useRoot(char *path){
+	root = path;
+}
+
+char *Imp_root(){
+	return root;
+}
+
+
 static char *readFile(char *path){
 	FILE *stream;
 	char *contents;
@@ -45,7 +61,7 @@ void Imp_executeString(char *code){
 void Imp_executeFile(char *path){
 	char *contents = readFile(path);
 	if(!contents){
-		printf("Failed to read file.\n");
+		printf("Failed to read file %s.\n", path);
 		exit(1);
 	}
 	Imp_executeString(contents);
@@ -63,7 +79,10 @@ void Imp_indexPackage(char *source, char *destination){
 
 
 void Imp_removePackage(char *id){
-	printf("TODO: not yet implemented.");
+	char command[64];
+	sprintf(command, "rm -rf %s/%s", Imp_root(), id);
+	int rc = system(command);
+	exit(rc);
 }
 
 
@@ -83,4 +102,8 @@ void Imp_printEnvironment(){
 	     "\n\t\tversion:  0.0.1"
 	     "\n\n");
 }
+
+
+
+
 

@@ -460,10 +460,15 @@ Object *Runtime_executeInContext(Runtime *runtime
 
 Object *Runtime_execute(Runtime *self, char *code){
 	ParseTree tree;
-	ParseTree_init(&tree, code);
+	Object *r = NULL;
 
-	// TODO: check tree.error
-	Object *r = Runtime_executeInContext(self, self->root_scope, tree.root);
+	int rc = ParseTree_init(&tree, code);
+	if(rc){
+		Runtime_throwString(self, tree.error);
+	} else {
+		r = Runtime_executeInContext(self, self->root_scope, tree.root);
+	}
+
 	ParseTree_clean(&tree);
 	return r;
 }
@@ -477,4 +482,5 @@ int Runtime_objectCount(Runtime *self){
 
 void Runtime_throwString(Runtime *runtime, char *exception){
 	printf("Uncaught exception: %s\n", exception);
+	exit(1);
 }

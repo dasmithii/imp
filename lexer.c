@@ -21,10 +21,14 @@ int Tokenization_init(Tokenization *tokenization, char *code){
 
 	Token token;
 	bool afterSpace;
+	int line = 0;
 	while(*code){
 		if(isspace(*code)){
 			++code;
 			afterSpace = true;
+			if(*code == '\n'){
+				line++;
+			}
 			continue;
 		}
 
@@ -117,6 +121,10 @@ int Tokenization_init(Tokenization *tokenization, char *code){
 						++end;
 					}
 					token.data.number = strtod(code, &end); // ISSUE
+				} else {
+					tokenization->error = malloc(164);
+					sprintf(tokenization->error, "Unrecognized token '%c' on line %d.", *code, line);
+					return 1;
 				}
 				code = end - 1; // to counteract ** below
 				break;
@@ -143,6 +151,7 @@ void Tokenization_clean(Tokenization *tokenization){
 	assert(tokenization);
 	if(tokenization->error){
 		free(tokenization->error);
+		tokenization->error = NULL;
 	}
 	Vector_each(&tokenization->tokens, cleanToken);
 	Vector_clean(&tokenization->tokens);

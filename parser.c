@@ -122,6 +122,9 @@ int ParseTree_init(ParseTree *tree, char *code){
 	int rc = ParseNode_init(&tree->root
 		                , Tokenization_begin(&tree->tokenization)
 		                , Tokenization_end(&tree->tokenization));
+	if(rc){
+		tree->error = strdup("Parsing error.");
+	}
 	tree->root.type = BLOCK_NODE;
 	return rc;
 }
@@ -201,30 +204,6 @@ void ParseTree_print(ParseTree *self){
 	ParseNode_print(&self->root);
 }
 
-// typedef enum {
-// 	CALL_NODE,
-// 	MACRO_NODE,
-// 	CLOSURE_NODE,
-// 	LEAF_NODE
-// } ParseNodeType;
-
-
-// typedef struct ParseNode {
-// 	ParseNodeType type;
-// 	union {
-// 		Token *token;
-// 		struct {
-// 			size_t argc;
-// 			struct ParseNode *argv;
-// 		} non_leaf;
-// 	} contents;
-// } ParseNode;
-
-// typedef struct {
-// 	Tokenization tokenization;
-// 	ParseNode root;
-// 	char *error;
-// } ParseTree;
 
 
 ParseNode ParseNode_deepCopy(ParseNode *self){

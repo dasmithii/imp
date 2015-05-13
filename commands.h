@@ -1,6 +1,12 @@
 #ifndef IMP_COMMANDS_H_
 #define IMP_COMMANDS_H_
+#include <stdbool.h>
+#define IMP_DEFAULT_ROOT "/usr/local/imp"
 
+
+void Imp_debugMode(bool status);
+void Imp_useRoot(char *path);
+char *Imp_root();
 
 void Imp_launchREPL();
 void Imp_executeString(char *code);
