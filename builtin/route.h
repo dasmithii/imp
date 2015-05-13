@@ -4,6 +4,8 @@
 #include "../object.h"
 
 
+bool ImpRoute_isValid(Object *self);
+
 void ImpRoute_init(Object *self);
 void ImpRoute_print(Object *self);
 char *ImpRoute_getRaw(Object *self);
@@ -11,6 +13,9 @@ void ImpRoute_setRaw(Object *self, char *text);
 void ImpRoute_set(Object *self, Object *other);
 
 Object *ImpRoute_mapping(Object *self, Object *context);
+
+int ImpRoute_argc(Object *self);
+void ImpRoute_argv(Object *self, int i, char *dest);
 
 
 #endif

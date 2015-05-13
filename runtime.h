@@ -37,7 +37,6 @@ Object *Runtime_executeInContext(Runtime *runtime
 void Runtime_throw(Runtime *runtime, Object *exception);
 void Runtime_throwString(Runtime *runtime, char *exception);
 void Runtime_markRecursive(Runtime *runtime, Object *object);
-void Runtime_print(Runtime *runtime, Object *object);
 Object *Runtime_shallowCopy(Runtime *runtime, Object *object);
 
 int Runtime_objectCount(Runtime *self);
@@ -46,6 +45,7 @@ void Runtime_setReturnValue(Runtime *self, Object *value);
 void Runtime_clearReturnValue(Runtime *self);
 Object *Runtime_returnValue(Runtime *self);
 
+void Runtime_print(Runtime *self, Object *context, Object *object);
 
 
 #endif

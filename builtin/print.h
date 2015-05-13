@@ -5,6 +5,7 @@
 
 
 void ImpPrinter_init(Object *self);
+void Imp_print(Object *o);
 
 
 #endif

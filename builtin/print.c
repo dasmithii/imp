@@ -4,29 +4,6 @@
 #include <stdio.h>
 #include "boolean.h"
 
-static void print(Runtime *runtime
-	            , Object *context
-	            , Object *object){
-	if(!object){
-		printf("NULL");
-		return;
-	}
-
-	switch(BuiltIn_protoId(object)){
-	case BUILTIN_ROUTE:
-		print(runtime, context, Object_getDeep(context, ImpRoute_getRaw(object)));
-		break;
-	case BUILTIN_STRING:
-		printf("%s", (char*) Object_getDataDeep(object, "__data"));
-		break;
-	case BUILTIN_NUMBER:
-		printf("%f", *((double*) Object_getDataDeep(object, "__data")));
-		break;
-	default:
-		// TODO
-		break;
-	}
-}
 
 
 static Object *ImpPrinter_activate_internal(Runtime *runtime
@@ -39,7 +16,7 @@ static Object *ImpPrinter_activate_internal(Runtime *runtime
 	// if(special){
 	// }
 	for(int i = 0; i < argc; i++){
-		print(runtime, context, argv[i]);
+		Runtime_print(runtime, context, argv[i]);
 		if(argc > 1 && i < argc - 1){
 			printf(" ");
 		}

@@ -434,3 +434,9 @@ int Object_referenceCount(Object *self){
 	return *((int*) Object_getDataShallow(self, "__referenceCount"));
 }
 
+
+void Object_print(Object *self){
+	assert(Object_isValid(self));
+	printf("Object %p:\n", self);
+}
+

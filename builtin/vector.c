@@ -1,5 +1,6 @@
 #include "vector.h"
 #include "general.h"
+#include "number.h"
 
 Vector *ImpVector_getRaw(Object *self){
 	return (Vector*) Object_getDataDeep(self, "__data");
@@ -14,7 +15,7 @@ static Object *ImpVector_print_internal(Runtime *runtime
 	Vector *raw = ImpVector_getRaw(caller);
 	for(int i = 0; i < raw->size; i++){
 		Object *element = *((Object**) Vector_hook(raw, i));
-		Runtime_print(runtime, element);
+		Runtime_print(runtime, context, element);
 	}
 }
 

@@ -308,15 +308,6 @@ Object *Runtime_cloneField(Runtime *runtime, char *field){
 }
 
 
-void Runtime_print(Runtime *runtime, Object *object){
-	Runtime_activate(runtime
-				   , NULL
-				   , Object_getShallow(runtime->root_scope, "print")
-				   , 1
-				   , &object);
-}
-
-
 static Object *Runtime_tokenToObject(Runtime *self, Object *scope, Token *token){
 	switch(token->type){
 	case TOKEN_SLOT:
@@ -483,4 +474,29 @@ int Runtime_objectCount(Runtime *self){
 void Runtime_throwString(Runtime *runtime, char *exception){
 	printf("Uncaught exception: %s\n", exception);
 	exit(1);
+}
+
+void Runtime_print(Runtime *runtime, Object *context, Object *object){
+	assert(runtime);
+	assert(Object_isValid(context));
+	assert(Object_isValid(object));
+
+	Object *special = Object_getDeep(object, "_print");
+	if(special){
+		Runtime_activateOn(runtime 
+			             , context
+			             , special
+			             , 0
+			             , NULL
+			             , object);
+	}
+
+	void *internal = Object_getDataDeep(object, "__print");
+	if(internal){
+		CFunction cf = *((CFunction*) internal);
+		cf(runtime, context, object, 0, NULL);
+		return;
+	}
+
+	Object_print(object);
 }

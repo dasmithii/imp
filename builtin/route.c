@@ -26,7 +26,7 @@ static bool validRouteText(char *text){
 }
 
 
-static bool validRoute(Object *obj){
+bool ImpRoute_isValid(Object *obj){
 	return Object_isValid(obj)                      &&
 	       BuiltIn_protoId(obj) == BUILTIN_ROUTE    &&
 	       validRouteText(ImpRoute_getRaw(obj));
@@ -41,7 +41,7 @@ void ImpRoute_setRaw(Object *self, char *text){
 }
 
 void ImpRoute_print(Object *self){
-	assert(validRoute(self));
+	assert(ImpRoute_isValid(self));
 	char *data = Object_getDataDeep(self, "__data");
 	printf("%s", data);
 }
@@ -52,15 +52,15 @@ static Object *ImpRoute_print_internal(Runtime *runtime
 	                                  , Object *caller
 	                                  , int argc
 	                                  , Object **argv){
-	assert(validRoute(caller));
-	ImpRoute_print(caller);
-	return caller;	
+	assert(ImpRoute_isValid(caller));
+	Runtime_print(runtime, context, ImpRoute_mapping(caller, context));
+	return NULL;	
 }
 
 
 void ImpRoute_set(Object *self, Object *value){
-	assert(validRoute(self));
-	assert(validRoute(value));
+	assert(ImpRoute_isValid(self));
+	assert(ImpRoute_isValid(value));
 	ImpRoute_setRaw(self, ImpRoute_getRaw(value));
 }
 
@@ -98,7 +98,51 @@ void ImpRoute_init(Object *self){
 }
 
 
+int ImpRoute_argc(Object *self){
+	assert(ImpRoute_isValid(self));
+	char *raw = ImpRoute_getRaw(self);
+	int r = 1;
+	while(*raw){
+		if(*raw == ':'){
+			++r;
+		}
+		++raw;
+	}
+	return r;
+}
+
+void ImpRoute_argv(Object *self, int i, char *dest){
+	assert(ImpRoute_isValid(self));
+	assert(i < ImpRoute_argc(self));
+
+	char *raw = ImpRoute_getRaw(self);
+	int c = 0;
+	while(c < i){
+		if(*raw == ':'){
+			++c;
+		}
+		++raw;
+	}
+	while(*raw && *raw != ':'){
+		*dest = *raw;
+		++raw;
+		++dest;
+	}
+	*dest = 0;
+}
+
+
 Object *ImpRoute_mapping(Object *self, Object *context){
-	assert(Object_isValid(self));
-	return Object_getDeep(context, ImpRoute_getRaw(self));
+	assert(ImpRoute_isValid(self));
+	Object *r = context;
+	int argc = ImpRoute_argc(self);
+	for(int i = 0; i < argc; i++){
+		char cho[64];
+		ImpRoute_argv(self, i, cho);
+		r = Object_getDeep(r, cho);
+		if(!r){
+			return NULL;
+		}
+	}
+	return r;
 }

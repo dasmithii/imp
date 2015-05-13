@@ -59,5 +59,7 @@ void Object_unreference(Object *self);
 int Object_referenceCount(Object *self);
 
 
+void Object_print(Object *self);
+
 
 #endif
