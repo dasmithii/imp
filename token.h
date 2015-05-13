@@ -5,7 +5,7 @@
 
 
 typedef enum {
-	TOKEN_ATOM,
+	TOKEN_SLOT,
 	TOKEN_NUMBER,
 	TOKEN_STRING,
 
@@ -27,7 +27,6 @@ typedef enum {
 	TOKEN_STAR,
 	TOKEN_PLUS,
 	TOKEN_QUESTION,
-	TOKEN_COLON,
 	TOKEN_SEMI,
 	TOKEN_DASH
 } TokenType;

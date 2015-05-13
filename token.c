@@ -5,7 +5,7 @@
 
 void Token_clean(Token *token) {
 	assert(token);
-	if(token->type == TOKEN_ATOM || token->type == TOKEN_COMMENT){
+	if(token->type == TOKEN_SLOT || token->type == TOKEN_COMMENT){
 		assert(token->data.text);
 		free(token->data.text);
 		token->data.text = NULL;
@@ -14,7 +14,7 @@ void Token_clean(Token *token) {
 
 void Token_print(Token *token){
 	switch(token->type){
-	case TOKEN_ATOM:
+	case TOKEN_SLOT:
 		printf("%s", token->data.text);
 		break;
 	case TOKEN_STRING:
@@ -74,9 +74,6 @@ void Token_print(Token *token){
 	case TOKEN_QUESTION:
 		printf("?");
 		break;
-	case TOKEN_COLON:
-		printf(":");
-		break;
 	case TOKEN_SEMI:
 		printf(";");
 		break;
@@ -89,7 +86,7 @@ void Token_print(Token *token){
 
 void Token_printType(Token *token){
 	switch(token->type){
-	case TOKEN_ATOM:
+	case TOKEN_SLOT:
 		printf("atom");
 		break;
 	case TOKEN_NUMBER:
@@ -110,7 +107,7 @@ void Token_printType(Token *token){
 
 void Token_printVerbose(Token *token){
 	Token_printType(token);
-	if(token->type == TOKEN_ATOM     ||
+	if(token->type == TOKEN_SLOT     ||
 	   token->type == TOKEN_NUMBER   ||
 	   token->type == TOKEN_STRING   ||
 	   token->type == TOKEN_COMMENT){
@@ -156,7 +153,6 @@ bool Token_isUnary(Token *self){
 		   self->type == TOKEN_STAR      ||
 		   self->type == TOKEN_PLUS      ||
 		   self->type == TOKEN_QUESTION  ||
-		   self->type == TOKEN_COLON     ||
 		   self->type == TOKEN_SEMI      ||
 		   self->type == TOKEN_DASH;
 }

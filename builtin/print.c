@@ -1,6 +1,6 @@
 #include "print.h"
 #include "general.h"
-#include "atom.h"
+#include "route.h"
 #include <stdio.h>
 #include "boolean.h"
 
@@ -13,8 +13,8 @@ static void print(Runtime *runtime
 	}
 
 	switch(BuiltIn_protoId(object)){
-	case BUILTIN_ATOM:
-		print(runtime, context, Object_getDeep(context, ImpAtom_getRaw(object)));
+	case BUILTIN_ROUTE:
+		print(runtime, context, Object_getDeep(context, ImpRoute_getRaw(object)));
 		break;
 	case BUILTIN_STRING:
 		printf("%s", (char*) Object_getDataDeep(object, "__data"));

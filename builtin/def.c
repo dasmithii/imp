@@ -2,7 +2,7 @@
 #include "../object.h"
 #include "general.h"
 #include "../c.h"
-#include "atom.h"
+#include "route.h"
 
 static Object *ImpDef_activate_internal(Runtime *runtime
 	                                  , Object *context
@@ -11,7 +11,7 @@ static Object *ImpDef_activate_internal(Runtime *runtime
 	                                  , Object **argv){
 	// TODO: check arguments (should only be two, and first
 	// should be an atom).
-	char *field = ImpAtom_getRaw(argv[0]);
+	char *field = ImpRoute_getRaw(argv[0]);
 	Object_putShallow(context, field, argv[1]);
 	return argv[1];
 }

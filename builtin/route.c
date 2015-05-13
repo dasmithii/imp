@@ -1,4 +1,4 @@
-#include "atom.h"
+#include "route.h"
 #include <string.h>
 #include <stdio.h>
 #include "general.h"
@@ -7,18 +7,18 @@
 
 
 
-char *ImpAtom_getRaw(Object *self){
+char *ImpRoute_getRaw(Object *self){
 	assert(Object_isValid(self));
 	return (char*) Object_getDataDeep(self, "__data");
 }
 
-static bool validAtomText(char *text){
+static bool validRouteText(char *text){
 	if(!text){
 		return false;
 	}
 	int len = strlen(text);
 	for(int i = 0; i < len; i++){
-		if(!isalnum(text[i]) && text[i] != '_'){
+		if(!isalnum(text[i]) && text[i] != '_' && text[i] != ':'){
 			return false;
 		}
 	}
@@ -26,80 +26,79 @@ static bool validAtomText(char *text){
 }
 
 
-static bool validAtom(Object *obj){
+static bool validRoute(Object *obj){
 	return Object_isValid(obj)                      &&
-	       BuiltIn_protoId(obj) == BUILTIN_ATOM     &&
-	       validAtomText(ImpAtom_getRaw(obj));
+	       BuiltIn_protoId(obj) == BUILTIN_ROUTE    &&
+	       validRouteText(ImpRoute_getRaw(obj));
 }  
 
 
 
-void ImpAtom_setRaw(Object *self, char *text){
+void ImpRoute_setRaw(Object *self, char *text){
 	assert(Object_isValid(self));
-	assert(validAtomText(text));
+	assert(validRouteText(text));
 	Object_putDataDeep(self, "__data", strdup(text));
 }
 
-void ImpAtom_print(Object *self){
-	assert(validAtom(self));
+void ImpRoute_print(Object *self){
+	assert(validRoute(self));
 	char *data = Object_getDataDeep(self, "__data");
 	printf("%s", data);
 }
 
 
-static Object *ImpAtom_print_internal(Runtime *runtime
+static Object *ImpRoute_print_internal(Runtime *runtime
 	                                  , Object *context
 	                                  , Object *caller
 	                                  , int argc
 	                                  , Object **argv){
-	assert(validAtom(caller));
-	ImpAtom_print(caller);
+	assert(validRoute(caller));
+	ImpRoute_print(caller);
 	return caller;	
 }
 
 
-void ImpAtom_set(Object *self, Object *value){
-	assert(validAtom(self));
-	assert(validAtom(value));
-	ImpAtom_setRaw(self, ImpAtom_getRaw(value));
+void ImpRoute_set(Object *self, Object *value){
+	assert(validRoute(self));
+	assert(validRoute(value));
+	ImpRoute_setRaw(self, ImpRoute_getRaw(value));
 }
 
 
-static Object *ImpAtom_clone_internal(Runtime *runtime
+static Object *ImpRoute_clone_internal(Runtime *runtime
 	                                  , Object *context
 	                                  , Object *caller
 	                                  , int argc
 	                                  , Object **argv){
 	Object *r = Runtime_rawObject(runtime);
 	Object_putShallow(r, "_prototype", caller);
-	Object_putDataShallow(r, "__data", strdup(ImpAtom_getRaw(caller)));
+	Object_putDataShallow(r, "__data", strdup(ImpRoute_getRaw(caller)));
 	return r;	
 }
 
 
 
-static Object *ImpAtom_activate_internal(Runtime *runtime
+static Object *ImpRoute_activate_internal(Runtime *runtime
 	                                   , Object *context
 	                                   , Object *caller
 	                                   , int argc
 	                                   , Object **argv){
-	char *raw = ImpAtom_getRaw(caller);
+	char *raw = ImpRoute_getRaw(caller);
 	Object *obj = Object_getDeep(context, raw);
 
 	return Runtime_activate(runtime, context, obj, argc, argv);
 }
 
-void ImpAtom_init(Object *self){
-	BuiltIn_setId(self, BUILTIN_ATOM);
-
-	Object_registerCMethod(self, "__print", ImpAtom_print_internal);
-	Object_registerCMethod(self, "__clone", ImpAtom_clone_internal);
-	Object_registerCMethod(self, "__activate", ImpAtom_activate_internal);
-	ImpAtom_setRaw(self, "defaultAtom");
+void ImpRoute_init(Object *self){
+	BuiltIn_setId(self, BUILTIN_ROUTE);
+	Object_registerCMethod(self, "__print", ImpRoute_print_internal);
+	Object_registerCMethod(self, "__clone", ImpRoute_clone_internal);
+	Object_registerCMethod(self, "__activate", ImpRoute_activate_internal);
+	ImpRoute_setRaw(self, "defaultRoute");
 }
 
 
-Object *ImpAtom_mapping(Object *self, Object *context){
+Object *ImpRoute_mapping(Object *self, Object *context){
 	assert(Object_isValid(self));
-	return Object_getDeep(context, ImpAtom_getRaw(self));
+	return Object_getDeep(context, ImpRoute_getRaw(self));
 }

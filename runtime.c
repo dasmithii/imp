@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 #include "builtin/general.h"
-#include "builtin/atom.h"
+#include "builtin/route.h"
 #include "builtin/number.h"
 #include "builtin/string.h"
 #include "builtin/print.h"
@@ -230,9 +230,9 @@ void Runtime_init(Runtime *self){
 	ImpNumber_init(n);
 	Object_putShallow(self->root_scope, "number", n);
 
-	Object *a = Runtime_rawObject(self);
-	ImpAtom_init(a);
-	Object_putShallow(self->root_scope, "atom", a);
+	Object *route = Runtime_rawObject(self);
+	ImpRoute_init(route);
+	Object_putShallow(self->root_scope, "route", route);
 
 	Object *printer = Runtime_rawObject(self);
 	ImpPrinter_init(printer);
@@ -319,11 +319,11 @@ void Runtime_print(Runtime *runtime, Object *object){
 
 static Object *Runtime_tokenToObject(Runtime *self, Object *scope, Token *token){
 	switch(token->type){
-	case TOKEN_ATOM:
+	case TOKEN_SLOT:
 		{
-			Object *atom = Runtime_cloneField(self, "atom");
-			ImpAtom_setRaw(atom, token->data.text);
-			return atom;
+			Object *route = Runtime_cloneField(self, "route");
+			ImpRoute_setRaw(route, token->data.text);
+			return route;
 		}
 	case TOKEN_NUMBER:
 		{

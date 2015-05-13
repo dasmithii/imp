@@ -1,6 +1,6 @@
 #include "return.h"
 #include "general.h"
-#include "atom.h"
+#include "route.h"
 #include <stdio.h>
 #include "boolean.h"
 
@@ -12,8 +12,8 @@ static Object *ImpReturn_activate_internal(Runtime *runtime
 	                             , Object **argv){
 	assert(argc == 1);
 	Object *value = argv[0];
-	if(BuiltIn_id(value) == BUILTIN_ATOM){
-		value = ImpAtom_mapping(value, context);
+	if(BuiltIn_id(value) == BUILTIN_ROUTE){
+		value = ImpRoute_mapping(value, context);
 	}
 	Runtime_setReturnValue(runtime, value);
 	return NULL;

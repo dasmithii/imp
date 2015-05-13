@@ -89,7 +89,7 @@ static void ParseNode_cacheReferences(ParseNode *node, Object *context, Object *
 	assert(Object_isValid(cache));
 
 	if(node->type == LEAF_NODE){
-		if(node->contents.token->type == TOKEN_ATOM){
+		if(node->contents.token->type == TOKEN_SLOT){
 			char *atom = node->contents.token->data.text;
 			Object *reference = Object_getDeep(context, atom);
 			if(reference){
@@ -111,7 +111,11 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 	internal->code = malloc(sizeof(ParseNode));
 
 	*(internal->code) = ParseNode_deepCopy(code);
+
+
 	internal->code->type = BLOCK_NODE;
+
+
 	Object_putDataShallow(self, "__data", internal);
 	ParseNode_cacheReferences(code, context, internal->context);
 	assert(Object_isValid(internal->context));
