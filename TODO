@@ -1,8 +1,3 @@
  + Check for mismatched grouping operators and such
 
- + Setup Runtime_throw.
-
  + Finish builtins: (1) hashmap
-
- + Include support for ':' operator. Update def and set builtins
-   accordingly, so fields of objects can ....
