@@ -1,3 +1,7 @@
+ + Replace slot system with legit accessor.
+
+ + Inject 'self' into method call contexts.
+
  + Check for mismatched grouping operators and such
 
  + Finish builtins: (1) hashmap

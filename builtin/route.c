@@ -83,10 +83,46 @@ static Object *ImpRoute_activate_internal(Runtime *runtime
 	                                   , Object *caller
 	                                   , int argc
 	                                   , Object **argv){
-	char *raw = ImpRoute_getRaw(caller);
-	Object *obj = Object_getDeep(context, raw);
+	assert(runtime);
+	assert(Object_isValid(context));
+	assert(Object_isValid(caller));
 
-	return Runtime_activate(runtime, context, obj, argc, argv);
+	// if maps to an object directly, return said object
+	Object *mapping = ImpRoute_mapping(caller, context);
+	if(mapping){
+		return Runtime_activate(runtime, context, mapping, argc, argv);
+	}
+
+	// otherwise, try calling special or internal methods
+	// TODO
+	char buf[128];
+	buf[0] = 0;
+	int rargc = ImpRoute_argc(caller);
+	for(int i = 0; i < rargc - 1; i++){
+		char part[64];
+		ImpRoute_argv(caller, i, part);
+		strcat(buf, part);
+		strcat(buf, ":");
+	}
+	buf[strlen(buf) - 1] = 0;
+
+	Object *internal = Runtime_cloneField(runtime, "route");
+	ImpRoute_setRaw(internal, buf);
+	mapping = ImpRoute_mapping(internal, context);
+	if(mapping){
+		char meth[32];
+		meth[0] = 0;
+		strcat(meth, "__");
+		ImpRoute_argv(caller, rargc - 1, meth + strlen(meth));
+
+		void *f = Object_getDataDeep(mapping, meth);
+		if(f){
+			CFunction cf = *((CFunction*) f);
+			return cf(runtime, context, mapping, argc, argv);
+		}
+	}
+	Runtime_throwString(runtime, "NO!");
+	return NULL;
 }
 
 void ImpRoute_init(Object *self){

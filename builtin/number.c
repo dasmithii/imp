@@ -13,7 +13,7 @@ static double *ImpNumber_data(Object *self){
 
 void ImpNumber_add(Object *self, Object *other){
 	double *data = ImpNumber_data(self);
-	*data = (*data) + ImpNumber_getRaw(other);
+	*data += ImpNumber_getRaw(other);
 }
 
 static Object *ImpNumber_add_internal(Runtime *runtime

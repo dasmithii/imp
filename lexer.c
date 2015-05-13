@@ -102,7 +102,7 @@ int Tokenization_init(Tokenization *tokenization, char *code){
 					token.data.text[end - code] = 0;
 					memcpy(token.data.text, code, (end-code));
 					++end;
-				} else if(isalpha(*code)){
+				} else if(isalpha(*code) || *code == '_'){
 					token.type = TOKEN_SLOT;
 					end = code + 1;
 					while(isalnum(*end) || *end == '_' || *end == ':'){
