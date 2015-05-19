@@ -103,7 +103,7 @@ int Tokenization_init(Tokenization *tokenization, char *code){
 					memcpy(token.data.text, code, (end-code));
 					++end;
 				} else if(isalpha(*code) || *code == '_'){
-					token.type = TOKEN_SLOT;
+					token.type = TOKEN_ROUTE;
 					end = code + 1;
 					while(isalnum(*end) || *end == '_' || *end == ':'){
 						++end;

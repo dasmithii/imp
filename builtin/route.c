@@ -112,6 +112,15 @@ static Object *ImpRoute_activate_internal(Runtime *runtime
 	if(mapping){
 		char meth[32];
 		meth[0] = 0;
+		strcat(meth, "_");
+		ImpRoute_argv(caller, rargc - 1, meth + strlen(meth));
+		Object *special = Object_getDeep(mapping, meth);
+		if(special){
+			return Runtime_activateOn(runtime, context, special, argc, argv, mapping);
+		}
+
+
+		meth[0] = 0;
 		strcat(meth, "__");
 		ImpRoute_argv(caller, rargc - 1, meth + strlen(meth));
 
@@ -134,9 +143,8 @@ void ImpRoute_init(Object *self){
 }
 
 
-int ImpRoute_argc(Object *self){
-	assert(ImpRoute_isValid(self));
-	char *raw = ImpRoute_getRaw(self);
+int ImpRoute_argc_(char *raw){
+	assert(raw);
 	int r = 1;
 	while(*raw){
 		if(*raw == ':'){
@@ -147,11 +155,16 @@ int ImpRoute_argc(Object *self){
 	return r;
 }
 
-void ImpRoute_argv(Object *self, int i, char *dest){
+int ImpRoute_argc(Object *self){
 	assert(ImpRoute_isValid(self));
-	assert(i < ImpRoute_argc(self));
+	return ImpRoute_argc_(ImpRoute_getRaw(self));
+}
 
-	char *raw = ImpRoute_getRaw(self);
+void ImpRoute_argv_(char *raw, int i, char *dest){
+	assert(raw);
+	assert(i < ImpRoute_argc_(raw));
+	assert(dest);
+
 	int c = 0;
 	while(c < i){
 		if(*raw == ':'){
@@ -167,18 +180,30 @@ void ImpRoute_argv(Object *self, int i, char *dest){
 	*dest = 0;
 }
 
-
-Object *ImpRoute_mapping(Object *self, Object *context){
+void ImpRoute_argv(Object *self, int i, char *dest){
 	assert(ImpRoute_isValid(self));
+	assert(dest);
+	return ImpRoute_argv_(ImpRoute_getRaw(self), i, dest);
+}
+
+
+Object *ImpRoute_mapping_(char *self, Object *context){
 	Object *r = context;
-	int argc = ImpRoute_argc(self);
+	int argc = ImpRoute_argc_(self);
 	for(int i = 0; i < argc; i++){
 		char cho[64];
-		ImpRoute_argv(self, i, cho);
+		ImpRoute_argv_(self, i, cho);
 		r = Object_getDeep(r, cho);
 		if(!r){
 			return NULL;
 		}
 	}
 	return r;
+}
+
+
+Object *ImpRoute_mapping(Object *self, Object *context){
+	assert(ImpRoute_isValid(self));
+	assert(Object_isValid(context));
+	return ImpRoute_mapping_(ImpRoute_getRaw(self), context);
 }

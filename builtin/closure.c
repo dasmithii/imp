@@ -5,15 +5,18 @@
 #include <stdio.h>
 #include "../toolbox/vector.h"
 #include "vector.h"
+#include "route.h"
+
+Object *c1 = NULL;
+Object *c2 = NULL;
+Object *c3 = NULL;
+
 
 typedef struct {
 	ParseNode *code; // closure
 	Object *context; // cached objects in closure
 } ImpClosure_internal;
 
-
-Object *c1 = NULL;
-Object *c2 = NULL;
 
 static ImpClosure_internal *ImpClosure_getRaw(Object *self){
 	assert(Object_isValid(self));
@@ -57,6 +60,7 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 	assert(Object_isValid(arguments));
 	Object_putShallow(scope, "arguments", arguments);
 
+
 	assert(Object_isValid(scope));
 	Vector *raw = ImpVector_getRaw(arguments);
 	for(int i = 0; i < argc; i++){
@@ -89,11 +93,11 @@ static void ParseNode_cacheReferences(ParseNode *node, Object *context, Object *
 	assert(Object_isValid(cache));
 
 	if(node->type == LEAF_NODE){
-		if(node->contents.token->type == TOKEN_SLOT){
-			char *atom = node->contents.token->data.text;
-			Object *reference = Object_getDeep(context, atom);
+		if(node->contents.token->type == TOKEN_ROUTE){
+			char *route = node->contents.token->data.text;
+			Object *reference = ImpRoute_mapping_(route, context);
 			if(reference){
-				Object_putShallow(cache, atom, reference);
+				Object_putShallow(cache, route, reference);
 			}
 		}
 	} else {
@@ -106,6 +110,7 @@ static void ParseNode_cacheReferences(ParseNode *node, Object *context, Object *
 
 
 void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object *context){
+
 	ImpClosure_internal *internal = malloc(sizeof(ImpClosure_internal));
 	internal->context = Runtime_rawObject(runtime);
 	internal->code = malloc(sizeof(ParseNode));
@@ -119,6 +124,7 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 	Object_putDataShallow(self, "__data", internal);
 	ParseNode_cacheReferences(code, context, internal->context);
 	assert(Object_isValid(internal->context));
+
 }
 
 
@@ -129,12 +135,17 @@ static Object *ImpClosure_clone_internal(Runtime *runtime
 	                       , int argc
 	                       , Object **argv){
 	Object *r = Runtime_rawObject(runtime);
-	Object_putShallow(r, "_prototype", Object_rootPrototype(caller));
-	if(c1){
-		c2 = r;
-	} else {
+
+	if(!c1){
 		c1 = r;
+	} else if(!c2){
+		c2 = r;
+	} else if(!c3){
+		c3 = r;
 	}
+
+
+	Object_putShallow(r, "_prototype", Object_rootPrototype(caller));
 	return r;
 }
 
@@ -144,7 +155,7 @@ static Object *ImpClosure_collect_internal(Runtime *runtime
 	                       , int argc
 	                       , Object **argv){
 	assert(runtime);
-	assert(Object_isValid(caller));
+	assert(validClosure(caller));
 
 	ImpClosure_internal *raw = ImpClosure_getRaw(caller);
 	assert(Object_isValid(raw->context));
@@ -152,10 +163,10 @@ static Object *ImpClosure_collect_internal(Runtime *runtime
 	free(raw->code);
 	raw->code = NULL;
 	raw->context = NULL;
-	free(raw);
 	Object_remShallow(caller, "__data");
 
 	assert(Object_isValid(caller));
+
 
 	return NULL;
 }
@@ -182,6 +193,7 @@ static Object *ImpClosure_mark_internal(Runtime *runtime
 
 
 void ImpClosure_init(Object *self){
+
 	assert(Object_isValid(self));
 
 	BuiltIn_setId(self, BUILTIN_CLOSURE);

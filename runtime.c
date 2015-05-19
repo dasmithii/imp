@@ -22,7 +22,7 @@
 // Activates <object> with given arguments on the <origin> 
 // object. This is particularly useful for method-type
 // objects.
-static Object *Runtime_activateOn(Runtime *runtime
+Object *Runtime_activateOn(Runtime *runtime
 	                            , Object *context
 	                            , Object *object
 	                            , int argc
@@ -46,7 +46,7 @@ static Object *Runtime_activateOn(Runtime *runtime
 	void *internal = Object_getDataDeep(object, "__activate");
 	if(internal){
 		CFunction cf = *((CFunction*) internal);
-		return cf(runtime, context, origin, argc, argv);
+		return cf(runtime, context, origin, argc, argv);  // TODO: deal with this
 	}
 
 	// TODO: throw error - uncallable
@@ -150,7 +150,7 @@ void Runtime_markRecursive(Runtime *runtime, Object *object){
 
 static void Runtime_runGC(Runtime *self){
 	assert(self);
-	assert(self->gc_able);
+	assert(self->gc_locks == 0);
 
 	// Unmark all allocations.
 	Vector_each(&self->collectables, unmark); // TODO: check error
@@ -191,7 +191,7 @@ Object *Runtime_rawObject(Runtime *self){
 
 	int oc = Runtime_objectCount(self);
 
-	if(self->gc_able && oc >= 20 && oc % 20 == 0){
+	if(self->gc_locks == 0 && oc >= 20 && oc % 20 == 0){
 		Runtime_runGC(self);
 	}
 
@@ -214,7 +214,8 @@ Object *Runtime_rawObject(Runtime *self){
 
 void Runtime_init(Runtime *self){
 	assert(self);
-	self->gc_able = false;
+	self->gc_locks = 0;
+	Runtime_lockGC(self);
 
 	self->error = NULL;
 	Vector_init(&self->collectables, sizeof(Object*));
@@ -272,7 +273,7 @@ void Runtime_init(Runtime *self){
 	ImpReturn_init(returner);
 	Object_putShallow(self->root_scope, "return", returner);
 
-	self->gc_able = true;
+	Runtime_unlockGC(self);
 }
 
 
@@ -310,7 +311,7 @@ Object *Runtime_cloneField(Runtime *runtime, char *field){
 
 static Object *Runtime_tokenToObject(Runtime *self, Object *scope, Token *token){
 	switch(token->type){
-	case TOKEN_SLOT:
+	case TOKEN_ROUTE:
 		{
 			Object *route = Runtime_cloneField(self, "route");
 			ImpRoute_setRaw(route, token->data.text);
@@ -439,7 +440,9 @@ Object *Runtime_executeInContext(Runtime *runtime
 	case CLOSURE_NODE:
 		{
 			r = Runtime_cloneField(runtime, "closure");
+			Runtime_lockGC(runtime);
 			ImpClosure_compile(runtime, r, &node, scope);
+			Runtime_unlockGC(runtime);
 		}
 		break;
 	}
@@ -499,4 +502,17 @@ void Runtime_print(Runtime *runtime, Object *context, Object *object){
 	}
 
 	Object_print(object);
+}
+
+
+void Runtime_lockGC(Runtime *self){
+	assert(self);
+	self->gc_locks++;
+}
+
+
+void Runtime_unlockGC(Runtime *self){
+	assert(self);
+	self->gc_locks--;
+	assert(self->gc_locks >= 0);
 }

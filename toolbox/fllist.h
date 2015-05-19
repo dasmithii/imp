@@ -1,5 +1,10 @@
-#ifndef _FLUX_LINKED_LIST_UTILITY_
-#define _FLUX_LINKED_LIST_UTILITY_
+// Toolkit - a collection of utilities for C-based software projects.
+// Douglas Adam Smith II
+// github.com/dasmithii/toolkit
+
+
+#ifndef TOOLBOX_LINKED_LIST_H_
+#define TOOLBOX_LINKED_LIST_H_
 #include <stdlib.h>
 #include <stdbool.h>
 

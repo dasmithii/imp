@@ -5,7 +5,7 @@
 
 
 typedef enum {
-	TOKEN_SLOT,
+	TOKEN_ROUTE,
 	TOKEN_NUMBER,
 	TOKEN_STRING,
 

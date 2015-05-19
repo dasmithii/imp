@@ -1,5 +1,10 @@
-#ifndef _BASELINE_MEMORY_UTILITIES_
-#define _BASELINE_MEMORY_UTILITIES_
+// Toolkit - a collection of utilities for C-based software projects.
+// Douglas Adam Smith II
+// github.com/dasmithii/toolkit
+
+
+#ifndef TOOLBOX_MEMORY_H_
+#define TOOLBOX_MEMORY_H_
 #include <stdlib.h>
 
 

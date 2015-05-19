@@ -1,9 +1,14 @@
+// Toolkit - a collection of utilities for C-based software projects.
+// Douglas Adam Smith II
+// github.com/dasmithii/toolkit
+
+
 // Errors are handled like assumptions, except their checks exist
 // in production-ready programs. And rather than exiting immediately,
 // they goto the "error:" label, where necessary deallocations are
 // handled.
-#ifndef _BASELINE_ERROR_HANDLING_
-#define _BASELINE_ERROR_HANDLING_
+#ifndef TOOLBOX_ERRORS_H_
+#define TOOLBOX_ERRORS_H_
 
 #define error(msg)                                                       \
 	fprintf(stderr, "%s (line: %d, file: %s)", msg, __LINE__, __FILE__); \

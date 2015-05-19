@@ -1,5 +1,10 @@
-#ifndef BASELINE_BIT_UTILITIES
-#define BASELINE_BIT_UTILITIES
+// Toolkit - a collection of utilities for C-based software projects.
+// Douglas Adam Smith II
+// github.com/dasmithii/toolkit
+
+
+#ifndef TOOLBOX_BITS_H_
+#define TOOLBOX_BITS_H_
 #include <stdbool.h>
 
 

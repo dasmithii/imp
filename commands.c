@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "toolbox/queue.h"
 
 static char *root = "/usr/local/imp";
 
@@ -38,10 +39,10 @@ static char *readFile(char *path){
 }
 
 
-
 void Imp_launchREPL(){
 	Runtime runtime;
 	Runtime_init(&runtime);
+
 	for(;;){
 		char code[164];
 		printf(" > ");

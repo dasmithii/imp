@@ -1,5 +1,10 @@
-#ifndef _BASELINE_ARRAY_
-#define _BASELINE_ARRAY_
+// Toolkit - a collection of utilities for C-based software projects.
+// Douglas Adam Smith II
+// github.com/dasmithii/toolkit
+
+
+#ifndef TOOLBOX_ARRAY_H_
+#define TOOLBOX_ARRAY_H_
 #include <stdlib.h>
 
 

@@ -1,5 +1,10 @@
-#ifndef BASELINE_HASH
-#define BASELINE_HASH
+// Toolkit - a collection of utilities for C-based software projects.
+// Douglas Adam Smith II
+// github.com/dasmithii/toolkit
+
+
+#ifndef TOOLBOX_HASH_H_
+#define TOOLBOX_HASH_H_
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>

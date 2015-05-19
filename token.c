@@ -5,7 +5,7 @@
 
 void Token_clean(Token *token) {
 	assert(token);
-	if(token->type == TOKEN_SLOT || token->type == TOKEN_COMMENT){
+	if(token->type == TOKEN_ROUTE || token->type == TOKEN_COMMENT){
 		assert(token->data.text);
 		free(token->data.text);
 		token->data.text = NULL;
@@ -14,7 +14,7 @@ void Token_clean(Token *token) {
 
 void Token_print(Token *token){
 	switch(token->type){
-	case TOKEN_SLOT:
+	case TOKEN_ROUTE:
 		printf("%s", token->data.text);
 		break;
 	case TOKEN_STRING:
@@ -86,7 +86,7 @@ void Token_print(Token *token){
 
 void Token_printType(Token *token){
 	switch(token->type){
-	case TOKEN_SLOT:
+	case TOKEN_ROUTE:
 		printf("atom");
 		break;
 	case TOKEN_NUMBER:
@@ -107,7 +107,7 @@ void Token_printType(Token *token){
 
 void Token_printVerbose(Token *token){
 	Token_printType(token);
-	if(token->type == TOKEN_SLOT     ||
+	if(token->type == TOKEN_ROUTE     ||
 	   token->type == TOKEN_NUMBER   ||
 	   token->type == TOKEN_STRING   ||
 	   token->type == TOKEN_COMMENT){

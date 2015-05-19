@@ -1,8 +1,20 @@
 Overview
 
-    Imp is a little scripting language I'm working on for
-    fun. It is prototype-based, duck-typed, and excessively
+    Imp is a little scripting language that I've been working on
+    for fun. It is prototype-based, duck-typed, and excessively
     parenthesized.
+
+      (print 'Hello, world!')
+
+
+
+Slots
+  
+    Everything is an object, and objects are merely collections 
+    of slots (i.e. pointers to other objects, or, in some cases,
+    raw data).
+
+      (set object:slot)
 
 
 

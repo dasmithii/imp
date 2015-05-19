@@ -1,3 +1,8 @@
+// Toolkit - a collection of utilities for C-based software projects.
+// Douglas Adam Smith II
+// github.com/dasmithii/toolkit
+
+
 #include "heap.h"
 #include "memory.h"
 #include <stdbool.h>

@@ -1,5 +1,10 @@
-#ifndef BASELINE_STACK
-#define BASELINE_STACK
+// Toolkit - a collection of utilities for C-based software projects.
+// Douglas Adam Smith II
+// github.com/dasmithii/toolkit
+
+
+#ifndef TOOLBOX_STACK_H_
+#define TOOLBOX_STACK_H_
 #include <stdbool.h>
 #include "vector.h"
 

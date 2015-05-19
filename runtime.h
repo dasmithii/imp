@@ -6,14 +6,14 @@
 
 
 typedef struct {
-	bool gc_able;
-
 	char *error;
 	Object *root_scope;
 
 	Vector collectables;  // TODO: use queue or something lockless instead of vector
 
 	Object *lastReturnValue; // TODO: track return values for each coroutine
+
+	int gc_locks;
 } Runtime;
 
 
@@ -23,6 +23,13 @@ Object *Runtime_execute(Runtime *self, char *code);
 Object *Runtime_rawObject(Runtime *self);
 Object *Runtime_clone(Runtime *self, Object *base);
 Object *Runtime_cloneField(Runtime *self, char *name);
+
+Object *Runtime_activateOn(Runtime *runtime
+	                     , Object *context
+	                     , Object *caller
+	                     , int argc
+	                     , Object **argv
+	                     , Object *origin);
 
 Object *Runtime_activate(Runtime *runtime
 	                   , Object *context
@@ -46,6 +53,9 @@ void Runtime_clearReturnValue(Runtime *self);
 Object *Runtime_returnValue(Runtime *self);
 
 void Runtime_print(Runtime *self, Object *context, Object *object);
+void Runtime_interrupt(Runtime *self);
 
+void Runtime_lockGC(Runtime *self);
+void Runtime_unlockGC(Runtime *self);
 
 #endif

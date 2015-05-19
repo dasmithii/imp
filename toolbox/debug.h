@@ -1,10 +1,15 @@
+// Toolkit - a collection of utilities for C-based software projects.
+// Douglas Adam Smith II
+// github.com/dasmithii/toolkit
+
+
 // Baseline debug utilities are built atop the standard `assert` macro,
 // and are nullified accordingly when NDEBUG is defined.
 //
 // In place of assertions, we use assumptions, and provide various 
 // helpful assumption macros, all derived from the base assume_m().
-#ifndef _BASELINE_ASSUMPTIONS_
-#define _BASELINE_ASSUMPTIONS_
+#ifndef TOOLBOX_DEBUG_H_
+#define TOOLBOX_DEBUG_H_
 #include <assert.h>
 
 #define assume_m(cond, msg) \

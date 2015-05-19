@@ -1,5 +1,10 @@
-#ifndef _BASELINE_HEAP_
-#define _BASELINE_HEAP_
+// Toolkit - a collection of utilities for C-based software projects.
+// Douglas Adam Smith II
+// github.com/dasmithii/toolkit
+
+
+#ifndef TOOLBOX_HEAP_H_
+#define TOOLBOX_HEAP_H_
 #include <stddef.h>
 #include <stdbool.h>
 

@@ -1,5 +1,10 @@
-#ifndef BASELINE_CIRCLE
-#define BASELINE_CIRCLE
+// Toolkit - a collection of utilities for C-based software projects.
+// Douglas Adam Smith II
+// github.com/dasmithii/toolkit
+
+
+#ifndef TOOLBOX_CIRCLE_H_
+#define TOOLBOX_CIRCLE_H_
 #include <stdlib.h>
 #include <string.h>
 #include "fllist.h"
