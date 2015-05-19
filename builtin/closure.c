@@ -60,10 +60,14 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 	assert(Object_isValid(arguments));
 	Object_putShallow(scope, "arguments", arguments);
 
+	if(argc > 0){
+		Object_putShallow(scope, "self", argv[0]);
+	}
+
 
 	assert(Object_isValid(scope));
 	Vector *raw = ImpVector_getRaw(arguments);
-	for(int i = 0; i < argc; i++){
+	for(int i = 1; i < argc; i++){
 		Vector_append(raw, &argv[i]);
 	}
 	assert(Object_isValid(arguments));
@@ -94,10 +98,19 @@ static void ParseNode_cacheReferences(ParseNode *node, Object *context, Object *
 
 	if(node->type == LEAF_NODE){
 		if(node->contents.token->type == TOKEN_ROUTE){
+			char buf[32];
 			char *route = node->contents.token->data.text;
-			Object *reference = ImpRoute_mapping_(route, context);
+			char *ptr = buf;
+			while(*route && *route != ':'){
+				*ptr = *route;
+				ptr++;
+				route++;
+			}
+			*ptr = 0;
+
+			Object *reference = Object_getDeep(context, buf);
 			if(reference){
-				Object_putShallow(cache, route, reference);
+				Object_putShallow(cache, buf, reference);
 			}
 		}
 	} else {

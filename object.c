@@ -437,6 +437,6 @@ int Object_referenceCount(Object *self){
 
 void Object_print(Object *self){
 	assert(Object_isValid(self));
-	printf("Object %p:\n", self);
+	printf("Object %p", self);
 }
 

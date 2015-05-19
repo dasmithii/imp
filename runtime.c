@@ -14,6 +14,7 @@
 #include "builtin/boolean.h"
 #include "builtin/while.h"
 #include "builtin/vector.h"
+#include "builtin/return.h"
 #include "c.h"
 
 
@@ -31,26 +32,59 @@ Object *Runtime_activateOn(Runtime *runtime
 	assert(runtime);
 	assert(context);
 	assert(Object_isValid(object));
+	Object *r = NULL;
+
+	Object_reference(context);
+	Object_reference(object);
+	for(int i = 0; i < argc; i++){
+		Object_reference(argv[i]);
+	}
+	Object_reference(origin);
+
+
 
 	Object *special = Object_getDeep(object, "_activate");
+	void *internal = Object_getDataDeep(object, "__activate");
 	if(special){
-		return Runtime_activateOn(runtime 
+		r = Runtime_activateOn(runtime 
 			                    , context
 			                    , special
 			                    , argc
 			                    , argv
 			                    , origin);
-	}
-
-
-	void *internal = Object_getDataDeep(object, "__activate");
-	if(internal){
+	} else if(internal){
 		CFunction cf = *((CFunction*) internal);
-		return cf(runtime, context, origin, argc, argv);  // TODO: deal with this
+
+		if(BuiltIn_id(object) == BUILTIN_CLOSURE){
+			// make self first arg in argv
+			int argc2 = argc + 1;
+			Object **argv2 = malloc(sizeof(Object*) * argc2);
+			argv2[0] = origin;
+			for(int i = 1; i < argc2; i++){
+				argv2[i] = argv[i - 1];
+			}
+
+			r = cf(runtime, context, object, argc2, argv2);  // TODO: deal with this
+			free(argv2);
+		} else {
+			r = cf(runtime, context, object, argc, argv);
+		}
 	}
 
-	// TODO: throw error - uncallable
-	return object;
+
+	Object_unreference(context);
+	Object_unreference(object);
+	for(int i = 0; i < argc; i++){
+		Object_unreference(argv[i]);
+	}
+	Object_unreference(origin);
+
+
+	if(special || internal){
+		return r;
+	}
+	Runtime_throwString(runtime, "Object not callable.");
+	return NULL;
 }
 
 
@@ -476,7 +510,7 @@ int Runtime_objectCount(Runtime *self){
 
 void Runtime_throwString(Runtime *runtime, char *exception){
 	printf("Uncaught exception: %s\n", exception);
-	exit(1);
+	abort();
 }
 
 void Runtime_print(Runtime *runtime, Object *context, Object *object){
@@ -515,4 +549,17 @@ void Runtime_unlockGC(Runtime *self){
 	assert(self);
 	self->gc_locks--;
 	assert(self->gc_locks >= 0);
+}
+
+
+bool Runtime_isManaged(Runtime *self, Object *object){
+	assert(self);
+	assert(object);
+	for(int i = 0; i < self->collectables.size; i++){
+		Object *item = *((Object**) Vector_hook(&self->collectables, i));
+		if(item == object){
+			return true;
+		}
+	}
+	return false;
 }

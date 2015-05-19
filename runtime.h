@@ -58,4 +58,7 @@ void Runtime_interrupt(Runtime *self);
 void Runtime_lockGC(Runtime *self);
 void Runtime_unlockGC(Runtime *self);
 
+bool Runtime_isManaged(Runtime *self, Object *object);
+
+
 #endif

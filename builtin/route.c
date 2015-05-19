@@ -89,9 +89,14 @@ static Object *ImpRoute_activate_internal(Runtime *runtime
 
 	// if maps to an object directly, return said object
 	Object *mapping = ImpRoute_mapping(caller, context);
-	if(mapping){
-		return Runtime_activate(runtime, context, mapping, argc, argv);
+	Object *submapping = ImpRoute_submapping(caller, context);
+	if(!submapping){
+		submapping = mapping;
 	}
+	if(mapping){
+		return Runtime_activateOn(runtime, context, mapping, argc, argv, submapping);
+	}
+	// else?
 
 	// otherwise, try calling special or internal methods
 	// TODO
@@ -104,7 +109,6 @@ static Object *ImpRoute_activate_internal(Runtime *runtime
 		strcat(buf, part);
 		strcat(buf, ":");
 	}
-	buf[strlen(buf) - 1] = 0;
 
 	Object *internal = Runtime_cloneField(runtime, "route");
 	ImpRoute_setRaw(internal, buf);
@@ -130,6 +134,7 @@ static Object *ImpRoute_activate_internal(Runtime *runtime
 			return cf(runtime, context, mapping, argc, argv);
 		}
 	}
+	abort();
 	Runtime_throwString(runtime, "NO!");
 	return NULL;
 }
@@ -187,6 +192,21 @@ void ImpRoute_argv(Object *self, int i, char *dest){
 }
 
 
+
+Object *ImpRoute_submapping_(char *self, Object *context){
+	Object *r = context;
+	int argc = ImpRoute_argc_(self);
+	for(int i = 0; i < argc - 1; i++){
+		char cho[64];
+		ImpRoute_argv_(self, i, cho);
+		r = Object_getDeep(r, cho);
+		if(!r){
+			return NULL;
+		}
+	}
+	return r;
+}
+
 Object *ImpRoute_mapping_(char *self, Object *context){
 	Object *r = context;
 	int argc = ImpRoute_argc_(self);
@@ -202,8 +222,15 @@ Object *ImpRoute_mapping_(char *self, Object *context){
 }
 
 
+
 Object *ImpRoute_mapping(Object *self, Object *context){
 	assert(ImpRoute_isValid(self));
 	assert(Object_isValid(context));
 	return ImpRoute_mapping_(ImpRoute_getRaw(self), context);
+}
+
+Object *ImpRoute_submapping(Object *self, Object *context){
+	assert(ImpRoute_isValid(self));
+	assert(Object_isValid(context));
+	return ImpRoute_submapping_(ImpRoute_getRaw(self), context);
 }

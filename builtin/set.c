@@ -3,6 +3,7 @@
 #include "general.h"
 #include "../c.h"
 #include "route.h"
+#include <string.h>
 
 static Object *ImpSet_activate_internal(Runtime *runtime
 	                                  , Object *context

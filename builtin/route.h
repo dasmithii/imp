@@ -12,6 +12,8 @@ char *ImpRoute_getRaw(Object *self);
 void ImpRoute_setRaw(Object *self, char *text);
 void ImpRoute_set(Object *self, Object *other);
 
+Object *ImpRoute_submapping(Object *self, Object *context);
+Object *ImpRoute_submapping_(char *self, Object *context);
 Object *ImpRoute_mapping(Object *self, Object *context);
 Object *ImpRoute_mapping_(char *self, Object *context);
 
