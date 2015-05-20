@@ -13,7 +13,7 @@ char *ImpRoute_getRaw(Object *self){
 }
 
 static bool validRouteText(char *text){
-	if(!text){
+	if(!text || *text == 0){
 		return false;
 	}
 	int len = strlen(text);
@@ -70,9 +70,11 @@ static Object *ImpRoute_clone_internal(Runtime *runtime
 	                                  , Object *caller
 	                                  , int argc
 	                                  , Object **argv){
+	Object_reference(caller);
 	Object *r = Runtime_rawObject(runtime);
 	Object_putShallow(r, "_prototype", caller);
 	Object_putDataShallow(r, "__data", strdup(ImpRoute_getRaw(caller)));
+	Object_unreference(caller);
 	return r;	
 }
 
@@ -87,53 +89,60 @@ static Object *ImpRoute_activate_internal(Runtime *runtime
 	assert(Object_isValid(context));
 	assert(Object_isValid(caller));
 
-	// if maps to an object directly, return said object
+	Object *r = NULL;
+
+	Object_reference(context);
+	Object_reference(caller);
+	for(int i = 0; i < argc; i++){
+		Object_reference(argv[i]);
+	}
+
 	Object *mapping = ImpRoute_mapping(caller, context);
 	Object *submapping = ImpRoute_submapping(caller, context);
 	if(!submapping){
 		submapping = mapping;
 	}
-	if(mapping){
-		return Runtime_activateOn(runtime, context, mapping, argc, argv, submapping);
-	}
-	// else?
 
-	// otherwise, try calling special or internal methods
-	// TODO
-	char buf[128];
-	buf[0] = 0;
-	int rargc = ImpRoute_argc(caller);
-	for(int i = 0; i < rargc - 1; i++){
-		char part[64];
-		ImpRoute_argv(caller, i, part);
-		strcat(buf, part);
-		strcat(buf, ":");
-	}
-
-	Object *internal = Runtime_cloneField(runtime, "route");
-	ImpRoute_setRaw(internal, buf);
-	mapping = ImpRoute_mapping(internal, context);
+	// if maps to an object directly, activate said object
 	if(mapping){
+		r = Runtime_activateOn(runtime, context, mapping, argc, argv, submapping);
+	} else if(submapping){
+		// otherwise, try activating special or internal methods
+		int rargc = ImpRoute_argc(caller);
+
 		char meth[32];
 		meth[0] = 0;
 		strcat(meth, "_");
 		ImpRoute_argv(caller, rargc - 1, meth + strlen(meth));
-		Object *special = Object_getDeep(mapping, meth);
+		Object *special = Object_getDeep(submapping, meth);
 		if(special){
-			return Runtime_activateOn(runtime, context, special, argc, argv, mapping);
-		}
+			r = Runtime_activateOn(runtime, context, special, argc, argv, submapping);
+		} else {
+			meth[0] = 0;
+			strcat(meth, "__");
+			ImpRoute_argv(caller, rargc - 1, meth + strlen(meth));
 
-
-		meth[0] = 0;
-		strcat(meth, "__");
-		ImpRoute_argv(caller, rargc - 1, meth + strlen(meth));
-
-		void *f = Object_getDataDeep(mapping, meth);
-		if(f){
-			CFunction cf = *((CFunction*) f);
-			return cf(runtime, context, mapping, argc, argv);
+			void *f = Object_getDataDeep(submapping, meth);
+			if(f){
+				CFunction cf = *((CFunction*) f);
+				// TODO: put submapping into argv and pass mapping in its place
+				r = cf(runtime, context, submapping, argc, argv);
+			}
 		}
 	}
+
+	// unference resources
+	Object_unreference(context);
+	Object_unreference(caller);
+	for(int i = 0; i < argc; i++){
+		Object_unreference(argv[i]);
+	}
+	
+	// if activation successful, return
+	if(mapping || submapping){
+		return r;
+	}
+
 	abort();
 	Runtime_throwString(runtime, "NO!");
 	return NULL;

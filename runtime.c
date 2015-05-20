@@ -344,10 +344,15 @@ Object *Runtime_cloneField(Runtime *runtime, char *field){
 
 
 static Object *Runtime_tokenToObject(Runtime *self, Object *scope, Token *token){
+	assert(self);
+	assert(Object_isValid(scope));
+	assert(token);
+
 	switch(token->type){
 	case TOKEN_ROUTE:
 		{
 			Object *route = Runtime_cloneField(self, "route");
+			assert(token->data.text);
 			ImpRoute_setRaw(route, token->data.text);
 			return route;
 		}

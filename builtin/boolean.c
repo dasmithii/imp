@@ -6,28 +6,39 @@
 #include "../runtime.h"
 
 
-static bool isBoolean(Object *object){
-	if(!object){
-		return false;
-	}
-	return BuiltIn_id(Object_rootPrototype(object)) == BUILTIN_BOOLEAN;
+bool ImpBoolean_isValid(Object *self){
+	return Object_isValid(self) &&
+	       BuiltIn_id(self) == BUILTIN_BOOLEAN;
 }
+
 
 static Object *ImpBoolean_clone_internal(Runtime *runtime
 	                                   , Object *context
 	                                   , Object *caller
 	                                   , int argc
 	                                   , Object **argv){
-	// TODO: check arguments
+	assert(runtime);
+	assert(ImpBoolean_isValid(caller));
+
+	if(argc > 0){
+		Runtime_throwString(runtime, "Boolean:clone accepts no arguments.");
+		return NULL;
+	}
+
+	Object_reference(caller);
 	Object *r = Runtime_rawObject(runtime);
 	Object_putDataShallow(r, "_prototype", Object_rootPrototype(caller));
 	Object_putDataShallow(r, "__data", malloc(sizeof(bool)));
 	ImpBoolean_setRaw(r, ImpBoolean_getRaw(caller));
+	Object_unreference(caller);
+
 	return r;	
 }
 
 
 void ImpBoolean_init(Object *self){
+	assert(self);
+
 	BuiltIn_setId(self, BUILTIN_BOOLEAN);
 	Object_putDataShallow(self, "__data", malloc(sizeof(bool)));
 	ImpBoolean_setRaw(self, false);

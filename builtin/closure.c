@@ -7,10 +7,6 @@
 #include "vector.h"
 #include "route.h"
 
-Object *c1 = NULL;
-Object *c2 = NULL;
-Object *c3 = NULL;
-
 
 typedef struct {
 	ParseNode *code; // closure
@@ -43,48 +39,49 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 	                                      , Object *caller
 	                                      , int argc
 	                                      , Object **argv){
+	printf("ACTIVATING CLOSURE\n");
+	// check inputs
 	assert(runtime);
 	assert(validClosure(caller));
+	for(int i = 0; i < argc; i++){
+		assert(Object_isValid(argv[i]));
+	}
+
+	// reference resources
+	Object_reference(context);
+	Object_reference(caller);
+	for(int i = 0; i < argc; i++){
+		Object_reference(argv[i]);
+	}
 
 	ImpClosure_internal *internal = Object_getDataShallow(caller, "__data");
-
 	Object *scope = Runtime_clone(runtime, internal->context);
-	assert(Object_isValid(scope));
 	Object_reference(scope);
-	assert(Object_isValid(scope));
-
-	assert(validClosure(caller));
-
 
 	Object *arguments = Runtime_cloneField(runtime, "vector");
-	assert(Object_isValid(arguments));
 	Object_putShallow(scope, "arguments", arguments);
 
 	if(argc > 0){
 		Object_putShallow(scope, "self", argv[0]);
 	}
 
-
-	assert(Object_isValid(scope));
 	Vector *raw = ImpVector_getRaw(arguments);
 	for(int i = 1; i < argc; i++){
 		Vector_append(raw, &argv[i]);
 	}
-	assert(Object_isValid(arguments));
-
-	
-	assert(Object_isValid(scope));
  
 	Object *r = Runtime_executeInContext(runtime
 		                               , scope
 		                               , *internal->code);
 
-	assert(Object_isValid(scope));
 
 
 	Object_unreference(scope);
-	assert(Object_isValid(scope));
-
+	Object_unreference(context);
+	Object_unreference(caller);
+	for(int i = 0; i < argc; i++){
+		Object_unreference(argv[i]);
+	}
 
 	return r;
 }
@@ -123,6 +120,12 @@ static void ParseNode_cacheReferences(ParseNode *node, Object *context, Object *
 
 
 void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object *context){
+	assert(runtime);
+	assert(Object_isValid(self));
+	assert(Object_isValid(context));
+
+	Object_reference(self);
+	Object_reference(context);
 
 	ImpClosure_internal *internal = malloc(sizeof(ImpClosure_internal));
 	internal->context = Runtime_rawObject(runtime);
@@ -138,6 +141,8 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 	ParseNode_cacheReferences(code, context, internal->context);
 	assert(Object_isValid(internal->context));
 
+	Object_unreference(self);
+	Object_unreference(context);
 }
 
 
@@ -147,18 +152,10 @@ static Object *ImpClosure_clone_internal(Runtime *runtime
 	                       , Object *caller
 	                       , int argc
 	                       , Object **argv){
+	Object_reference(caller);
 	Object *r = Runtime_rawObject(runtime);
-
-	if(!c1){
-		c1 = r;
-	} else if(!c2){
-		c2 = r;
-	} else if(!c3){
-		c3 = r;
-	}
-
-
 	Object_putShallow(r, "_prototype", Object_rootPrototype(caller));
+	Object_unreference(caller);
 	return r;
 }
 

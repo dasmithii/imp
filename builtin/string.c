@@ -37,9 +37,12 @@ static Object *ImpString_clone_internal(Runtime *runtime
 	                                  , Object *caller
 	                                  , int argc
 	                                  , Object **argv){
+	Object_reference(caller);
 	Object *r = Runtime_rawObject(runtime);
 	Object_putShallow(r, "_prototype", caller);
 	Object_putDataShallow(r, "__data", strdup(ImpString_getRaw(caller)));
+	Object_unreference(caller);
+
 	return r;	
 }
 

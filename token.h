@@ -41,14 +41,22 @@ typedef struct {
 } Token;
 
 
+//// management
 void Token_clean(Token *token);
+
+
+//// miscellaneous
 void Token_print(Token *token);
 void Token_printType(Token *token);
 void Token_printVerbose(Token *token);
 
+
+//// helpers
 bool Token_isOpen(Token *self);
 bool Token_isClosed(Token *self);
 bool Token_isGrouping(Token *self);
 bool Token_isUnary(Token *self);
+
+
 
 #endif
