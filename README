@@ -1,33 +1,37 @@
 Overview
 
-    Imp is a little scripting language I'm working on for fun. It 
+    Imp is a little scripting language I'm building for fun. It 
     is dynamic, prototype-based, and excessively parenthesized.
 
       >  (print 'Hello, world!')
-    
 
 
-Tutorial
+
+
+Introduction
 
                         Grouping Operators
 
     Above, parentheses activate the printer object with a single
     argument. Resulting is an instance of software's greatest
-    cliché. The following produces identical output:
+    cliché.
+
+    The following produces identical output:
 
       >  (print [{(return 'Hello, world')}])
 
     This is because, in imp, parentheses are function calls; curly
-    braces define code blocks; and hard brackets expand macros. In
-    this snippet, the macro expansion evaluates to 'Hello, world',
-    and thus we have (print 'Hello, world').
+    braces define code blocks; and hard brackets expand macros. 
+    The macro expands to 'Hello, world', and thus we have 
+    (print 'Hello, world').
 
-    Note the similarity between function calls and macro
+    Take note of the similarity between function calls and macro
     expansions. Each requires one activate-able object and may
     accept arbitrary arguments. Accordingly, activate-able objects
     can be used for either purpose. There is no difference in
     semantics between macro code and runtime-executed code, as
     there is in C.
+
 
 
                          The Object System
@@ -36,8 +40,8 @@ Tutorial
     compile-time distinctions between object types, and that,
     instead, objects are permitted wherever they are capable of
     going). So, essentially, there exists only one type: the
-    object, which comprises arbitrary fields that are themselves 
-    nested objects (except in the case of built-ins).
+    object, which contains arbitrary fields that are themselves 
+    nested objects (except in the case of built-in).
 
     Object fields are accessible via the colon operator and can be
     managed with the built-in 'def', 'set', and 'rem' functions.
@@ -49,8 +53,8 @@ Tutorial
       >  (def myObject:mySlot 'hello')
       >  (rem myObject)
 
-    Exceptions are thrown when programmers attempt to access
-    fields and methods that do not exist. For example:
+    Exceptions are thrown when code attempts to access fields and
+    methods that do not exist. For example:
 
       >  (def myObject $)             # Create new (empty) object.
       >  (myObject:nonExistentMethod) # Error!
@@ -68,54 +72,38 @@ Tutorial
     the 'arguments' variable, a vector of arbitrary length.
 
     
-                         Special and Internal Slots
 
-   Slot names prefixed with an underscore are considered
-   'special' in the sense that they should not be mucked with by
-   mud-bloods. _prototyp
+                 Special and Internal Slots
 
+    Where many languages have reserved keywords, imp has a        <<<
+    reserved keyword space, which comes in two parts.
 
+    Anything prefixed with a single underscore is considered
+    'special' and should be handled with care. The _collect
+    method, for example, is activated upon garbage collection. 
+    _mark is activated
+    
 
+     . _mark is activated during
+    the mark phase of mark & sweep collection
 
-      
-
-
-Slots
-  
-    Everything is an object, and objects are merely collections 
-    of slots (i.e. pointers to other objects, or, in some cases,
-    raw data).
-
-      (set object:slot)
+    _mark, and _prototype are each
 
 
+    slots with 
 
-Special Slots
 
-    Fields prefixed with an underscore are considered 'special'
-    and should be handled with care (if at all). These include
-    the following:
-
-      +  _prototype
-      +  _cleanup
-      +  _activate
+     said space is graduated
+    Underscore-prefixed names mark slots that are of special 
+    importance. 
 
 
 
+    Some may be accessed by the imp runtime behind the scenes. 
+    interpreter for special tasks, such as garbage collection and
+    function activation. _collect, for example, calls 
 
-Internal Slots
 
-    A double underscore prefix is indicative of internal data, 
-    which is especially special and required by built-in or 
-    library-provided data structures. Avoid mucking with these
-    unless you absolutely must (or are curious).
-
-    Commonly slots for housing internals include:
-
-      +  __data
-      +  __init
-      +  __cleanup
-      +  __activate
 
 
 
