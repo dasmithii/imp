@@ -43,7 +43,8 @@ typedef struct {
 
 //// management
 void Token_clean(Token *token);
-
+void Token_free(Token *token);
+Token *Token_copy(Token *self);
 
 //// miscellaneous
 void Token_print(Token *token);
@@ -56,6 +57,8 @@ bool Token_isOpen(Token *self);
 bool Token_isClosed(Token *self);
 bool Token_isGrouping(Token *self);
 bool Token_isUnary(Token *self);
+bool Token_isTextual(Token *self);
+
 
 
 

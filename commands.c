@@ -21,6 +21,7 @@ char *Imp_root(){
 
 
 static char *readFile(char *path){
+	assert(path);
 	FILE *stream;
 	char *contents;
 	size_t fileSize = 0;

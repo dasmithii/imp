@@ -9,6 +9,8 @@
 #include <stdio.h>
 
 
+
+
 int Tokenization_init(Tokenization *tokenization, char *code){
 	assert(tokenization);
 	assert(code);
@@ -109,6 +111,9 @@ int Tokenization_init(Tokenization *tokenization, char *code){
 						++end;
 					}
 					token.data.text = malloc((end - code) + 1);
+					if(!token.data.text){
+						abort();
+					}
 					token.data.text[end - code] = 0;
 					memcpy(token.data.text, code, (end-code));
 				} else if(isdigit(*code) || *code == '.'){

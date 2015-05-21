@@ -440,3 +440,9 @@ void Object_print(Object *self){
 	printf("Object %p", self);
 }
 
+
+bool Object_canBeActivated(Object *self){
+	assert(Object_isValid(self));
+	return Object_hasKeyDeep(self, "_activate") ||
+	       Object_hasKeyDeep(self, "__activate");
+}

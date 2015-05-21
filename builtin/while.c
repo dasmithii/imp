@@ -1,11 +1,21 @@
-#include "while.h"
-#include "../object.h"
-#include "general.h"
-#include "../c.h"
-#include "../runtime.h"
 #include <stdbool.h>
 #include <stdio.h>
+
+#include "../object.h"
+#include "../c.h"
+#include "../runtime.h"
+
 #include "boolean.h"
+#include "general.h"
+#include "while.h"
+
+
+
+
+bool ImpWhile_isValid(Object *self){
+	return Object_isValid(self) &&
+	       BuiltIn_id(self) == BUILTIN_WHILE;
+}
 
 
 static Object *ImpWhile_activate_internal(Runtime *runtime
@@ -13,11 +23,23 @@ static Object *ImpWhile_activate_internal(Runtime *runtime
 	                                    , Object *caller
 	                                    , int argc
 	                                    , Object **argv){
+	assert(runtime);
+	assert(Object_isValid(context));
+	assert(ImpWhile_isValid(caller));
 
-
-	// TODO: check arguments
 	Object *condition = argv[0];
 	Object *step = argv[1];
+
+	if(argc != 2){
+		Runtime_throwString(runtime, "while accepts exactly 2 arguments.");
+	} else if(!Object_canBeActivated(condition)){
+		Runtime_throwString(runtime, "while condition must be activatable");
+	} else if(!Object_canBeActivated(step)){
+		Runtime_throwString(runtime, "while step must be activatable");
+	}
+
+	Object_reference(context);
+	Object_reference(caller);
 	Object_reference(condition);
 	Object_reference(step);
 
@@ -37,6 +59,9 @@ static Object *ImpWhile_activate_internal(Runtime *runtime
 		Object_unreference(subcontext);
 	}
 
+
+	Object_unreference(context);
+	Object_unreference(caller);
 	Object_unreference(condition);
 	Object_unreference(step);
 
@@ -45,6 +70,7 @@ static Object *ImpWhile_activate_internal(Runtime *runtime
 
 
 void ImpWhile_init(Object *self){
+	assert(self);
 	BuiltIn_setId(self, BUILTIN_WHILE);
 	Object_registerCMethod(self, "__activate", ImpWhile_activate_internal);
 }

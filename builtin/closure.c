@@ -1,11 +1,15 @@
-#include "closure.h"
-#include <string.h>
-#include "general.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
 #include "../toolbox/vector.h"
-#include "vector.h"
+
+#include "closure.h"
+#include "general.h"
 #include "route.h"
+#include "vector.h"
+
+
 
 
 typedef struct {
@@ -19,18 +23,17 @@ static ImpClosure_internal *ImpClosure_getRaw(Object *self){
 	return (ImpClosure_internal*) Object_getDataDeep(self, "__data");
 }
 
-static bool validClosure(Object *obj){
+
+bool ImpClosure_isValid(Object *obj){
 	return Object_isValid(obj)                       &&
 	       BuiltIn_protoId(obj) == BUILTIN_CLOSURE   &&
 	       Object_isValid(ImpClosure_getRaw(obj)->context);
 }
 
 
-
 void ImpClosure_print(Object *self){
-	assert(validClosure(self));
+	assert(ImpClosure_isValid(self));
 	ParseNode_print(ImpClosure_getRaw(self)->code);
-	// TODO: print context
 }
 
 
@@ -39,10 +42,8 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 	                                      , Object *caller
 	                                      , int argc
 	                                      , Object **argv){
-	printf("ACTIVATING CLOSURE\n");
-	// check inputs
 	assert(runtime);
-	assert(validClosure(caller));
+	assert(ImpClosure_isValid(caller));
 	for(int i = 0; i < argc; i++){
 		assert(Object_isValid(argv[i]));
 	}
@@ -74,8 +75,6 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 		                               , scope
 		                               , *internal->code);
 
-
-
 	Object_unreference(scope);
 	Object_unreference(context);
 	Object_unreference(caller);
@@ -85,7 +84,6 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 
 	return r;
 }
-
 
 
 static void ParseNode_cacheReferences(ParseNode *node, Object *context, Object *cache){
@@ -118,9 +116,9 @@ static void ParseNode_cacheReferences(ParseNode *node, Object *context, Object *
 }
 
 
-
 void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object *context){
 	assert(runtime);
+	assert(code);
 	assert(Object_isValid(self));
 	assert(Object_isValid(context));
 
@@ -128,14 +126,18 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 	Object_reference(context);
 
 	ImpClosure_internal *internal = malloc(sizeof(ImpClosure_internal));
+	if(!internal){
+		abort();
+	}
 	internal->context = Runtime_rawObject(runtime);
 	internal->code = malloc(sizeof(ParseNode));
+	if(!internal->code){
+		abort();
+	}
 
 	*(internal->code) = ParseNode_deepCopy(code);
 
-
 	internal->code->type = BLOCK_NODE;
-
 
 	Object_putDataShallow(self, "__data", internal);
 	ParseNode_cacheReferences(code, context, internal->context);
@@ -146,12 +148,15 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 }
 
 
-// note: compile should be called after clone
 static Object *ImpClosure_clone_internal(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
 	                       , int argc
 	                       , Object **argv){
+	assert(runtime);
+	assert(Object_isValid(caller));
+	assert(argc == 0);
+
 	Object_reference(caller);
 	Object *r = Runtime_rawObject(runtime);
 	Object_putShallow(r, "_prototype", Object_rootPrototype(caller));
@@ -159,13 +164,14 @@ static Object *ImpClosure_clone_internal(Runtime *runtime
 	return r;
 }
 
+
 static Object *ImpClosure_collect_internal(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
 	                       , int argc
 	                       , Object **argv){
 	assert(runtime);
-	assert(validClosure(caller));
+	assert(ImpClosure_isValid(caller));
 
 	ImpClosure_internal *raw = ImpClosure_getRaw(caller);
 	assert(Object_isValid(raw->context));
@@ -174,9 +180,6 @@ static Object *ImpClosure_collect_internal(Runtime *runtime
 	raw->code = NULL;
 	raw->context = NULL;
 	Object_remShallow(caller, "__data");
-
-	assert(Object_isValid(caller));
-
 
 	return NULL;
 }
@@ -188,22 +191,15 @@ static Object *ImpClosure_mark_internal(Runtime *runtime
 	                       , int argc
 	                       , Object **argv){
 	assert(runtime);
-	assert(validClosure(caller));
+	assert(ImpClosure_isValid(caller));
 
 	ImpClosure_internal *raw = ImpClosure_getRaw(caller);
-	assert(Object_isValid(raw->context));
-
 	Runtime_markRecursive(runtime, raw->context);
-
-	assert(validClosure(caller));
-	assert(Object_isValid(raw->context));
-
 	return NULL;
 }
 
 
 void ImpClosure_init(Object *self){
-
 	assert(Object_isValid(self));
 
 	BuiltIn_setId(self, BUILTIN_CLOSURE);

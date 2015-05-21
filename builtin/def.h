@@ -3,5 +3,5 @@
 #include "../object.h"
 
 void ImpDef_init(Object *self);
-
+ 
 #endif

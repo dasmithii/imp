@@ -1,8 +1,9 @@
-#include "route.h"
 #include <string.h>
 #include <stdio.h>
-#include "general.h"
 #include <ctype.h>
+
+#include "general.h"
+#include "route.h"
 
 
 
@@ -11,6 +12,7 @@ char *ImpRoute_getRaw(Object *self){
 	assert(Object_isValid(self));
 	return (char*) Object_getDataDeep(self, "__data");
 }
+
 
 static bool validRouteText(char *text){
 	if(!text || *text == 0){
@@ -30,15 +32,15 @@ bool ImpRoute_isValid(Object *obj){
 	return Object_isValid(obj)                      &&
 	       BuiltIn_protoId(obj) == BUILTIN_ROUTE    &&
 	       validRouteText(ImpRoute_getRaw(obj));
-}  
-
+}
 
 
 void ImpRoute_setRaw(Object *self, char *text){
-	assert(Object_isValid(self));
+	assert(self);
 	assert(validRouteText(text));
 	Object_putDataDeep(self, "__data", strdup(text));
 }
+
 
 void ImpRoute_print(Object *self){
 	assert(ImpRoute_isValid(self));
@@ -52,8 +54,16 @@ static Object *ImpRoute_print_internal(Runtime *runtime
 	                                  , Object *caller
 	                                  , int argc
 	                                  , Object **argv){
+	assert(runtime);
+	assert(Object_isValid(context));
 	assert(ImpRoute_isValid(caller));
-	Runtime_print(runtime, context, ImpRoute_mapping(caller, context));
+
+	if(argc != 0){
+		Runtime_throwString(runtime, "route:print does not accept arguments");
+	} else {
+		Runtime_print(runtime, context, ImpRoute_mapping(caller, context));
+	}
+
 	return NULL;	
 }
 
@@ -66,18 +76,25 @@ void ImpRoute_set(Object *self, Object *value){
 
 
 static Object *ImpRoute_clone_internal(Runtime *runtime
-	                                  , Object *context
-	                                  , Object *caller
-	                                  , int argc
-	                                  , Object **argv){
+	                                 , Object *context
+	                                 , Object *caller
+	                                 , int argc
+	                                 , Object **argv){
+	assert(runtime);
+	assert(Object_isValid(caller));
+
+	if(argc != 0){
+		Runtime_throwString(runtime, "route:clone does not accept arguments");
+		return NULL;
+	}
+
 	Object_reference(caller);
 	Object *r = Runtime_rawObject(runtime);
 	Object_putShallow(r, "_prototype", caller);
 	Object_putDataShallow(r, "__data", strdup(ImpRoute_getRaw(caller)));
 	Object_unreference(caller);
-	return r;	
+	return r;
 }
-
 
 
 static Object *ImpRoute_activate_internal(Runtime *runtime
@@ -87,7 +104,7 @@ static Object *ImpRoute_activate_internal(Runtime *runtime
 	                                   , Object **argv){
 	assert(runtime);
 	assert(Object_isValid(context));
-	assert(Object_isValid(caller));
+	assert(ImpRoute_isValid(caller));
 
 	Object *r = NULL;
 
@@ -143,12 +160,13 @@ static Object *ImpRoute_activate_internal(Runtime *runtime
 		return r;
 	}
 
-	abort();
 	Runtime_throwString(runtime, "NO!");
 	return NULL;
 }
 
+
 void ImpRoute_init(Object *self){
+	assert(self);
 	BuiltIn_setId(self, BUILTIN_ROUTE);
 	Object_registerCMethod(self, "__print", ImpRoute_print_internal);
 	Object_registerCMethod(self, "__clone", ImpRoute_clone_internal);
@@ -169,10 +187,12 @@ int ImpRoute_argc_(char *raw){
 	return r;
 }
 
+
 int ImpRoute_argc(Object *self){
 	assert(ImpRoute_isValid(self));
 	return ImpRoute_argc_(ImpRoute_getRaw(self));
 }
+
 
 void ImpRoute_argv_(char *raw, int i, char *dest){
 	assert(raw);
@@ -194,12 +214,12 @@ void ImpRoute_argv_(char *raw, int i, char *dest){
 	*dest = 0;
 }
 
+
 void ImpRoute_argv(Object *self, int i, char *dest){
 	assert(ImpRoute_isValid(self));
 	assert(dest);
 	return ImpRoute_argv_(ImpRoute_getRaw(self), i, dest);
 }
-
 
 
 Object *ImpRoute_submapping_(char *self, Object *context){
@@ -216,6 +236,7 @@ Object *ImpRoute_submapping_(char *self, Object *context){
 	return r;
 }
 
+
 Object *ImpRoute_mapping_(char *self, Object *context){
 	Object *r = context;
 	int argc = ImpRoute_argc_(self);
@@ -231,12 +252,12 @@ Object *ImpRoute_mapping_(char *self, Object *context){
 }
 
 
-
 Object *ImpRoute_mapping(Object *self, Object *context){
 	assert(ImpRoute_isValid(self));
 	assert(Object_isValid(context));
 	return ImpRoute_mapping_(ImpRoute_getRaw(self), context);
 }
+
 
 Object *ImpRoute_submapping(Object *self, Object *context){
 	assert(ImpRoute_isValid(self));

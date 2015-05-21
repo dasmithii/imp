@@ -1,8 +1,8 @@
-#include "runtime.h"
-#include "parser.h"
 #include <string.h>
 #include <stdio.h>
 
+#include "runtime.h"
+#include "parser.h"
 #include "builtin/general.h"
 #include "builtin/route.h"
 #include "builtin/number.h"
@@ -57,8 +57,11 @@ Object *Runtime_activateOn(Runtime *runtime
 
 		if(BuiltIn_id(object) == BUILTIN_CLOSURE){
 			// make self first arg in argv
-			int argc2 = argc + 1;
+			const int argc2 = argc + 1;
 			Object **argv2 = malloc(sizeof(Object*) * argc2);
+			if(!argv2){
+				abort();
+			}
 			argv2[0] = origin;
 			for(int i = 1; i < argc2; i++){
 				argv2[i] = argv[i - 1];
@@ -109,11 +112,7 @@ Object *Runtime_activate(Runtime *runtime
 static void unmark(void *addr){
 	assert(addr);
 	Object *obj = *((Object**) addr);
-	assert(Object_isValid(obj));
-
 	Object_unmark(obj);
-
-	assert(Object_isValid(obj));
 }
 
 
@@ -124,8 +123,6 @@ static void Runtime_markRecursiveIfVolatile(Runtime *runtime, Object *object){
 	if(Object_referenceCount(object) > 0){  // some internal objects are reference counted / volatile 
 		Runtime_markRecursive(runtime, object);
 	}
-
-	assert(Object_isValid(object));
 }
 
 
@@ -149,7 +146,6 @@ static void Runtime_collectOne(Runtime *runtime, Object *object){
 			cf(runtime, NULL, object, 0, NULL);
 		}
 	}
-	assert(Object_isValid(object));
 	Object_free(object);
 }
 
@@ -159,9 +155,6 @@ void Runtime_markRecursive(Runtime *runtime, Object *object){
 	assert(Object_isValid(object));
 
 	Object_markRecursive(object);
-
-	assert(Object_isValid(object));
-
 
 	Object *special = Object_getDeep(object, "_mark");
 	if(special){
@@ -178,13 +171,13 @@ void Runtime_markRecursive(Runtime *runtime, Object *object){
 			cf(runtime, NULL, object, 0, NULL);
 		}
 	}
-
-	assert(Object_isValid(object));
 }
 
 static void Runtime_runGC(Runtime *self){
 	assert(self);
 	assert(self->gc_locks == 0);
+	assert(self->gc_on == false);
+	self->gc_on = true;
 
 	// Unmark all allocations.
 	Vector_each(&self->collectables, unmark); // TODO: check error
@@ -197,6 +190,9 @@ static void Runtime_runGC(Runtime *self){
 
 	// Mark all accessible allocations.
 	Runtime_markRecursive(self, self->root_scope);
+	if(self->lastReturnValue){
+		Runtime_markRecursive(self, self->lastReturnValue);
+	}
 
 	// Move all accessible allocations to a new vector. Clean
 	// the others.
@@ -216,6 +212,7 @@ static void Runtime_runGC(Runtime *self){
 	// Delete old vector of pointers. Replace it.
 	Vector_clean(&self->collectables);
 	self->collectables = leftovers;
+	self->gc_on = false;
 }
 
 
@@ -225,13 +222,18 @@ Object *Runtime_rawObject(Runtime *self){
 
 	int oc = Runtime_objectCount(self);
 
-	if(self->gc_locks == 0 && oc >= 20 && oc % 20 == 0){
+	if(self->gc_on == false       &&
+	   self->gc_locks == 0        &&
+	   oc >= 20 && oc % 20 == 0){
 		Runtime_runGC(self);
 	}
 
 
 	// allocate record, and return new object
 	Object *r = malloc(sizeof(Object));
+	if(!r){
+		abort();
+	}
 	Object_init(r);
 	assert(Object_isValid(r));
 	Vector_append(&self->collectables, &r);
@@ -249,6 +251,7 @@ Object *Runtime_rawObject(Runtime *self){
 void Runtime_init(Runtime *self){
 	assert(self);
 	self->gc_locks = 0;
+	self->gc_on = false;
 	Runtime_lockGC(self);
 
 	self->error = NULL;
@@ -315,30 +318,34 @@ Object *Runtime_clone(Runtime *runtime, Object *object){
 	assert(runtime);
 	assert(Object_isValid(object));
 
+	Object *r = NULL;
+	Object_reference(object);
+
 	// TODO: check for special and internal methods
 	Object *special = Object_getDeep(object, "_clone");
-	if(special){
-		return Runtime_activateOn(runtime 
-			                    , NULL
-			                    , special
-			                    , 0
-			                    , NULL
-			                    , object);
-	}
-
-
 	void *internal = Object_getDataDeep(object, "__clone");
-	if(internal){
+	if(special){
+		r = Runtime_activateOn(runtime 
+			                 , NULL
+			                 , special
+			                 , 0
+			                 , NULL
+			                 , object);
+	} else if(internal){
 		CFunction cf = *((CFunction*) internal);
-		return cf(runtime, NULL, object, 0, NULL);
+		r = cf(runtime, NULL, object, 0, NULL);
+	} else {
+		r = Runtime_rawObject(runtime);
+		Object_putShallow(r, "_prototype", object);
 	}
 
-	Object *raw = Runtime_rawObject(runtime);
-	Object_putShallow(raw, "_prototype", object);
-	return raw;
+	Object_unreference(object);
+	return r;
 }
 
 Object *Runtime_cloneField(Runtime *runtime, char *field){
+	assert(runtime);
+	assert(field);
 	return Runtime_clone(runtime, Object_getDeep(runtime->root_scope, field));
 }
 
@@ -348,25 +355,31 @@ static Object *Runtime_tokenToObject(Runtime *self, Object *scope, Token *token)
 	assert(Object_isValid(scope));
 	assert(token);
 
+	Object *r = NULL;
+	Object_reference(scope);
+
 	switch(token->type){
 	case TOKEN_ROUTE:
 		{
 			Object *route = Runtime_cloneField(self, "route");
 			assert(token->data.text);
 			ImpRoute_setRaw(route, token->data.text);
-			return route;
+			r = route;
+			break;
 		}
 	case TOKEN_NUMBER:
 		{
 			Object *number = Runtime_cloneField(self, "number");
 			ImpNumber_setRaw(number, token->data.number);
-			return number;
+			r = number;
+			break;
 		}
 	case TOKEN_STRING:
 		{
 			Object *str = Runtime_cloneField(self, "string");
 			ImpString_setRaw(str, token->data.text);
-			return str;
+			r = str;
+			break;
 		}
 	// case TOKEN_NOT:
 	// 	return newOf(self, scope, "!");
@@ -395,28 +408,34 @@ static Object *Runtime_tokenToObject(Runtime *self, Object *scope, Token *token)
 	// case TOKEN_DASH:
 	// 	return newOf(self, scope, "-");
 	default:
-		return NULL;
 		break;
 	}
+
+	Object_unreference(scope);
+	return r;
 }
 
 
 void Runtime_setReturnValue(Runtime *self, Object *value){
+	assert(self);
+	// value == null is allowed
 	self->lastReturnValue = value;
 }
 
 void Runtime_clearReturnValue(Runtime *self){
+	assert(self);
 	Runtime_setReturnValue(self, NULL);
 }
 
 Object *Runtime_returnValue(Runtime *self){
+	assert(self);
 	return self->lastReturnValue;
 }
 
 
 Object *Runtime_executeInContext(Runtime *runtime
-	                              , Object *scope
-	                              , ParseNode node){
+	                           , Object *scope
+	                           , ParseNode node){
 	assert(runtime);
 	assert(Object_isValid(scope));
 	Object *r = NULL;
@@ -449,6 +468,9 @@ Object *Runtime_executeInContext(Runtime *runtime
 		{
 			// iterate through parse node... TODO: mark these in collection
 			Object **subs = malloc(node.contents.non_leaf.argc * sizeof(Object*));
+			if(!subs){
+				abort();
+			}
 			for(int i = 0; i < node.contents.non_leaf.argc; i++){
 				subs[i] = Runtime_executeInContext(runtime
 					                             , scope
@@ -492,6 +514,9 @@ Object *Runtime_executeInContext(Runtime *runtime
 }
 
 Object *Runtime_execute(Runtime *self, char *code){
+	assert(self);
+	assert(code); // todo ebnf check code
+
 	ParseTree tree;
 	Object *r = NULL;
 
@@ -509,11 +534,14 @@ Object *Runtime_execute(Runtime *self, char *code){
 
 
 int Runtime_objectCount(Runtime *self){
+	assert(self);
 	return self->collectables.size;
 }
 
 
 void Runtime_throwString(Runtime *runtime, char *exception){
+	assert(runtime);
+	assert(exception);
 	printf("Uncaught exception: %s\n", exception);
 	abort();
 }
@@ -523,7 +551,11 @@ void Runtime_print(Runtime *runtime, Object *context, Object *object){
 	assert(Object_isValid(context));
 	assert(Object_isValid(object));
 
+	Object_reference(context);
+	Object_reference(object);
+
 	Object *special = Object_getDeep(object, "_print");
+	void *internal = Object_getDataDeep(object, "__print");
 	if(special){
 		Runtime_activateOn(runtime 
 			             , context
@@ -531,21 +563,21 @@ void Runtime_print(Runtime *runtime, Object *context, Object *object){
 			             , 0
 			             , NULL
 			             , object);
-	}
-
-	void *internal = Object_getDataDeep(object, "__print");
-	if(internal){
+	} else if(internal){
 		CFunction cf = *((CFunction*) internal);
 		cf(runtime, context, object, 0, NULL);
-		return;
+	} else {
+		Object_print(object);
 	}
 
-	Object_print(object);
+	Object_unreference(context);
+	Object_unreference(object);
 }
 
 
 void Runtime_lockGC(Runtime *self){
 	assert(self);
+	assert(self->gc_on == false);
 	self->gc_locks++;
 }
 

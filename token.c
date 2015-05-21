@@ -3,16 +3,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
 void Token_clean(Token *token) {
 	assert(token);
-	if(token->type == TOKEN_ROUTE || token->type == TOKEN_COMMENT){
-		assert(token->data.text);
+	if(token->type == TOKEN_ROUTE   ||
+	   token->type == TOKEN_COMMENT || 
+	   token->type == TOKEN_STRING){
 		free(token->data.text);
 		token->data.text = NULL;
 	}
 }
 
 void Token_print(Token *token){
+	assert(token);
 	switch(token->type){
 	case TOKEN_ROUTE:
 		printf("%s", token->data.text);
@@ -85,6 +88,7 @@ void Token_print(Token *token){
 
 
 void Token_printType(Token *token){
+	assert(token);
 	switch(token->type){
 	case TOKEN_ROUTE:
 		printf("atom");
@@ -106,8 +110,9 @@ void Token_printType(Token *token){
 
 
 void Token_printVerbose(Token *token){
+	assert(token);
 	Token_printType(token);
-	if(token->type == TOKEN_ROUTE     ||
+	if(token->type == TOKEN_ROUTE    ||
 	   token->type == TOKEN_NUMBER   ||
 	   token->type == TOKEN_STRING   ||
 	   token->type == TOKEN_COMMENT){
@@ -118,6 +123,7 @@ void Token_printVerbose(Token *token){
 
 
 bool Token_isOpen(Token *self){
+	assert(self);
 	if(!self){
 		return false;
 	}
@@ -127,6 +133,7 @@ bool Token_isOpen(Token *self){
 }
 
 bool Token_isClosed(Token *self){
+	assert(self);
 	if(!self){
 		return false;
 	}
@@ -136,10 +143,12 @@ bool Token_isClosed(Token *self){
 }
 
 bool Token_isGrouping(Token *self){
+	assert(self);
 	return Token_isOpen(self) || Token_isClosed(self);
 }
 
 bool Token_isUnary(Token *self){
+	assert(self);
 	if(!self){
 		return false;
 	}
@@ -155,4 +164,36 @@ bool Token_isUnary(Token *self){
 		   self->type == TOKEN_QUESTION  ||
 		   self->type == TOKEN_SEMI      ||
 		   self->type == TOKEN_DASH;
+}
+
+
+bool Token_isTextual(Token *self){
+	assert(self);
+	return self->type == TOKEN_ROUTE    ||
+	       self->type == TOKEN_COMMENT  ||
+	       self->type == TOKEN_STRING;
+}
+
+
+Token *Token_copy(Token *self){
+	assert(self);
+	Token *r = malloc(sizeof(Token));
+	if(!r){
+		abort();
+	}
+	*r = *self;
+	if(Token_isTextual(self) && self->data.text){
+		r->data.text = strdup(self->data.text);
+		if(!r->data.text){
+			abort();
+		}
+	}
+	return r;
+}
+
+
+void Token_free(Token *self){
+	assert(self);
+	Token_clean(self);
+	free(self);
 }

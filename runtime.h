@@ -13,6 +13,7 @@ typedef struct {
 	Object *lastReturnValue; // TODO: track return values for each coroutine
 
 	int gc_locks;
+	bool gc_on;
 } Runtime;
 
 

@@ -212,12 +212,14 @@ ParseNode ParseNode_deepCopy(ParseNode *self){
 	ParseNode r;
 	r.type = self->type;
 	if(r.type == LEAF_NODE){
-		r.contents.token = malloc(sizeof(Token));
-		*r.contents.token = *self->contents.token;
+		r.contents.token = Token_copy(self->contents.token);
 	} else {
 		size_t argc = self->contents.non_leaf.argc;
 		r.contents.non_leaf.argc = self->contents.non_leaf.argc;
 		r.contents.non_leaf.argv = malloc(argc * sizeof(ParseNode));
+		if(!r.contents.non_leaf.argv){
+			abort();
+		}
 		for(int i = 0; i < argc; i++){
 			r.contents.non_leaf.argv[i] = ParseNode_deepCopy(self->contents.non_leaf.argv + i);
 		}
@@ -226,11 +228,14 @@ ParseNode ParseNode_deepCopy(ParseNode *self){
 }
 
 
+// like ParseNode_clean but accounting for tokens, which are
+// stored in ParseTree->tokenization regularly, but not in
+// this case (for use in closures). Bad code.
 void ParseNode_deepClean(ParseNode *self){
 	assert(self);
 
 	if(self->type == LEAF_NODE){
-		free(self->contents.token);
+		Token_free(self->contents.token);
 		self->contents.token = NULL;
 	} else {
 		size_t argc = self->contents.non_leaf.argc;

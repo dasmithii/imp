@@ -1,7 +1,7 @@
 #ifndef IMP_COMMANDS_H_
 #define IMP_COMMANDS_H_
-#include <stdbool.h>
 #define IMP_DEFAULT_ROOT "/usr/local/imp"
+#include <stdbool.h>
 
 
 void Imp_debugMode(bool status);

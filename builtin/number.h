@@ -17,5 +17,7 @@ void ImpNumber_set(Object *self, Object *value);
 
 void ImpNumber_setRaw(Object *self, double value);
 double ImpNumber_getRaw(Object *self);
+bool ImpNumber_isValid(Object *self);
+
 
 #endif

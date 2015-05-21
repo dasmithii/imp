@@ -8,16 +8,11 @@ typedef Object *(*CFunction)(Runtime *runtime
 	                       , Object *caller
 	                       , int argc
 	                       , Object **argv);
-
 void Object_setCData(Object *self, void *data);
 void *Object_getCData(Object *self);
-
 void Object_registerCMethod(Object *self
 	                     , char *name
 	                     , CFunction f);
-
-CFunction Object_getCMethod(Object *self, char *name);
-
 CFunction toCFunction(void *addr);
 
 #endif

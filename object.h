@@ -62,6 +62,7 @@ Object *Object_rootPrototype(Object *self);
 bool Object_isValid(Object *self);
 bool Slot_isValid(Slot *self);
 void Object_print(Object *self);
+bool Object_canBeActivated(Object *self);
 
 
 

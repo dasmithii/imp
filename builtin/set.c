@@ -1,9 +1,21 @@
-#include "set.h"
-#include "../object.h"
-#include "general.h"
-#include "../c.h"
-#include "route.h"
 #include <string.h>
+#include <stdio.h>
+
+#include "../object.h"
+#include "../c.h"
+
+#include "set.h"
+#include "general.h"
+#include "route.h"
+
+
+
+
+bool ImpSet_isValid(Object *self){
+	return Object_isValid(self) &&
+	       BuiltIn_id(self) == BUILTIN_SETTER;
+}
+
 
 static Object *ImpSet_activate_internal(Runtime *runtime
 	                                  , Object *context
@@ -12,13 +24,18 @@ static Object *ImpSet_activate_internal(Runtime *runtime
 	                                  , Object **argv){
 	assert(runtime);
 	assert(Object_isValid(context));
-	assert(Object_isValid(caller));
-	assert(argc == 2);
-	assert(ImpRoute_isValid(argv[0]));
-	assert(Object_isValid(argv[1]));
+	assert(ImpSet_isValid(caller));
+
+	if(argc != 2){
+		Runtime_throwString(runtime, "set requires exactly 2 arguments.");
+		return NULL;
+	} else if(!ImpRoute_isValid(argv[0])){
+		Runtime_throwString(runtime, "set requires a route for argument 1.");
+		return NULL;
+	}
+
 	Object *route = argv[0];
 	Object *value = argv[1];
-
 
 	Object *par = context;
 	int rargc = ImpRoute_argc(route);
@@ -46,7 +63,9 @@ static Object *ImpSet_activate_internal(Runtime *runtime
 	return NULL;
 }
 
+
 void ImpSet_init(Object *self){
+	assert(self);
 	BuiltIn_setId(self, BUILTIN_SETTER);
 	Object_registerCMethod(self, "__activate", ImpSet_activate_internal);
 }
