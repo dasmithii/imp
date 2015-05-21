@@ -1,12 +1,8 @@
  + Make it so blocks with one statement don't need parens
 
- + Deal with closures & reference caching
-
  + Implement vector slicing
 
- + TODO: check return codes on built in calls
-
- + TODO: vector route closure
+ + TODO: check return codes on builtin calls
 
  + Maybe give objects reference count fields (instead of slots)
 
@@ -16,8 +12,6 @@
  + Make printer look for toString methods.
  
  + Replace slot system with legit accessor.
-
- + Inject 'self' into method call contexts.
 
  + Check for mismatched grouping operators and such
 
