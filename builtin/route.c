@@ -160,7 +160,7 @@ static Object *ImpRoute_activate_internal(Runtime *runtime
 		return r;
 	}
 
-	Runtime_throwString(runtime, "NO!");
+	Runtime_throwString(runtime, "variable does not exist.");
 	return NULL;
 }
 
@@ -233,6 +233,9 @@ Object *ImpRoute_submapping_(char *self, Object *context){
 			return NULL;
 		}
 	}
+	if(r == context){
+		return NULL;
+	}
 	return r;
 }
 
@@ -247,6 +250,9 @@ Object *ImpRoute_mapping_(char *self, Object *context){
 		if(!r){
 			return NULL;
 		}
+	}
+	if(r == context){
+		return NULL;
 	}
 	return r;
 }

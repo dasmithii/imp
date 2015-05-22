@@ -29,7 +29,8 @@ Object *Runtime_cloneField(Runtime *self, char *name);
 
 
 //// code execution
-Object *Runtime_execute(Runtime *self, char *code);
+Object *Runtime_executeSource(Runtime *self, char *code);
+Object *Runtime_executeSourceInContext(Runtime *self, char *code, Object *context);
 Object *Runtime_activateOn(Runtime *runtime
 	                     , Object *context
 	                     , Object *caller

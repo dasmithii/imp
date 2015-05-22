@@ -3,6 +3,7 @@
 #include "../c.h"
 #include "../object.h"
 
+bool ImpString_isValid(Object *self);
 
 void ImpString_init(Object *self);
 void ImpString_print(Object *self);

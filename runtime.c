@@ -310,6 +310,10 @@ void Runtime_init(Runtime *self){
 	ImpReturn_init(returner);
 	Object_putShallow(self->root_scope, "return", returner);
 
+	Object *importer = Runtime_rawObject(self);
+	ImpImporter_init(importer);
+	Object_putShallow(self->root_scope, "import", importer);
+
 	Runtime_unlockGC(self);
 }
 
@@ -513,7 +517,9 @@ Object *Runtime_executeInContext(Runtime *runtime
 	return r;
 }
 
-Object *Runtime_execute(Runtime *self, char *code){
+Object *Runtime_executeSourceInContext(Runtime *self
+	                                 , char *code
+	                                 , Object *context){
 	assert(self);
 	assert(code); // todo ebnf check code
 
@@ -524,12 +530,17 @@ Object *Runtime_execute(Runtime *self, char *code){
 	if(rc){
 		Runtime_throwString(self, tree.error);
 	} else {
-		r = Runtime_executeInContext(self, self->root_scope, tree.root);
+		r = Runtime_executeInContext(self, context, tree.root);
 	}
 
 	ParseTree_clean(&tree);
 	return r;
 }
+
+Object *Runtime_executeSource(Runtime *self, char *code){
+	return Runtime_executeSourceInContext(self, code, self->root_scope);
+}
+
 
 
 

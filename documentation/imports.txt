@@ -1,0 +1,23 @@
+
+
+    Imp projects are merely directories.
+
+    |--root
+    |  |---sources
+    |  |---packages
+    |  |---main.imp
+    |  |---test.imp
+    |  |---something.c
+    |  |---something.h
+    |  |---README
+
+    Projects are executable when a main.imp or main.c file
+    
+
+
+
+Pac
+
+
+
+(import '')

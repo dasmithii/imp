@@ -48,7 +48,7 @@ void Imp_launchREPL(){
 		char code[164];
 		printf(" > ");
 		fgets(code, 164, stdin);
-		Runtime_execute(&runtime, code);
+		Runtime_executeSource(&runtime, code);
 	}
 }
 
@@ -56,7 +56,7 @@ void Imp_launchREPL(){
 void Imp_executeString(char *code){
 	Runtime runtime;
 	Runtime_init(&runtime);
-	Runtime_execute(&runtime, code);
+	Runtime_executeSource(&runtime, code);
 }
 
 

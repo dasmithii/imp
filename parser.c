@@ -11,12 +11,6 @@ static int ParseNode_init(ParseNode *node, Token *begin, Token *end){
 	assert(begin);
 	assert(end);
 
-	if(!node || !begin){
-		printf("fuck");
-		exit(1);
-	}
-
-
 	// check if leaf node
 	if(end == begin + 1){
 		node->type = LEAF_NODE;
@@ -113,6 +107,7 @@ static int ParseNode_init(ParseNode *node, Token *begin, Token *end){
 int ParseTree_init(ParseTree *tree, char *code){
 	assert(tree);
 	assert(code);
+	tree->error = NULL;
 
 	int ec = Tokenization_init(&tree->tokenization, code);
 	if(ec){
