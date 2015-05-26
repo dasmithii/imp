@@ -68,7 +68,8 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 
 	Vector *raw = ImpVector_getRaw(arguments);
 	for(int i = 1; i < argc; i++){
-		Vector_append(raw, &argv[i]);
+		Object *arg = unrouteInContext(argv[i], context);
+		Vector_append(raw, &arg);
 	}
  
 	Object *r = Runtime_executeInContext(runtime

@@ -6,7 +6,7 @@
 
 #include "general.h"
 #include "number.h"
-
+#include "route.h"
 
 
 
@@ -45,11 +45,12 @@ static Object *ImpNumber_add_internal(Runtime *runtime
 	}
 
 	for(int i = 0; i < argc; i++){
-		if(!ImpNumber_isValid(argv[i])){
+		Object *arg = unrouteInContext(argv[i], context);
+		if(!ImpNumber_isValid(arg)){
 			Runtime_throwString(runtime, "number:add accepts only numbers as arguments");
 			return NULL;
 		}
-		ImpNumber_add(caller, argv[i]);
+		ImpNumber_add(caller, arg);
 	}
 
 	return NULL;
@@ -70,11 +71,15 @@ static Object *ImpNumber_sub_internal(Runtime *runtime
 	                       , int argc
 	                       , Object **argv){
 	assert(runtime);
+	assert(Object_isValid(context));
 	assert(ImpNumber_isValid(caller));
 
 	if(argc != 1){
 		Runtime_throwString(runtime, "number:sub requires exactly one argument.");
-	} else if(!ImpNumber_isValid(argv[0])){
+	}
+
+	Object *arg = unrouteInContext(argv[0], context);
+	if(!ImpNumber_isValid(argv[0])){
 		Runtime_throwString(runtime, "number:sub argument must be of number type.");
 	} else {
 		ImpNumber_sub(caller, argv[0]);
@@ -87,6 +92,7 @@ static Object *ImpNumber_sub_internal(Runtime *runtime
 void ImpNumber_mult(Object *self, Object *other){
 	assert(ImpNumber_isValid(self));
 	assert(ImpNumber_isValid(other));
+
 	double *data = ImpNumber_data(self);
 	*data = (*data) * ImpNumber_getRaw(other);
 }
@@ -98,19 +104,19 @@ static Object *ImpNumber_mult_internal(Runtime *runtime
 	                       , int argc
 	                       , Object **argv){
 	assert(runtime);
+	assert(Object_isValid(context));
 	assert(ImpNumber_isValid(caller));
 
 	if(argc == 0){
 		Runtime_throwString(runtime, "number:mult requires at least one argument.");
-		return NULL;
 	}
 
 	for(int i = 0; i < argc; i++){
-		if(!ImpNumber_isValid(argv[i])){
+		Object *arg = unrouteInContext(argv[i], context);
+		if(!ImpNumber_isValid(arg)){
 			Runtime_throwString(runtime, "number:mult accepts only numbers as arguments");
-			return NULL;
 		}
-		ImpNumber_mult(caller, argv[i]);
+		ImpNumber_mult(caller, arg);
 	}
 
 	return NULL;
@@ -131,15 +137,23 @@ static Object *ImpNumber_div_internal(Runtime *runtime
 	                       , int argc
 	                       , Object **argv){
 	assert(runtime);
+	assert(Object_isValid(context));
 	assert(ImpNumber_isValid(caller));
+
 
 	if(argc != 1){
 		Runtime_throwString(runtime, "number:div requires exactly one argument.");
-	} else if(!ImpNumber_isValid(argv[0])){
-		Runtime_throwString(runtime, "number:div argument must be of number type.");
-	} else {
-		ImpNumber_div(caller, argv[0]);
+	} else{
+		Object *arg = unrouteInContext(argv[0], context);
+
+		if(!ImpNumber_isValid(arg)){
+			Runtime_throwString(runtime, "number:div argument must be of number type.");
+		} else {
+			ImpNumber_div(caller, arg);
+		}
 	}
+
+
 
 	return NULL;
 }
@@ -157,6 +171,11 @@ static Object *ImpNumber_print_internal(Runtime *runtime
 	                       , int argc
 	                       , Object **argv){
 	assert(ImpNumber_isValid(caller));
+
+	if(argc > 0){
+		Runtime_throwString(runtime, "number:print does not accept arguments.");
+	}
+
 	ImpNumber_print(caller);
 	return NULL;
 }
@@ -175,14 +194,18 @@ static Object *ImpNumber_set_internal(Runtime *runtime
 	                       , int argc
 	                       , Object **argv){
 	assert(runtime);
-	assert(caller);
+	assert(Object_isValid(context));
+	assert(Object_isValid(caller));
 
 	if(argc != 1){
 		Runtime_throwString(runtime, "number:set requires exactly one argument.");
-	} else if(!ImpNumber_isValid(argv[0])){
+	} 
+
+	Object *arg = unrouteInContext(argv[0], context);
+	if(!ImpNumber_isValid(arg)){
 		Runtime_throwString(runtime, "number:set requires an argument of type number");
 	} else{
-		ImpNumber_set(caller, argv[0]);
+		ImpNumber_set(caller, arg);
 	}
 
 	return NULL;
@@ -220,6 +243,8 @@ static Object *ImpNumber_clone_internal(Runtime *runtime
 	assert(runtime);
 	assert(caller);
 	assert(argc == 0);
+
+
 
 	Object_reference(caller);
 

@@ -47,11 +47,11 @@ Object *Runtime_activateOn(Runtime *runtime
 	void *internal = Object_getDataDeep(object, "__activate");
 	if(special){
 		r = Runtime_activateOn(runtime 
-			                    , context
-			                    , special
-			                    , argc
-			                    , argv
-			                    , origin);
+			                 , context
+			                 , special
+			                 , argc
+			                 , argv
+			                 , origin);
 	} else if(internal){
 		CFunction cf = *((CFunction*) internal);
 
@@ -258,7 +258,9 @@ void Runtime_init(Runtime *self){
 	Vector_init(&self->collectables, sizeof(Object*));
 
 	self->root_scope = Runtime_rawObject(self);
-	// TODO: init basic types and core functions.
+
+	Object_putShallow(self->root_scope, "self", self->root_scope);
+
 
 	Object *s = Runtime_rawObject(self);
 	ImpString_init(s);
@@ -313,6 +315,7 @@ void Runtime_init(Runtime *self){
 	Object *importer = Runtime_rawObject(self);
 	ImpImporter_init(importer);
 	Object_putShallow(self->root_scope, "import", importer);
+
 
 	Runtime_unlockGC(self);
 }
@@ -554,7 +557,7 @@ void Runtime_throwString(Runtime *runtime, char *exception){
 	assert(runtime);
 	assert(exception);
 	printf("Uncaught exception: %s\n", exception);
-	abort();
+	exit(1);
 }
 
 void Runtime_print(Runtime *runtime, Object *context, Object *object){

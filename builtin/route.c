@@ -251,9 +251,6 @@ Object *ImpRoute_mapping_(char *self, Object *context){
 			return NULL;
 		}
 	}
-	if(r == context){
-		return NULL;
-	}
 	return r;
 }
 
@@ -270,3 +267,14 @@ Object *ImpRoute_submapping(Object *self, Object *context){
 	assert(Object_isValid(context));
 	return ImpRoute_submapping_(ImpRoute_getRaw(self), context);
 }
+
+Object *unrouteInContext(Object *obj, Object *ctx){
+	assert(Object_isValid(obj));
+	assert(Object_isValid(ctx));
+
+	if(BuiltIn_id(obj) == BUILTIN_ROUTE){
+		return ImpRoute_mapping(obj, ctx);
+	}
+	return obj;
+}
+

@@ -6,53 +6,72 @@
 #include "toolbox/vector.h"
 
 
-static int ParseNode_init(ParseNode *node, Token *begin, Token *end){
+static int ParseNode_init(ParseTree *parent
+	                    , ParseNode *node
+	                    , Token *begin
+	                    , Token *end){
 	assert(node);
 	assert(begin);
 	assert(end);
 
 	// check if leaf node
 	if(end == begin + 1){
+		if(!Token_isUnary(begin) && !Token_isLiteral(begin)){
+			parent->error = strdup("mismatched grouping operators (invalid leaf).");
+			return 1;
+		}
 		node->type = LEAF_NODE;
 		node->contents.token = begin;
 		return 0;
 	}
 
+
 	switch(begin[0].type){
 	case TOKEN_HARD_OPEN:
 		node->type = MACRO_NODE;
 		if((end - 1)->type != TOKEN_HARD_CLOSE){
-			//TODO
+			parent->error = strdup("unmatched hard bracket.");
 			return -1;
 		}
 		break;
 	case TOKEN_SOFT_OPEN:
 		node->type = CALL_NODE;
 		if((end - 1)->type != TOKEN_SOFT_CLOSE){
-			//TODO
+			parent->error = strdup("unmatched soft bracket.");
 			return -1;
 		}
 		break;
 	case TOKEN_CURLY_OPEN:
 		node->type = CLOSURE_NODE;
 		if((end - 1)->type != TOKEN_CURLY_CLOSE){
-			//TODO
+			parent->error = strdup("unmatched curly brace.");
 			return -1;
 		}
 		break;
 	default:
+		if(Token_isClosed(begin)){
+			parent->error = strdup("misplaced closing.");
+			return 1;
+		}
 		node->type = CALL_NODE;
 		node->contents.non_leaf.argc = 2;
 		node->contents.non_leaf.argv = malloc(2 * sizeof(ParseNode));
-		ParseNode_init(node->contents.non_leaf.argv, begin, begin + 1); // TODO: check error
-		ParseNode_init(node->contents.non_leaf.argv + 1, begin + 1, end);   // TODO: check error
-		return 0;
-		break;
+		return ParseNode_init(parent, node->contents.non_leaf.argv, begin, begin + 1)     ||
+		       ParseNode_init(parent, node->contents.non_leaf.argv + 1, begin + 1, end);
 	}
 
 	// remove beginning and trailing grouping operators
 	++begin;
 	--end;
+
+
+	if(end == begin){
+		parent->error = strdup("empty group.");
+		return 1;
+	}
+
+
+
 
 	// find and parse sub-nodes
 	Vector subs;
@@ -66,7 +85,9 @@ static int ParseNode_init(ParseNode *node, Token *begin, Token *end){
 		if(depth == 0){
 			if(prev){
 				ParseNode node;
-				ParseNode_init(&node, prev, it);
+				if(ParseNode_init(parent, &node, prev, it)){
+					return 1;
+				}
 				Vector_append(&subs, &node);
 			}
 			prev = it;
@@ -97,7 +118,9 @@ static int ParseNode_init(ParseNode *node, Token *begin, Token *end){
 		++it;
 	}
 	ParseNode final;
-	ParseNode_init(&final, prev, it);
+	if(ParseNode_init(parent, &final, prev, it)){
+		return 1;
+	}
 	Vector_append(&subs, &final);
 	node->contents.non_leaf.argc = subs.size;
 	node->contents.non_leaf.argv = (void*)subs.buffer.data;
@@ -114,14 +137,14 @@ int ParseTree_init(ParseTree *tree, char *code){
 		tree->error = strdup(tree->tokenization.error);
 		return ec;
 	}
-	int rc = ParseNode_init(&tree->root
-		                , Tokenization_begin(&tree->tokenization)
-		                , Tokenization_end(&tree->tokenization));
-	if(rc){
-		tree->error = strdup("Parsing error.");
+	if(ParseNode_init(tree
+     , &tree->root
+     , Tokenization_begin(&tree->tokenization)
+     , Tokenization_end(&tree->tokenization))){
+		return 1;
 	}
 	tree->root.type = BLOCK_NODE;
-	return rc;
+	return 0;
 }
 
 

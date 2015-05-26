@@ -197,3 +197,10 @@ void Token_free(Token *self){
 	Token_clean(self);
 	free(self);
 }
+
+bool Token_isLiteral(Token *self){
+	assert(self);
+	return self->type == TOKEN_STRING   ||
+	       self->type == TOKEN_ROUTE    ||
+	       self->type == TOKEN_NUMBER;
+}

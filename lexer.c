@@ -98,9 +98,16 @@ int Tokenization_init(Tokenization *tokenization, char *code){
 					++code;
 					++end;
 					while(*end != '\''){
+						if(*end == 0){
+							tokenization->error = strdup("unterminated string.");
+							return 1;
+						}
 						++end;
 					}
 					token.data.text = malloc((end - code) + 1);
+					if(!token.data.text){
+						abort();
+					}
 					token.data.text[end - code] = 0;
 					memcpy(token.data.text, code, (end-code));
 					++end;

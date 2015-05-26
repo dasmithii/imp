@@ -208,8 +208,6 @@ static void Object_insertShallow(Object *self, char *key, void *data){
 		, self->slotCount
 		, sizeof(Slot)
 		, Slot_compare_generic);
-
-	assert(Object_isValid(self));
 }
 
 static void Object_insertDeep(Object *self, char *key, void *data){
@@ -257,8 +255,6 @@ void Object_putShallow(Object *self, char *key, Object *value){
 	assert(!keyForInternal(key));
 
 	Object_insertShallow(self, key, value);
-
-	assert(Object_isValid(self));
 }
 
 
@@ -437,7 +433,13 @@ int Object_referenceCount(Object *self){
 
 void Object_print(Object *self){
 	assert(Object_isValid(self));
-	printf("Object %p", self);
+	printf("Object %p\n", self);
+	for(int i = 0; i < self->slotCount; i++){
+		printf(" - %s: %p", self->slots[i].key, self->slots[i].data);
+		if(i < self->slotCount - 1){
+			printf("\n");
+		}
+	}
 }
 
 

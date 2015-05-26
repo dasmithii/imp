@@ -272,7 +272,13 @@ static Object *ImpVector_mark_internal(Runtime *runtime
 	assert(runtime);
 	assert(ImpVector_isValid(caller));
 
+	// base vector is empty
+	if(Object_hasKeyShallow(caller, "__id")){
+		return NULL;
+	}
+
 	Vector *internal = ImpVector_getRaw(caller);
+	assert(internal);
 	for(int i = 0; i < internal->size; i++){
 		Object *element = *((Object**) Vector_hook(internal, i));
 		Runtime_markRecursive(runtime, element);

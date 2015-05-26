@@ -28,7 +28,19 @@ static Object *ImpPrinter_activate_internal(Runtime *runtime
 	// if(special){
 	// }
 	for(int i = 0; i < argc; i++){
-		Runtime_print(runtime, context, argv[i]);
+		Object *obj = argv[i];
+		if(BuiltIn_id(obj) == BUILTIN_ROUTE){
+			obj = ImpRoute_mapping(obj, context);
+			if(!obj){
+				Runtime_throwString(runtime, "variable does not exist.");
+			}
+		}
+
+		if(Object_hasKeyShallow(obj, "__id")){
+			Object_print(obj);
+		} else {
+			Runtime_print(runtime, context, obj);
+		}
 		if(argc > 1 && i < argc - 1){
 			printf(" ");
 		}

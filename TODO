@@ -1,3 +1,21 @@
+TODAY:
+ 1. Fix bug where function defs delete themselves.
+ 2. Implement exception try/catch with callback functions.
+    - Use (try {<code>}, )
+ 3. Make C module loader
+
+
+
+
+
+MAYBE:
+ + make carrots variable expansion operators
+
+
+
+AT SOME POINT:
+
+
  + Make it so blocks with one statement don't need parens
 
  + Implement vector slicing
@@ -16,3 +34,5 @@
  + Check for mismatched grouping operators and such
 
  + Finish builtins: (1) hashmap
+
+ + Exception catching

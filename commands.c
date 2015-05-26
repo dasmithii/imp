@@ -75,7 +75,8 @@ void Imp_fetchPackage(char *source){
 }
 
 
-void Imp_indexPackage(char *source, char *destination){
+void Imp_indexPackage(char *dest, char *src){	
+	// figure out if src is 
 	printf("TODO: not yet implemented.");
 }
 
