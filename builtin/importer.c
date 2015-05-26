@@ -1,13 +1,17 @@
 #include "importer.h"
 #include "general.h"
+
 #include <sys/stat.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
+#include <dlfcn.h>
 
 #include "../commands.h"
 #include "string.h"
+#include "builtin/general.h"
 
 
 bool ImpImporter_isValid(Object *self){
@@ -41,14 +45,139 @@ static char *readFile(char *path){
 	return contents;
 }
 
+
+
+
+// Internal modules provide an imp interface to C code. They
+// are useful when high performance is required and/or for
+// wrapping existing C libraries.
+//
+// An internal module consists primarily of one .c file and 
+// the headers it includes. Soon, multi-file modules will
+// be supported. But for now, this is the way.
 static void importInternal(Runtime *runtime
 	                , Object *context
 	                , char *path){
-	abort(); // TODO
+	char *code = readFile(path);
+	if(!code){
+		Runtime_throwFormatted(runtime, "failed to read file: %s", path);
+	}
+
+	char name[32]; *name = 0;
+	strcat(name, path);
+	strchr(name, '.')[0] = 0;
+
+	printf("%s\n", name);
+
+
+	char prefix[64]; *prefix = 0;
+	strcat(prefix, "Object *");
+	strcat(prefix, path);
+	char *end = strchr(prefix, '.');
+	end[0] = '_';
+	end[1] = 0;
+
+	printf("%s\n", prefix);
+
+
+	const int prefixLen = strlen(prefix);
+
+	Vector symbols;
+	Vector_init(&symbols, 48);	
+
+	char *ptr = code;
+	while(ptr && *ptr){
+		ptr = strstr(ptr, prefix);
+		if(!ptr){
+			break;
+		}
+		ptr += prefixLen;
+
+		char symbol[48];
+		char *it = symbol;
+
+
+		while(ptr && (isalnum(*ptr) || *ptr == '_')){
+			*it = *ptr;
+			++it;
+			++ptr;
+		}
+		*it = 0;
+		Vector_append(&symbols, symbol);
+		printf(" - detected symbol: %s\n", symbol);
+	}
+
+
+	// compile .so file
+	char command[128];
+	sprintf(command, "gcc -shared -o %s.so -fPIC %s", name, path);
+	if(system(command)){
+		Runtime_throwFormatted(runtime, "failed to build %s.so", name);
+	}
+
+
+	// load .so and...
+	char sopath[32]; *sopath = 0;
+	strcat(sopath, name);
+	strcat(sopath, ".so");
+	void *so = dlopen(sopath, RTLD_LAZY);
+	if(!so){
+		Runtime_throwFormatted(runtime, "failed to dlopen %s", sopath);
+	}
+
+
+	Object_reference(context);
+	Object *module_ctx = Runtime_clone(runtime, context);
+	Object_putShallow(context, name, module_ctx);
+
+
+	for(int i = 0; i < symbols.size; i++){
+		char *wopre = Vector_hook(&symbols, i);
+
+		char full_[64]; *full_ = 0;
+		char *full = full_;
+		strcat(full, prefix);
+		full += strlen("Object *");
+		strcat(full, wopre);
+		if(*wopre >= 'a' && *wopre <= 'z'){
+			// load module-level function
+			void *sym = dlsym(so, full);
+			if(!sym){
+				Runtime_throwFormatted(runtime, "failed to find symbol '%s'", full);
+			}
+			char key[64]; *key = 0;
+			strcat(key, "__");
+			strcat(key, wopre);
+
+			Object_registerCMethod(module_ctx, key, sym);
+		} else if(*wopre >= 'A' && *wopre <= 'Z'){
+			// load method (and its base object, if not yet loaded)
+			// TODO:
+			Runtime_throwString(runtime, "NYI");
+		} else {
+			Runtime_throwString(runtime, "BAD SYMBOL");
+		}
+	}
+
+
+
+	Object_unreference(context);
+
+
+	// dlclose(so);
+
+
+	Vector_clean(&symbols);
+	// gather types
+
+
+
+
+	free(code);
 } 
        
 
-static importRegular(Runtime *runtime
+static void importRegular(Runtime *runtime
 	               , Object *context
 	               , char *path){
 	assert(runtime);
