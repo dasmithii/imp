@@ -120,7 +120,7 @@ static void importInternal(Runtime *runtime
 	char sopath[32]; *sopath = 0;
 	strcat(sopath, name);
 	strcat(sopath, ".so");
-	void *so = dlopen(sopath, RTLD_LAZY);
+	void *so = dlopen(sopath, RTLD_LAZY);  // .so file
 	if(!so){
 		Runtime_throwFormatted(runtime, "failed to dlopen %s", sopath);
 	}
@@ -132,19 +132,23 @@ static void importInternal(Runtime *runtime
 
 
 	for(int i = 0; i < symbols.size; i++){
-		char *wopre = Vector_hook(&symbols, i);
-
+		char *wopre = Vector_hook(&symbols, i); // without prefix
+ 
 		char full_[64]; *full_ = 0;
-		char *full = full_;
+		char *full = full_;  // full symbol
 		strcat(full, prefix);
 		full += strlen("Object *");
 		strcat(full, wopre);
+
+
+		// load module-level function
+		void *sym = dlsym(so, full);
+		if(!sym){
+			Runtime_throwFormatted(runtime, "failed to find symbol '%s'", full);
+		}
+
+
 		if(*wopre >= 'a' && *wopre <= 'z'){
-			// load module-level function
-			void *sym = dlsym(so, full);
-			if(!sym){
-				Runtime_throwFormatted(runtime, "failed to find symbol '%s'", full);
-			}
 			char key[64]; *key = 0;
 			strcat(key, "__");
 			strcat(key, wopre);
@@ -153,7 +157,31 @@ static void importInternal(Runtime *runtime
 		} else if(*wopre >= 'A' && *wopre <= 'Z'){
 			// load method (and its base object, if not yet loaded)
 			// TODO:
-			Runtime_throwString(runtime, "NYI");
+
+			char baseKey[32];
+			for(int i = 0;; i++){
+				if(wopre[i] == 0 || wopre[i] == '_'){
+					baseKey[i] = 0;
+					break;
+				}
+				baseKey[i] = wopre[i];
+			}
+
+			char key[64]; *key = 0;
+			strcat(key, "__");
+			strcat(key, wopre + strlen(baseKey) + 1);
+			
+
+			if(!Object_hasKeyShallow(module_ctx, baseKey)){
+				Object_putShallow(module_ctx, baseKey, Runtime_rawObject(runtime));
+			}
+
+			Object *baseObj = Object_getShallow(module_ctx, baseKey);
+			assert(baseObj);
+
+
+
+			Object_registerCMethod(baseObj, key, sym);
 		} else {
 			Runtime_throwString(runtime, "BAD SYMBOL");
 		}
