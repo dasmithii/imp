@@ -26,6 +26,7 @@ BuiltinId BuiltIn_id(Object *self);
 BuiltinId BuiltIn_protoId(Object *self);
 bool BuiltIn_protoHadId(Object *self, BuiltinId biid);
 
+bool BuiltIn_isSpecial(Object *self);
 
 
 #endif

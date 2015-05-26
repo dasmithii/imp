@@ -44,3 +44,10 @@ bool BuiltIn_protoHadId(Object *self, BuiltinId id){
 	return BuiltIn_protoId(self) == id;
 }
 
+// special built ins get sent routes as arguments
+bool BuiltIn_isSpecial(Object *self){
+	const BuiltinId id = BuiltIn_id(self);
+	return id == BUILTIN_ROUTE   || 
+	       id == BUILTIN_DEFINER ||
+	       id == BUILTIN_SETTER;   
+}  

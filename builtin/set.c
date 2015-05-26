@@ -35,31 +35,18 @@ static Object *ImpSet_activate_internal(Runtime *runtime
 	}
 
 	Object *route = argv[0];
-	Object *value = argv[1];
+	Object *value = unrouteInContext(argv[1], context);
 
-	Object *par = context;
-	int rargc = ImpRoute_argc(route);
+	Object *parent = ImpRoute_submapping(route, context);
+	if(!parent){
+		Runtime_throwString(runtime, "set failed; try def.");
+	}
 
-	for(int i = 0; i < rargc - 1; i++){
-		char buf[64];
-		ImpRoute_argv(route, i, buf);
-		par = Object_getDeep(par, buf);
-		if(!par){
-			char err[128];
-			sprintf(err, "variable '%s' does not exist.", ImpRoute_getRaw(route));
-			Runtime_throwString(runtime, err);
-			return NULL;
-		}
-	}
-	char fbuf[64];
-	ImpRoute_argv(route, rargc - 1, fbuf);
-	if(!Object_hasKeyShallow(par, fbuf)){
-		char err[128];
-		sprintf(err, "variable '%s' does not exist.", ImpRoute_getRaw(route));
-		Runtime_throwString(runtime, err);
-		return NULL;
-	}
-	Object_putDeep(par, fbuf, value);
+	char field[32];
+	ImpRoute_argv(route, ImpRoute_argc(route) - 1, field);
+
+	Object_putShallow(parent, field, value);
+
 	return NULL;
 }
 

@@ -1,5 +1,5 @@
 TODAY:
- 1. Fix bug where function defs delete themselves.
+ 1. Add Runtime_throwFormatted
  2. Implement exception try/catch with callback functions.
     - Use (try {<code>}, )
  3. Make C module loader

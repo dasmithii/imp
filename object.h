@@ -34,7 +34,6 @@ void Slot_setFunction(Slot *self, Object*(*f)(int argc, Object *argv));
 //// garbage collection
 void Object_mark(Object *self);
 void Object_unmark(Object *self);
-void Object_markRecursive(Object *self);
 void Object_reference(Object *self);
 void Object_unreference(Object *self);
 int Object_referenceCount(Object *self);
@@ -56,6 +55,7 @@ void *Object_getDataDeep(Object *self, char *key);
 bool Object_hasKeyShallow(Object *self, char *key);
 bool Object_hasKeyDeep(Object *self, char *key);
 Object *Object_rootPrototype(Object *self);
+Object *Object_prototype(Object *self);
 
 
 //// miscellaneous

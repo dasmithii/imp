@@ -29,12 +29,6 @@ static Object *ImpPrinter_activate_internal(Runtime *runtime
 	// }
 	for(int i = 0; i < argc; i++){
 		Object *obj = argv[i];
-		if(BuiltIn_id(obj) == BUILTIN_ROUTE){
-			obj = ImpRoute_mapping(obj, context);
-			if(!obj){
-				Runtime_throwString(runtime, "variable does not exist.");
-			}
-		}
 
 		if(Object_hasKeyShallow(obj, "__id")){
 			Object_print(obj);

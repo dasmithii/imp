@@ -88,11 +88,9 @@ static Object *ImpRoute_clone_internal(Runtime *runtime
 		return NULL;
 	}
 
-	Object_reference(caller);
 	Object *r = Runtime_rawObject(runtime);
 	Object_putShallow(r, "_prototype", caller);
 	Object_putDataShallow(r, "__data", strdup(ImpRoute_getRaw(caller)));
-	Object_unreference(caller);
 	return r;
 }
 
@@ -107,12 +105,6 @@ static Object *ImpRoute_activate_internal(Runtime *runtime
 	assert(ImpRoute_isValid(caller));
 
 	Object *r = NULL;
-
-	Object_reference(context);
-	Object_reference(caller);
-	for(int i = 0; i < argc; i++){
-		Object_reference(argv[i]);
-	}
 
 	Object *mapping = ImpRoute_mapping(caller, context);
 	Object *submapping = ImpRoute_submapping(caller, context);
@@ -146,13 +138,6 @@ static Object *ImpRoute_activate_internal(Runtime *runtime
 				r = cf(runtime, context, submapping, argc, argv);
 			}
 		}
-	}
-
-	// unference resources
-	Object_unreference(context);
-	Object_unreference(caller);
-	for(int i = 0; i < argc; i++){
-		Object_unreference(argv[i]);
 	}
 	
 	// if activation successful, return

@@ -38,15 +38,10 @@ static Object *ImpWhile_activate_internal(Runtime *runtime
 		Runtime_throwString(runtime, "while step must be activatable");
 	}
 
-	Object_reference(context);
-	Object_reference(caller);
-	Object_reference(condition);
-	Object_reference(step);
-
 	for(;;){
 		// check condition
 		Runtime_activate(runtime, context, condition, 0, NULL);
-		if(Runtime_returnValue(runtime) == NULL                              ||
+		if(Runtime_returnValue(runtime) == NULL                         ||
 		   BuiltIn_id(Runtime_returnValue(runtime)) != BUILTIN_BOOLEAN  ||
 		   ImpBoolean_getRaw(Runtime_returnValue(runtime)) == false){
 			break;
@@ -54,16 +49,8 @@ static Object *ImpWhile_activate_internal(Runtime *runtime
 
 		// execute block
 		Object *subcontext = Runtime_clone(runtime, context);
-		Object_reference(subcontext);
 		Runtime_activate(runtime, subcontext, step, 0, NULL);
-		Object_unreference(subcontext);
 	}
-
-
-	Object_unreference(context);
-	Object_unreference(caller);
-	Object_unreference(condition);
-	Object_unreference(step);
 
 	return NULL;
 }

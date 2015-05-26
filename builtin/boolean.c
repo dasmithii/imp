@@ -28,7 +28,6 @@ static Object *ImpBoolean_clone_internal(Runtime *runtime
 		return NULL;
 	}
 
-	Object_reference(caller);
 	Object *r = Runtime_rawObject(runtime);
 	Object_putDataShallow(r, "_prototype", Object_rootPrototype(caller));
 	void *data = malloc(sizeof(bool));
@@ -37,8 +36,7 @@ static Object *ImpBoolean_clone_internal(Runtime *runtime
 	}
 	Object_putDataShallow(r, "__data", data);
 	ImpBoolean_setRaw(r, ImpBoolean_getRaw(caller));
-	Object_unreference(caller);
-
+	
 	return r;	
 }
 

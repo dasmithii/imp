@@ -18,6 +18,14 @@
 #include "c.h"
 
 
+// Object *Runtime_activateMethod(Runtime *runtime
+// 	                         , Object *context
+// 	                         , Object *object
+// 	                         , char *method
+// 	                         , int argc
+// 	                         , Object **argv){
+
+// }
 
 
 // Activates <object> with given arguments on the <origin> 
@@ -55,8 +63,16 @@ Object *Runtime_activateOn(Runtime *runtime
 	} else if(internal){
 		CFunction cf = *((CFunction*) internal);
 
-		if(BuiltIn_id(object) == BUILTIN_CLOSURE){
-			// make self first arg in argv
+		if(BuiltIn_isSpecial(object)){
+
+			// execute with arguments that haven't yet been 
+			// dereferenced
+			r = cf(runtime, context, object, argc, argv);
+
+		} else if(BuiltIn_id(object) == BUILTIN_CLOSURE){
+
+			// execute with dereferenced arguments prefixed
+			// with 'self' for use in closure
 			const int argc2 = argc + 1;
 			Object **argv2 = malloc(sizeof(Object*) * argc2);
 			if(!argv2){
@@ -64,13 +80,32 @@ Object *Runtime_activateOn(Runtime *runtime
 			}
 			argv2[0] = origin;
 			for(int i = 1; i < argc2; i++){
-				argv2[i] = argv[i - 1];
+				argv2[i] = unrouteInContext(argv[i - 1], context);
+				Object_reference(argv2[i]);
 			}
-
 			r = cf(runtime, context, object, argc2, argv2);  // TODO: deal with this
+			for(int i = 1; i < argc2; i++){
+				Object_unreference(argv2[i]);
+			}
 			free(argv2);
+
 		} else {
-			r = cf(runtime, context, object, argc, argv);
+
+			// execute with dereferenced arguments
+			Object **argv2 = malloc(sizeof(Object*) * argc);
+			if(!argv2){
+				abort();
+			}
+			for(int i = 0; i < argc; i++){
+				argv2[i] = unrouteInContext(argv[i], context);
+				Object_reference(argv2[i]);
+			}
+			r = cf(runtime, context, object, argc, argv2);  // TODO: deal with this
+			for(int i = 0; i < argc; i++){
+				Object_unreference(argv2[i]);
+			}
+			free(argv2);
+		
 		}
 	}
 
@@ -108,23 +143,11 @@ Object *Runtime_activate(Runtime *runtime
 }
 
 
-
 static void unmark(void *addr){
 	assert(addr);
 	Object *obj = *((Object**) addr);
 	Object_unmark(obj);
 }
-
-
-static void Runtime_markRecursiveIfVolatile(Runtime *runtime, Object *object){
-	assert(runtime);
-	assert(Object_isValid(object));
-
-	if(Object_referenceCount(object) > 0){  // some internal objects are reference counted / volatile 
-		Runtime_markRecursive(runtime, object);
-	}
-}
-
 
 
 static void Runtime_collectOne(Runtime *runtime, Object *object){
@@ -154,7 +177,11 @@ void Runtime_markRecursive(Runtime *runtime, Object *object){
 	assert(runtime);
 	assert(Object_isValid(object));
 
-	Object_markRecursive(object);
+	if(object->gc_mark){
+		return;
+	}
+	object->gc_mark = true;
+
 
 	Object *special = Object_getDeep(object, "_mark");
 	if(special){
@@ -171,6 +198,12 @@ void Runtime_markRecursive(Runtime *runtime, Object *object){
 			cf(runtime, NULL, object, 0, NULL);
 		}
 	}
+
+	for(int i = 0; i < object->slotCount; i++){
+		if(!Slot_isPrimitive(object->slots + i)){
+			Runtime_markRecursive(runtime, Slot_object(object->slots + i));
+		}
+	}
 }
 
 static void Runtime_runGC(Runtime *self){
@@ -185,7 +218,9 @@ static void Runtime_runGC(Runtime *self){
 	// mark volatile objects and dependencies
 	for(int i = 0; i < self->collectables.size; i++){
 		Object *object = *((Object**) Vector_hook(&self->collectables, i));
-		Runtime_markRecursiveIfVolatile(self, object);
+		if(Object_referenceCount(object) > 0){
+			Runtime_markRecursive(self, object);
+		}
 	}
 
 	// Mark all accessible allocations.
@@ -298,7 +333,7 @@ void Runtime_init(Runtime *self){
 	Object *fa = Runtime_rawObject(self);
 	ImpBoolean_init(fa);
 	ImpBoolean_setRaw(fa, false);
-	Object_putShallow(self->root_scope, "false", tr);
+	Object_putShallow(self->root_scope, "false", fa);
 
 	Object *whi = Runtime_rawObject(self);
 	ImpWhile_init(whi);
@@ -324,6 +359,7 @@ void Runtime_init(Runtime *self){
 Object *Runtime_clone(Runtime *runtime, Object *object){
 	assert(runtime);
 	assert(Object_isValid(object));
+	assert(Runtime_isManaged(runtime, object));
 
 	Object *r = NULL;
 	Object_reference(object);

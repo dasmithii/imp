@@ -71,12 +71,9 @@ static Object *ImpString_clone_internal(Runtime *runtime
 		return NULL;
 	}
 
-
-	Object_reference(caller);
 	Object *r = Runtime_rawObject(runtime);
 	Object_putShallow(r, "_prototype", caller);
 	Object_putDataShallow(r, "__data", strdup(ImpString_getRaw(caller))); // TODO: check pointer from strdup
-	Object_unreference(caller);
 
 	return r;	
 }

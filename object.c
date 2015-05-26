@@ -301,7 +301,6 @@ void Object_remShallow(Object *self, char *key){
 
 void Object_mark(Object *self){
 	assert(Object_isValid(self));
-	
 	self->gc_mark = true;
 }
 
@@ -310,25 +309,6 @@ void Object_unmark(Object *self){
 	assert(Object_isValid(self));
 	self->gc_mark = false;
 }
-
-
-void Object_markRecursive(Object *self){
-	assert(Object_isValid(self));
-
-	Object_mark(self);
-	for(int i = 0; i < self->slotCount; i++){
-		Slot *slot = self->slots + i;
-		if(!Slot_isPrimitive(slot)){
-			Object *obj = Slot_object(slot);
-			if(obj->gc_mark == false){
-				Object_markRecursive(obj);
-			}
-		}
-	}
-
-	assert(Object_isValid(self));
-}
-
 
 
 void Object_clean(Object *self){
@@ -353,6 +333,10 @@ void Object_free(Object *self){
 	free(self);
 }
 
+
+Object *Object_prototype(Object *self){
+	return Object_getShallow(self, "_prototype");
+}
 
 Object *Object_rootPrototype(Object *self){
 	assert(Object_isValid(self));
@@ -415,8 +399,8 @@ void Object_unreference(Object *self){
 	assert(Object_hasKeyShallow(self, "__referenceCount"));
 
 	int *data = Object_getDataShallow(self, "__referenceCount");
+	assert(*data > 0);
 	*data -= 1;
-	assert((*data) >= 0);
 	if(*data == 0){
 		Object_remShallow(self, "__referenceCount");
 	}

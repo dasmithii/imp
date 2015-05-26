@@ -20,7 +20,8 @@ static Object *ImpDef_activate_internal(Runtime *runtime
 	assert(Object_isValid(argv[1]));
 
 	Object *route = argv[0];
-	Object *value = argv[1];
+	Object *value = unrouteInContext(argv[1], context);
+	Object_reference(value);
 
 	if(argc != 2){
 		Runtime_throwString(runtime, "def accepts exactly 2 arguments.");
@@ -38,21 +39,15 @@ static Object *ImpDef_activate_internal(Runtime *runtime
 		Object *ppar = par;
 		par = Object_getDeep(par, buf);
 		if(!par){
-			Object_reference(caller);
-			Object_reference(context);
-			Object_reference(route);
-			Object_reference(value);
 			par = Runtime_rawObject(runtime);
-			Object_unreference(caller);
-			Object_unreference(context);
-			Object_unreference(route);
-			Object_unreference(value);
 			Object_putShallow(ppar, buf, par);
 		}
 	}
 	char fbuf[64];
 	ImpRoute_argv(route, rargc - 1, fbuf);
 	Object_putDeep(par, fbuf, value);
+
+	Object_unreference(value);
 	return NULL;
 }
 

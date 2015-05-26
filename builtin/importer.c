@@ -51,6 +51,10 @@ static void importInternal(Runtime *runtime
 static importRegular(Runtime *runtime
 	               , Object *context
 	               , char *path){
+	assert(runtime);
+	assert(Object_isValid(context));
+	assert(path);
+
 	const int plen = strlen(path);
 
 	char *code = readFile(path);
@@ -83,6 +87,7 @@ static importRegular(Runtime *runtime
 	Object_putShallow(context, name, module_ctx);
 	Runtime_executeSourceInContext(runtime, code, module_ctx);
 	Object_unreference(context);
+	free(code);
 }
 
 
@@ -149,11 +154,7 @@ static Object *ImpImporter_activate_internal(Runtime *runtime
 		Runtime_throwString(runtime, "import requires a string as its first argument.");
 	} else {
 		char *module = ImpString_getRaw(argv[0]);
-		Object_reference(context);
-		Object_reference(caller);
 		Imp_import(runtime, context, module); // TODO: handle import errors
-		Object_unreference(context);
-		Object_unreference(caller);
 	}
 
 	return NULL;

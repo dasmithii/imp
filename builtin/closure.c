@@ -25,9 +25,14 @@ static ImpClosure_internal *ImpClosure_getRaw(Object *self){
 
 
 bool ImpClosure_isValid(Object *obj){
-	return Object_isValid(obj)                       &&
-	       BuiltIn_protoId(obj) == BUILTIN_CLOSURE   &&
-	       Object_isValid(ImpClosure_getRaw(obj)->context);
+	if(!Object_isValid(obj) || BuiltIn_id(obj) != BUILTIN_CLOSURE){
+		return false;
+	}
+
+	if(Object_hasKeyShallow(obj, "_prototype")){
+		return Object_isValid(ImpClosure_getRaw(obj)->context);
+	}
+	return true;
 }
 
 
@@ -48,13 +53,6 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 		assert(Object_isValid(argv[i]));
 	}
 
-	// reference resources
-	Object_reference(context);
-	Object_reference(caller);
-	for(int i = 0; i < argc; i++){
-		Object_reference(argv[i]);
-	}
-
 	ImpClosure_internal *internal = Object_getDataShallow(caller, "__data");
 	Object *scope = Runtime_clone(runtime, internal->context);
 	Object_reference(scope);
@@ -68,8 +66,7 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 
 	Vector *raw = ImpVector_getRaw(arguments);
 	for(int i = 1; i < argc; i++){
-		Object *arg = unrouteInContext(argv[i], context);
-		Vector_append(raw, &arg);
+		Vector_append(raw, &argv[i]);
 	}
  
 	Object *r = Runtime_executeInContext(runtime
@@ -77,11 +74,6 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 		                               , *internal->code);
 
 	Object_unreference(scope);
-	Object_unreference(context);
-	Object_unreference(caller);
-	for(int i = 0; i < argc; i++){
-		Object_unreference(argv[i]);
-	}
 
 	return r;
 }
@@ -131,6 +123,7 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 		abort();
 	}
 	internal->context = Runtime_rawObject(runtime);
+	Object_reference(internal->context);
 	internal->code = malloc(sizeof(ParseNode));
 	if(!internal->code){
 		abort();
@@ -144,6 +137,7 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 	ParseNode_cacheReferences(code, context, internal->context);
 	assert(Object_isValid(internal->context));
 
+	Object_unreference(internal->context);
 	Object_unreference(self);
 	Object_unreference(context);
 }
@@ -195,7 +189,9 @@ static Object *ImpClosure_mark_internal(Runtime *runtime
 	assert(ImpClosure_isValid(caller));
 
 	ImpClosure_internal *raw = ImpClosure_getRaw(caller);
-	Runtime_markRecursive(runtime, raw->context);
+	if(Object_hasKeyShallow(caller, "_prototype")){
+		Runtime_markRecursive(runtime, raw->context);
+	}
 	return NULL;
 }
 

@@ -53,11 +53,7 @@ static Object *ImpVector_clone_internal(Runtime *runtime
 		Runtime_throwString(runtime, "vector:clone does not accept arguments.");
 		return NULL;
 	}
-
-	Object_reference(caller);
 	Object *r = Runtime_rawObject(runtime);
-	Object_unreference(caller);
-
 	Object_putShallow(r, "_prototype", caller);
 
 	Vector *internal = malloc(sizeof(Vector));
@@ -217,10 +213,7 @@ static Object *ImpVector_copy_internal(Runtime *runtime
 	}
 
 	Vector *newInternal = Vector_clone(ImpVector_getRaw(caller));
-
-	Object_reference(caller);
 	Object *r = Runtime_rawObject(runtime);
-	Object_unreference(caller);
 
 	Object_putDataShallow(r, "__data", newInternal);
 	Object_putShallow(r, "_prototype", Object_rootPrototype(caller));
