@@ -1,8 +1,7 @@
 TODAY:
- 1. Add Runtime_throwFormatted
+ 1. Make C module loader
  2. Implement exception try/catch with callback functions.
     - Use (try {<code>}, )
- 3. Make C module loader
 
 
 

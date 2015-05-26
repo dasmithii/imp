@@ -54,8 +54,8 @@ Object *Runtime_returnValue(Runtime *self);
 
 
 //// exception handling
-void Runtime_throw(Runtime *runtime, Object *exception);
 void Runtime_throwString(Runtime *runtime, char *exception);
+void Runtime_throwFormatted(Runtime *runtime, const char *format, ...);
 
 
 //// garbage collection

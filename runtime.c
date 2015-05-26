@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 #include "runtime.h"
 #include "parser.h"
@@ -16,16 +17,6 @@
 #include "builtin/vector.h"
 #include "builtin/return.h"
 #include "c.h"
-
-
-// Object *Runtime_activateMethod(Runtime *runtime
-// 	                         , Object *context
-// 	                         , Object *object
-// 	                         , char *method
-// 	                         , int argc
-// 	                         , Object **argv){
-
-// }
 
 
 // Activates <object> with given arguments on the <origin> 
@@ -592,9 +583,21 @@ int Runtime_objectCount(Runtime *self){
 void Runtime_throwString(Runtime *runtime, char *exception){
 	assert(runtime);
 	assert(exception);
-	printf("Uncaught exception: %s\n", exception);
+	fprintf(stderr, "Uncaught exception: %s\n", exception);
 	exit(1);
 }
+
+
+void Runtime_throwFormatted(Runtime *runtime, const char *format, ...){
+    va_list args;
+    va_start(args, format);
+    fprintf(stderr, "Uncaught exception: ");
+    vfprintf(stderr, format, args);
+    fprintf(stderr, ".\n");
+    va_end(args);
+    exit(1);
+}
+
 
 void Runtime_print(Runtime *runtime, Object *context, Object *object){
 	assert(runtime);

@@ -145,7 +145,9 @@ static Object *ImpRoute_activate_internal(Runtime *runtime
 		return r;
 	}
 
-	Runtime_throwString(runtime, "variable does not exist.");
+	Runtime_throwFormatted(runtime
+		                 , "variable '%s' does not exist"
+		                 , ImpRoute_getRaw(caller));
 	return NULL;
 }
 
