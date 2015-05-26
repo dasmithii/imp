@@ -1,27 +1,29 @@
 TODAY:
+
  1. Make C module loader
+
  2. Implement exception try/catch with callback functions.
     - Use (try {<code>}, )
 
-
+ 3. Improve error reporting.
 
 
 
 MAYBE:
+ 
  + make carrots variable expansion operators
+
+ + give objects reference count fields (instead of slots)
 
 
 
 AT SOME POINT:
-
 
  + Make it so blocks with one statement don't need parens
 
  + Implement vector slicing
 
  + TODO: check return codes on builtin calls
-
- + Maybe give objects reference count fields (instead of slots)
 
  + Make number and string methods search for toNumber and
    toString methods instead of rejecting other types.
@@ -35,3 +37,9 @@ AT SOME POINT:
  + Finish builtins: (1) hashmap
 
  + Exception catching
+
+
+
+ WAY LATER
+
+  + Concurrency!!!
