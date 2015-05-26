@@ -192,7 +192,7 @@ static void importInternal(Runtime *runtime
 	Object_unreference(context);
 
 
-	// dlclose(so);
+	// dlclose(so); TODO: make it so module_ctx destructor calls dlclose
 
 
 	Vector_clean(&symbols);

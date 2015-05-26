@@ -1,47 +1,32 @@
-TODAY:
+DEFINITELY:
 
- 1. Make C module loader
+	Major:
+	  + Implement exception handling mechanisms
 
- 2. Implement exception try/catch with callback functions.
-    - Use (try {<code>}, )
+	Minor:
+	  + Make it so dlclose is called by module context destructors
+	  + Improve error reporting.
 
- 3. Improve error reporting.
-
-
-SERIALIZE LIBRARY LOADS
 
 
 MAYBE:
- 
- + make carrots variable expansion operators
-
- + give objects reference count fields (instead of slots)
+  + make carrots variable expansion operators
+  + give objects reference count fields (instead of slots)
 
 
 
 AT SOME POINT:
-
  + Make it so blocks with one statement don't need parens
-
  + Implement vector slicing
-
  + TODO: check return codes on builtin calls
-
  + Make number and string methods search for toNumber and
    toString methods instead of rejecting other types.
-
  + Make printer look for toString methods.
- 
  + Replace slot system with legit accessor.
-
  + Check for mismatched grouping operators and such
-
  + Finish builtins: (1) hashmap
 
- + Exception catching
 
 
-
- WAY LATER
-
+LATER:
   + Concurrency!!!
