@@ -1,7 +1,8 @@
 Overview
 
     Imp is a little scripting language I'm building for fun. It 
-    is dynamic, prototype-based, and excessively parenthesized.
+    is dynamic, prototype based, duck typed, and excessively
+    parenthesized.
 
       >  (print 'Hello, world!')
 
