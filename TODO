@@ -1,15 +1,19 @@
-NOW:
+
+
+SCHEDULED:
 
  + Figure out build system for internal modules (i.e. how they
-  are linked with runtime files).
+   are linked with runtime files).
+
+ + Move many files in builtins directory to standard libraries
+   which may be imported.
+
+ + Make throw command.
 
 
 
 
 DEFINITELY:
-
-	Major:
-	  + Implement exception handling mechanisms
 
 	Minor:
 	  + Make it so dlclose is called by module context destructors
