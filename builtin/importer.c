@@ -73,7 +73,7 @@ static void *fileToDL(Runtime *runtime, char *path){
 	code = NULL;
 
 	char dest[64];
-	sprintf(dest, "%s/cache/%ld.so", Imp_root(), checksum);
+	sprintf(dest, "%s/cache/%ul.so", Imp_root(), checksum);
 	if(!fileExists(dest)){
 		char buf[128];
 
