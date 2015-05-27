@@ -1,6 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <setjmp.h>
 
 #include "runtime.h"
 #include "parser.h"
@@ -17,6 +18,15 @@
 #include "builtin/vector.h"
 #include "builtin/return.h"
 #include "c.h"
+
+
+typedef struct {
+	jmp_buf env;
+	Object *catcher;
+} TryData;
+
+
+
 
 
 // Activates <object> with given arguments on the <origin> 
@@ -280,6 +290,8 @@ void Runtime_init(Runtime *self){
 	self->gc_on = false;
 	Runtime_lockGC(self);
 
+	Stack_init(&self->tryStack, sizeof(TryData));
+
 	self->error = NULL;
 	Vector_init(&self->collectables, sizeof(Object*));
 
@@ -514,11 +526,36 @@ Object *Runtime_executeInContext(Runtime *runtime
 					Object_reference(subs[i]);
 				}
 			}
-			r = Runtime_activate(runtime
-				               , scope
-				               , subs[0]
-				               , node.contents.non_leaf.argc - 1
-				               , subs + 1);
+
+			const int argc = node.contents.non_leaf.argc - 1;
+			Object **argv =  subs + 1;
+
+			if(BuiltIn_id(subs[0]) == BUILTIN_ROUTE           &&
+			   strcmp(ImpRoute_getRaw(subs[0]), "try") == 0){
+				if(argc != 2){
+					Runtime_throwString(runtime, "try requires exactly two arguments");
+				}
+				TryData data;
+				data.catcher = argv[1];
+				// push TryData
+				if(!setjmp(data.env)){
+					Stack_push(&runtime->tryStack, &data);
+					r = Runtime_activate(runtime
+		               , scope
+		               , argv[0]
+		               , 0
+		               , NULL);
+					Stack_pop(&runtime->tryStack);
+				}
+				// pop TryData
+			} else {
+				r = Runtime_activate(runtime
+		               , scope
+		               , subs[0]
+		               , argc
+		               , argv);
+			}
+	
 
 			for(int i = 0; i < node.contents.non_leaf.argc; i++){
 				if(subs[i]){
@@ -579,23 +616,55 @@ int Runtime_objectCount(Runtime *self){
 	return self->collectables.size;
 }
 
+void Runtime_throw(Runtime *runtime, Object *exception){
+	assert(runtime);
+	assert(exception);
+
+	Object_reference(exception);
+
+	if(Stack_size(&runtime->tryStack) == 0){
+		fprintf(stderr, "Uncaught exception: ");
+		if(BuiltIn_id(exception) == BUILTIN_STRING){
+			fprintf(stderr, "%s", ImpString_getRaw(exception));
+		} else {
+			Runtime_print(runtime, NULL, exception);
+		}
+		fprintf(stderr, ".\n");
+		exit(1);
+	}
+	TryData deepestTry;
+	Stack_fetchTop(&runtime->tryStack, &deepestTry);
+	Stack_pop(&runtime->tryStack);
+	Object_reference(deepestTry.catcher);
+
+	Runtime_activate(runtime, runtime->root_scope, deepestTry.catcher, 1, &exception);
+	Object_unreference(deepestTry.catcher);
+	Object_unreference(exception);
+	
+	longjmp(deepestTry.env, 0);
+}
+
 
 void Runtime_throwString(Runtime *runtime, char *exception){
 	assert(runtime);
 	assert(exception);
-	fprintf(stderr, "Uncaught exception: %s\n", exception);
-	exit(1);
+
+	Object *obj = Runtime_cloneField(runtime, "string");
+	ImpString_setRaw(obj, exception);
+	Runtime_throw(runtime, obj);
 }
 
 
 void Runtime_throwFormatted(Runtime *runtime, const char *format, ...){
     va_list args;
     va_start(args, format);
-    fprintf(stderr, "Uncaught exception: ");
-    vfprintf(stderr, format, args);
+
+    char str[256];
+    vsprintf(str, format, args);
+    Runtime_throwString(runtime, str);
+
     fprintf(stderr, ".\n");
     va_end(args);
-    exit(1);
 }
 
 

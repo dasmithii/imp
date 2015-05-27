@@ -1,3 +1,11 @@
+NOW:
+
+ + Figure out build system for internal modules (i.e. how they
+  are linked with runtime files).
+
+
+
+
 DEFINITELY:
 
 	Major:

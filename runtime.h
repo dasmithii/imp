@@ -1,6 +1,7 @@
 #ifndef IMP_RUNTIME_H_
 #define IMP_RUNTIME_H_
 #include "toolbox/vector.h"
+#include "toolbox/stack.h"
 #include "object.h"
 #include "parser.h"
 
@@ -14,6 +15,8 @@ typedef struct {
 
 	int gc_locks;
 	bool gc_on;
+
+	Stack tryStack; // stack of try calls
 } Runtime;
 
 
@@ -54,6 +57,7 @@ Object *Runtime_returnValue(Runtime *self);
 
 
 //// exception handling
+void Runtime_throw(Runtime *runtime, Object *exception);
 void Runtime_throwString(Runtime *runtime, char *exception);
 void Runtime_throwFormatted(Runtime *runtime, const char *format, ...);
 
