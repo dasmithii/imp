@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <dlfcn.h>
+#include <time.h>
 
 #include "../commands.h"
 #include "string.h"
@@ -45,7 +46,51 @@ static char *readFile(char *path){
 	return contents;
 }
 
+unsigned long hash(unsigned char *str) {
+    unsigned long hash = 5381;
+    int c;
+    while(*str){
+    	c = *str;
+    	str++;
+    	hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+    }
+    return hash;
+}
 
+
+static void *fileToDL(Runtime *runtime, char *path){
+
+	// TODO: if cache is loaded, dump it
+	assert(runtime);
+	assert(path);
+
+	char *code = readFile(path);
+	if(!code){
+		Runtime_throwFormatted(runtime, "failed to read file '%s'", path);
+	}
+	unsigned long checksum = hash((unsigned char*) code);
+	free(code);
+	code = NULL;
+
+	char dest[64];
+	sprintf(dest, "%s/cache/%ld.so", Imp_root(), checksum);
+	if(!fileExists(dest)){
+		char buf[128];
+
+		// ensure that cache directory is set up
+		sprintf(buf, "mkdir -p %s/cache", Imp_root());
+		if(system(buf)){
+			Runtime_throwString(runtime, "failed to make .so cache dir");
+		}
+
+		// compile .so file
+		sprintf(buf, "gcc -shared -o %s -fPIC %s", dest, path);
+		if(system(buf)){
+			Runtime_throwFormatted(runtime, "failed to build '%s'", dest);
+		}
+	}
+	return dlopen(dest, RTLD_LAZY);
+}
 
 
 // Internal modules provide an imp interface to C code. They
@@ -104,25 +149,12 @@ static void importInternal(Runtime *runtime
 		}
 		*it = 0;
 		Vector_append(&symbols, symbol);
-		printf(" - detected symbol: %s\n", symbol);
 	}
 
-
-	// compile .so file
-	char command[128];
-	sprintf(command, "gcc -shared -o %s.so -fPIC %s", name, path);
-	if(system(command)){
-		Runtime_throwFormatted(runtime, "failed to build %s.so", name);
-	}
-
-
-	// load .so and...
-	char sopath[32]; *sopath = 0;
-	strcat(sopath, name);
-	strcat(sopath, ".so");
-	void *so = dlopen(sopath, RTLD_LAZY);  // .so file
+	// load dynamic library
+	void *so = fileToDL(runtime, path);
 	if(!so){
-		Runtime_throwFormatted(runtime, "failed to dlopen %s", sopath);
+		Runtime_throwString(runtime, "failed to dlopen");
 	}
 
 
@@ -203,7 +235,9 @@ static void importInternal(Runtime *runtime
 
 	free(code);
 } 
-       
+      
+
+
 
 static void importRegular(Runtime *runtime
 	               , Object *context

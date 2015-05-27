@@ -74,6 +74,7 @@ void Imp_executeFile(char *path){
 
 void Imp_fetch(char *source){
 	printf("TODO: not yet implemented.");
+	// TODO: either fetch tarbal or do git pull
 }
 
 
@@ -150,6 +151,8 @@ void Imp_remove(char *id){
 
 void Imp_update(char *id){
 	printf("TODO: not yet implemented.");
+	// TODO: if git repo, pull
+	//       if std, pull
 }
 
 
