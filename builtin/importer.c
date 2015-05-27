@@ -216,7 +216,7 @@ static void importRegular(Runtime *runtime
 
 	char *code = readFile(path);
 	if(!code){
-		Runtime_throwString(runtime, "failed to read file.");
+		Runtime_throwFormatted(runtime, "failed to read file '%s'", path);
 	}
 
 	char name[64];
@@ -236,7 +236,7 @@ static void importRegular(Runtime *runtime
 	*ptr = 0;
 
 	if(Object_hasKeyShallow(context, name)){
-		Runtime_throwString(runtime, "module name would overide existing variable.");
+		Runtime_throwFormatted(runtime, "module name '%s' would overide existing variable", name);
 	}
 
 	Object_reference(context);
@@ -259,40 +259,34 @@ void Imp_import(Runtime *runtime
 		Runtime_throwString(runtime, "cannot import empty string.");
 	}
 
-	char buf[64];
+	char buf[128];
 
-	// check <name>.imp
-	*buf = 0;
-	strcat(buf, module);
-	strcat(buf, ".imp");
+	// check local .imp
+	sprintf(buf, "%s.imp", module);
 	if(fileExists(buf)){
 		importRegular(runtime, context, buf);
+		return;
 	}
 
-	// check <name>.c
-	*buf = 0;
-	strcat(buf, module);
-	strcat(buf, ".c");
+	// check local .c 
+	sprintf(buf, "%s.c", module);
 	if(fileExists(buf)){
 		importInternal(runtime, context, buf);
+		return;
 	}
 
-	// check <root>/<name>.imp
-	*buf = 0;
-	strcat(buf, Imp_root());
-	strcat(buf, module);
-	strcat(buf, ".imp");
+	// check global .imp
+	sprintf(buf, "%s/index/%s.imp", Imp_root(), module);
 	if(fileExists(buf)){
 		importRegular(runtime, context, buf);
+		return;
 	}
 
-	// check <root>/<name>.imp
-	*buf = 0;
-	strcat(buf, Imp_root());
-	strcat(buf, module);
-	strcat(buf, ".c");
+	// check global.c
+	sprintf(buf, "%s/index/%s.c", Imp_root(), module);
 	if(fileExists(buf)){
 		importInternal(runtime, context, buf);
+		return;
 	}
 }
 

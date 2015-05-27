@@ -87,25 +87,25 @@ int main(int argc, char **argv){
 		}
 	} else if(strcmp(argv[1], "fetch") == 0){
 		if(argc == 3){
-			Imp_fetchPackage(argv[2]);
+			Imp_fetch(argv[2]);
 		} else {
 			invalid_args("'fetch' accepts exactly one parameter.");
 		}
 	} else if(strcmp(argv[1], "index") == 0){
 		if(argc == 4){
-			Imp_indexPackage(argv[2], argv[3]);
+			Imp_index(argv[2], argv[3]);
 		} else {
 			invalid_args("'index' accepts exactly two parameters.");
 		}
 	} else if(strcmp(argv[1], "remove") == 0){
 		if(argc == 3){
-			Imp_removePackage(argv[2]);
+			Imp_remove(argv[2]);
 		} else {
 			invalid_args("'remove' accepts exactly one parameter.");
 		}
 	} else if(strcmp(argv[1], "update") == 0){
 		if(argc == 3){
-			Imp_fetchPackage(argv[2]);
+			Imp_fetch(argv[2]);
 		} else {
 			invalid_args("'update' accepts exactly one parameter.");
 		}
