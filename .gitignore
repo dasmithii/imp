@@ -1,5 +1,5 @@
 bin
 build
 .release_time
-imp
+./imp
 test.imp

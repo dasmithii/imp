@@ -1,5 +1,3 @@
-
-
 SCHEDULED:
 
  + Fix try so that, if first argument is closure, it is executed
@@ -19,7 +17,7 @@ DEFINITELY:
 
 
 MAYBE:
-  + make carrots variable expansion operators
+  + make carrotwes variable expansion operators
   + give objects reference count fields (instead of slots)
 
 
