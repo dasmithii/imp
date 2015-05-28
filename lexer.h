@@ -1,7 +1,10 @@
 #ifndef IMP_LEXER_H_
 #define IMP_LEXER_H_
+
 #include "toolbox/vector.h"
 #include "token.h"
+
+
 
 
 typedef struct {
@@ -12,6 +15,7 @@ typedef struct {
 
 // interface
 Tokenization lex(char *code);
+
 
 // management
 int Tokenization_init(Tokenization *tokenization, char *code);

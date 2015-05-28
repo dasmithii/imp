@@ -1,7 +1,10 @@
-#include "token.h"
-#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
+#include "token.h"
+
+
 
 
 void Token_clean(Token *token) {
@@ -13,6 +16,7 @@ void Token_clean(Token *token) {
 		token->data.text = NULL;
 	}
 }
+
 
 void Token_print(Token *token){
 	assert(token);
@@ -132,6 +136,7 @@ bool Token_isOpen(Token *self){
 	       self->type == TOKEN_CURLY_OPEN;
 }
 
+
 bool Token_isClosed(Token *self){
 	assert(self);
 	if(!self){
@@ -142,10 +147,12 @@ bool Token_isClosed(Token *self){
 	       self->type == TOKEN_CURLY_CLOSE;
 }
 
+
 bool Token_isGrouping(Token *self){
 	assert(self);
 	return Token_isOpen(self) || Token_isClosed(self);
 }
+
 
 bool Token_isUnary(Token *self){
 	assert(self);
@@ -197,6 +204,7 @@ void Token_free(Token *self){
 	Token_clean(self);
 	free(self);
 }
+
 
 bool Token_isLiteral(Token *self){
 	assert(self);

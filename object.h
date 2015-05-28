@@ -1,7 +1,10 @@
 #ifndef IMP_OBJECT_H_
 #define IMP_OBJECT_H_
+
 #include <stdbool.h>
 #include <stdlib.h>
+
+
 
 
 typedef struct {
@@ -63,8 +66,6 @@ bool Object_isValid(Object *self);
 bool Slot_isValid(Slot *self);
 void Object_print(Object *self);
 bool Object_canBeActivated(Object *self);
-
-
 
 
 #endif

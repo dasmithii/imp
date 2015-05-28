@@ -1,9 +1,12 @@
 #include "parser.h"
+#include "toolbox/vector.h"
+
 #include <assert.h>
-#include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "toolbox/vector.h"
+#include <string.h>
+
+
 
 
 static int ParseNode_init(ParseTree *parent
@@ -127,6 +130,7 @@ static int ParseNode_init(ParseTree *parent
 	return 0;
 }
 
+
 int ParseTree_init(ParseTree *tree, char *code){
 	assert(tree);
 	assert(code);
@@ -216,12 +220,12 @@ void ParseNode_print(ParseNode *self){
 	}
 }
 
+
 void ParseTree_print(ParseTree *self){
 	assert(self);
 
 	ParseNode_print(&self->root);
 }
-
 
 
 ParseNode ParseNode_deepCopy(ParseNode *self){
@@ -264,6 +268,4 @@ void ParseNode_deepClean(ParseNode *self){
 		self->contents.non_leaf.argc = 0;
 	}
 }
-
-
 

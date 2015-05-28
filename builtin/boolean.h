@@ -1,5 +1,6 @@
 #ifndef IMP_BUILTIN_BOOLEAN_H_
 #define IMP_BUILTIN_BOOLEAN_H_
+
 #include "../object.h"
 
 

@@ -1,10 +1,8 @@
-#include <string.h>
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
 #include <setjmp.h>
 
-#include "runtime.h"
-#include "parser.h"
 #include "builtin/general.h"
 #include "builtin/route.h"
 #include "builtin/number.h"
@@ -18,15 +16,16 @@
 #include "builtin/vector.h"
 #include "builtin/return.h"
 #include "c.h"
+#include "parser.h"
+#include "runtime.h"
+
+
 
 
 typedef struct {
 	jmp_buf env;
 	Object *catcher;
 } TryData;
-
-
-
 
 
 // Activates <object> with given arguments on the <origin> 
@@ -127,7 +126,6 @@ Object *Runtime_activateOn(Runtime *runtime
 }
 
 
-
 Object *Runtime_activate(Runtime *runtime
 	                   , Object *context
 	                   , Object *object
@@ -207,6 +205,7 @@ void Runtime_markRecursive(Runtime *runtime, Object *object){
 	}
 }
 
+
 static void Runtime_runGC(Runtime *self){
 	assert(self);
 	assert(self->gc_locks == 0);
@@ -252,7 +251,6 @@ static void Runtime_runGC(Runtime *self){
 }
 
 
-
 Object *Runtime_rawObject(Runtime *self){
 	assert(self);
 
@@ -276,12 +274,6 @@ Object *Runtime_rawObject(Runtime *self){
 
 	return r;
 }
-
-
-
-
-
-
 
 
 void Runtime_init(Runtime *self){
@@ -354,7 +346,6 @@ void Runtime_init(Runtime *self){
 	ImpImporter_init(importer);
 	Object_putShallow(self->root_scope, "import", importer);
 
-
 	Runtime_unlockGC(self);
 }
 
@@ -388,6 +379,7 @@ Object *Runtime_clone(Runtime *runtime, Object *object){
 	Object_unreference(object);
 	return r;
 }
+
 
 Object *Runtime_cloneField(Runtime *runtime, char *field){
 	assert(runtime);
@@ -468,10 +460,12 @@ void Runtime_setReturnValue(Runtime *self, Object *value){
 	self->lastReturnValue = value;
 }
 
+
 void Runtime_clearReturnValue(Runtime *self){
 	assert(self);
 	Runtime_setReturnValue(self, NULL);
 }
+
 
 Object *Runtime_returnValue(Runtime *self){
 	assert(self);
@@ -486,7 +480,6 @@ Object *Runtime_executeInContext(Runtime *runtime
 	assert(Object_isValid(scope));
 	Object *r = NULL;
 
-
 	Object_reference(scope);
 
 	// if leaf node, form value
@@ -494,9 +487,7 @@ Object *Runtime_executeInContext(Runtime *runtime
 		r = Runtime_tokenToObject(runtime, scope, node.contents.token);
 	}
 
-
 	// TODO: check that first sub is function type?
-
 
 	switch(node.type){
 	case BLOCK_NODE:
@@ -555,7 +546,6 @@ Object *Runtime_executeInContext(Runtime *runtime
 		               , argc
 		               , argv);
 			}
-	
 
 			for(int i = 0; i < node.contents.non_leaf.argc; i++){
 				if(subs[i]){
@@ -584,6 +574,7 @@ Object *Runtime_executeInContext(Runtime *runtime
 	return r;
 }
 
+
 Object *Runtime_executeSourceInContext(Runtime *self
 	                                 , char *code
 	                                 , Object *context){
@@ -604,17 +595,17 @@ Object *Runtime_executeSourceInContext(Runtime *self
 	return r;
 }
 
+
 Object *Runtime_executeSource(Runtime *self, char *code){
 	return Runtime_executeSourceInContext(self, code, self->root_scope);
 }
-
-
 
 
 int Runtime_objectCount(Runtime *self){
 	assert(self);
 	return self->collectables.size;
 }
+
 
 void Runtime_throw(Runtime *runtime, Object *exception){
 	assert(runtime);

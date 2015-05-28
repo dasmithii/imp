@@ -1,9 +1,12 @@
 #ifndef IMP_RUNTIME_H_
 #define IMP_RUNTIME_H_
+
 #include "toolbox/vector.h"
 #include "toolbox/stack.h"
 #include "object.h"
 #include "parser.h"
+
+
 
 
 typedef struct {
@@ -50,7 +53,7 @@ Object *Runtime_executeInContext(Runtime *runtime
 	                              , ParseNode node);
 
 
-//// return value register
+//// return value 'register'
 void Runtime_setReturnValue(Runtime *self, Object *value);
 void Runtime_clearReturnValue(Runtime *self);
 Object *Runtime_returnValue(Runtime *self);
@@ -72,7 +75,6 @@ int Runtime_objectCount(Runtime *self);
 
 //// miscellaneous
 void Runtime_print(Runtime *self, Object *context, Object *object);
-
 
 
 #endif

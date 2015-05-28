@@ -1,7 +1,10 @@
 #ifndef IMP_TOKEN_H_
 #define IMP_TOKEN_H_
+
 #include <assert.h>
 #include <stdbool.h>
+
+
 
 
 typedef enum {
@@ -45,6 +48,7 @@ typedef struct {
 void Token_clean(Token *token);
 void Token_free(Token *token);
 Token *Token_copy(Token *self);
+
 
 //// miscellaneous
 void Token_print(Token *token);

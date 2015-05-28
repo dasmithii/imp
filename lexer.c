@@ -1,12 +1,12 @@
-#include "lexer.h"
-#include "token.h"
-
 #include <assert.h>
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+
+#include "lexer.h"
+#include "token.h"
 
 
 
@@ -181,16 +181,19 @@ static void printToken(void *token){
 	printf(" ");
 }
 
+
 void Tokenization_print(Tokenization *tokenization){
 	assert(tokenization);
 	assert(!tokenization->error);
 	Vector_each(&tokenization->tokens, printToken);
 }
 
+
 Token *Tokenization_begin(Tokenization *self){
 	assert(self);
 	return (Token*) self->tokens.buffer.data;
 }
+
 
 Token *Tokenization_end(Tokenization *self){
 	assert(self);

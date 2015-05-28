@@ -1,8 +1,8 @@
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
-#include "string.h"
 #include "general.h"
+#include "string.h"
 
 
 

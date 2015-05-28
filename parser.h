@@ -1,7 +1,10 @@
 #ifndef IMP_PARSER_H_
 #define IMP_PARSER_H_
-#include "token.h"
+
 #include "lexer.h"
+#include "token.h"
+
+
 
 
 typedef enum {

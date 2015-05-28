@@ -1,18 +1,18 @@
-#include "importer.h"
-#include "general.h"
-
-#include <sys/stat.h>
-#include <string.h>
+#include <ctype.h>
+#include <dlfcn.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <ctype.h>
-#include <dlfcn.h>
+#include <string.h>
+#include <sys/stat.h>
 #include <time.h>
 
 #include "../commands.h"
-#include "string.h"
+
 #include "builtin/general.h"
+#include "general.h"
+#include "importer.h"
+#include "string.h"
 
 
 bool ImpImporter_isValid(Object *self){
@@ -26,6 +26,7 @@ static bool fileExists(const char *path) {
     int result = stat(path, &st);
     return result == 0;
 }
+
 
 static char *readFile(char *path){
 	assert(path);
@@ -45,6 +46,7 @@ static char *readFile(char *path){
 	fclose(stream);
 	return contents;
 }
+
 
 unsigned long hash(unsigned char *str) {
     unsigned long hash = 5381;
@@ -124,7 +126,6 @@ static void importInternal(Runtime *runtime
 
 	printf("%s\n", prefix);
 
-
 	const int prefixLen = strlen(prefix);
 
 	Vector symbols;
@@ -141,7 +142,6 @@ static void importInternal(Runtime *runtime
 		char symbol[48];
 		char *it = symbol;
 
-
 		while(ptr && (isalnum(*ptr) || *ptr == '_')){
 			*it = *ptr;
 			++it;
@@ -157,11 +157,9 @@ static void importInternal(Runtime *runtime
 		Runtime_throwString(runtime, "failed to dlopen");
 	}
 
-
 	Object_reference(context);
 	Object *module_ctx = Runtime_clone(runtime, context);
 	Object_putShallow(context, name, module_ctx);
-
 
 	for(int i = 0; i < symbols.size; i++){
 		char *wopre = Vector_hook(&symbols, i); // without prefix
@@ -172,13 +170,11 @@ static void importInternal(Runtime *runtime
 		full += strlen("Object *");
 		strcat(full, wopre);
 
-
 		// load module-level function
 		void *sym = dlsym(so, full);
 		if(!sym){
 			Runtime_throwFormatted(runtime, "failed to find symbol '%s'", full);
 		}
-
 
 		if(*wopre >= 'a' && *wopre <= 'z'){
 			char key[64]; *key = 0;
@@ -211,33 +207,20 @@ static void importInternal(Runtime *runtime
 			Object *baseObj = Object_getShallow(module_ctx, baseKey);
 			assert(baseObj);
 
-
-
 			Object_registerCMethod(baseObj, key, sym);
 		} else {
 			Runtime_throwString(runtime, "BAD SYMBOL");
 		}
 	}
 
-
-
 	Object_unreference(context);
-
 
 	// dlclose(so); TODO: make it so module_ctx destructor calls dlclose
 
-
 	Vector_clean(&symbols);
-	// gather types
-
-
-
-
 	free(code);
 } 
       
-
-
 
 static void importRegular(Runtime *runtime
 	               , Object *context
@@ -323,6 +306,7 @@ void Imp_import(Runtime *runtime
 		return;
 	}
 }
+
 
 static Object *ImpImporter_activate_internal(Runtime *runtime
 	                                       , Object *context

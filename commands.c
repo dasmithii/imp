@@ -1,21 +1,25 @@
-#include "commands.h"
-#include "runtime.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
 
-#include "toolbox/queue.h"
+#include "commands.h"
+#include "runtime.h"
 
 static char *root = "/usr/local/imp";
+
+
+
 
 void Imp_debugMode(bool status){
 	// TODO
 }
 
+
 void Imp_useRoot(char *path){
 	root = path;
 }
+
 
 char *Imp_root(){
 	return root;
@@ -167,8 +171,4 @@ void Imp_printEnvironment(){
 	     "\n\t\tversion:  0.0.1"
 	     "\n\n");
 }
-
-
-
-
 

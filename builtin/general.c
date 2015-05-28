@@ -30,6 +30,7 @@ bool BuiltIn_hasId(Object *self, BuiltinId id){
 	return BuiltIn_id(self) == id;
 }
 
+
 BuiltinId BuiltIn_protoId(Object *self){
 	assert(self);
 	Object *prototype = Object_getShallow(self, "_prototype");
@@ -39,10 +40,12 @@ BuiltinId BuiltIn_protoId(Object *self){
 	return BuiltIn_id(prototype);
 }
 
+
 bool BuiltIn_protoHadId(Object *self, BuiltinId id){
 	assert(self);
 	return BuiltIn_protoId(self) == id;
 }
+
 
 // special built ins get sent routes as arguments
 bool BuiltIn_isSpecial(Object *self){

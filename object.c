@@ -1,10 +1,13 @@
-#include "object.h"
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
 #include <assert.h>
-#include <stdio.h>
 #include <ctype.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "object.h"
+
+
 
 
 static bool validKey(char *key){
@@ -23,15 +26,18 @@ static bool validKey(char *key){
 	return true;
 }
 
+
 static bool keyForInternal(char *key){
 	assert(validKey(key));
 	return strstr(key, "__") == key;
 }
 
+
 static bool keyForSpecial(char *key){
 	assert(validKey(key));
 	return strstr(key, "__") == key;
 }
+
 
 static bool keyForRegular(char *key){
 	assert(validKey(key));
@@ -53,16 +59,19 @@ void *Slot_data(Slot *self){
 	return self->data;
 }
 
+
 Object *Slot_object(Slot *self){
 	assert(self);
 	assert(!Slot_isPrimitive(self));
 	return (Object*) self->data;
 }
 
+
 bool Slot_isPrimitive(Slot *self){
 	assert(self);
 	return 0 == strncmp("__", self->key, 2);
 }
+
 
 void Slot_clean(Slot *self){
 	assert(self);
@@ -83,12 +92,12 @@ static int Slot_compare(Slot *self, Slot *other){
 	return strcmp(self->key, other->key);
 }
 
+
 static int Slot_compare_generic(const void *self, const void *other){
 	assert(self);
 	assert(other);
 	return Slot_compare((Slot*) self, (Slot*) other);
 }
-
 
 
 Slot *Object_getSlotShallow(Object *self, char *key){
@@ -134,6 +143,7 @@ Object *Object_getShallow(Object *self, char *key){
 	return NULL;
 }
 
+
 Object *Object_getDeep(Object *self, char *key){
 	assert(Object_isValid(self));
 	assert(!keyForInternal(key));
@@ -152,6 +162,7 @@ bool Object_hasKeyShallow(Object *self, char *key){
 
 	return Object_getSlotShallow(self, key) != NULL;
 }
+
 
 void *Object_getDataShallow(Object *self, char *key){
 	assert(Object_isValid(self));
@@ -175,8 +186,6 @@ void *Object_getDataDeep(Object *self, char *key){
 	}
 	return slot->data;
 }
-
-
 
 
 bool Object_hasKeyDeep(Object *self, char *key){
@@ -210,6 +219,7 @@ static void Object_insertShallow(Object *self, char *key, void *data){
 		, Slot_compare_generic);
 }
 
+
 static void Object_insertDeep(Object *self, char *key, void *data){
 	assert(Object_isValid(self));
 	assert(validKey(key));
@@ -225,7 +235,6 @@ static void Object_insertDeep(Object *self, char *key, void *data){
 
 	Object_insertShallow(self, key, data);
 }
-
 
 
 void Object_putDataShallow(Object *self, char *key, void *data){
@@ -246,7 +255,6 @@ void Object_putDataDeep(Object *self, char *key, void *data){
 
 	assert(Object_isValid(self));
 }
-
 
 
 void Object_putShallow(Object *self, char *key, Object *value){
@@ -297,8 +305,6 @@ void Object_remShallow(Object *self, char *key){
 }
 
 
-
-
 void Object_mark(Object *self){
 	assert(Object_isValid(self));
 	self->gc_mark = true;
@@ -338,6 +344,7 @@ Object *Object_prototype(Object *self){
 	return Object_getShallow(self, "_prototype");
 }
 
+
 Object *Object_rootPrototype(Object *self){
 	assert(Object_isValid(self));
 
@@ -355,6 +362,7 @@ void Object_putKeyShallow(Object *self, char *key){
 	Object_insertShallow(self, key, NULL);
 }
 
+
 bool Slot_isValid(Slot *self){
 	if(!self){
 		return false;
@@ -367,6 +375,7 @@ bool Slot_isValid(Slot *self){
 	}
 	return true;
 }
+
 
 bool Object_isValid(Object *self){
 	if(!self){
@@ -394,6 +403,7 @@ void Object_reference(Object *self){
 	}
 }
 
+
 void Object_unreference(Object *self){
 	assert(Object_isValid(self));
 	assert(Object_hasKeyShallow(self, "__referenceCount"));
@@ -405,6 +415,7 @@ void Object_unreference(Object *self){
 		Object_remShallow(self, "__referenceCount");
 	}
 }
+
 
 int Object_referenceCount(Object *self){
 	assert(Object_isValid(self));

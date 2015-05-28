@@ -1,8 +1,8 @@
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
-#include "../object.h"
 #include "../c.h"
+#include "../object.h"
 
 #include "set.h"
 #include "general.h"

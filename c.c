@@ -1,6 +1,10 @@
-#include "c.h"
-#include <string.h>
 #include <assert.h>
+#include <string.h>
+
+#include "c.h"
+
+
+
 
 void Object_setCData(Object *self, void *data){
 	assert(Object_isValid(self));
@@ -12,7 +16,6 @@ void *Object_getCData(Object *self){
 	assert(Object_isValid(self));
 	return Object_getDataDeep(self, "__cdata");
 }
-
 
 
 void Object_registerCMethod(Object *self

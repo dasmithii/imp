@@ -4,9 +4,6 @@
 
 #include "commands.h"
 
-
-
-
 static const char *const intro = 
 "\tImp - the programming language.";
 

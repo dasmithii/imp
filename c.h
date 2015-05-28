@@ -1,7 +1,11 @@
 #ifndef IMP_C_H_
 #define IMP_C_H_
+
 #include "object.h"
 #include "runtime.h"
+
+
+
 
 typedef Object *(*CFunction)(Runtime *runtime
 	                       , Object *context
@@ -14,5 +18,8 @@ void Object_registerCMethod(Object *self
 	                     , char *name
 	                     , CFunction f);
 CFunction toCFunction(void *addr);
+
+
+
 
 #endif

@@ -1,6 +1,6 @@
-#include "vector.h"
 #include "general.h"
 #include "number.h"
+#include "vector.h"
 
 
 

@@ -1,5 +1,6 @@
 #ifndef IMP_BUILTIN_CLOSURE_H_
 #define IMP_BUILTIN_CLOSURE_H_
+
 #include "../c.h"
 #include "../object.h"
 #include "../parser.h"
