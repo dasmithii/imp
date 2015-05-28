@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "commands.h"
+#include "imp/commands.h"
 
 static const char *const intro = 
 "\tImp - the programming language.";

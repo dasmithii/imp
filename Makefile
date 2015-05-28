@@ -5,8 +5,14 @@ BIN_NAME := imp
 CC ?= gcc
 # Extension of source files used in the project
 SRC_EXT = c
-# Path to the source directory, relative to the makefile
-SRC_PATH = .
+# Path to directory encompassing all files.
+SOURCE_PATH = .
+# Path to imp data directory.
+IMP_ROOT = /usr/local/imp
+# Path to interpreter, relative to the makefile
+INTERPRETER_PATH = ./interpreter
+# Path to imp standard library.
+CORE_PATH = ./core
 # Space-separated pkg-config libraries used by this project
 LIBS =
 # General compiler flags
@@ -16,7 +22,7 @@ RCOMPILE_FLAGS = -D NDEBUG
 # Additional debug-specific flags
 DCOMPILE_FLAGS = -D DEBUG
 # Add additional include paths
-INCLUDES = -I $(SRC_PATH)/
+INCLUDES = -I $(INTERPRETER_PATH)/
 # General linker settings
 LINK_FLAGS = 
 # Additional release-specific linker settings
@@ -74,18 +80,18 @@ install: export BIN_PATH := bin/release
 
 # Find all source files in the source directory, sorted by most
 # recently modified
-SOURCES = $(shell find $(SRC_PATH)/ -name '*.$(SRC_EXT)' -printf '%T@\t%p\n' \
+SOURCES = $(shell find $(INTERPRETER_PATH)/ -name '*.$(SRC_EXT)' -printf '%T@\t%p\n' \
 					| sort -k 1nr | cut -f2-)
 # fallback in case the above fails
 rwildcard = $(foreach d, $(wildcard $1*), $(call rwildcard,$d/,$2) \
 						$(filter $(subst *,%,$2), $d))
 ifeq ($(SOURCES),)
-	SOURCES := $(call rwildcard, $(SRC_PATH)/, *.$(SRC_EXT))
+	SOURCES := $(call rwildcard, $(INTERPRETER_PATH)/, *.$(SRC_EXT))
 endif
 
 # Set the object file names, with the source directory stripped
 # from the path, and the build path prepended in its place
-OBJECTS = $(SOURCES:$(SRC_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o)
+OBJECTS = $(SOURCES:$(INTERPRETER_PATH)/%.$(SRC_EXT)=$(BUILD_PATH)/%.o)
 # Set the dependency files that will be used to add header dependencies
 DEPS = $(OBJECTS:.o=.d)
 
@@ -158,12 +164,29 @@ dirs:
 install:
 	@echo "Installing to $(DESTDIR)$(INSTALL_PREFIX)/bin"
 	@$(INSTALL_PROGRAM) $(BIN_PATH)/$(BIN_NAME) $(DESTDIR)$(INSTALL_PREFIX)/bin
+	
+	@echo "Making directories..."
+	@mkdir -p $(IMP_ROOT)/cache $(IMP_ROOT)/index $(IMP_ROOT)/headers/imp
+	
+	@echo "Copying headers..."
+	@cp -r $(INTERPRETER_PATH)/imp/* $(IMP_ROOT)/headers/imp
+	@rm -rf `find $(IMP_ROOT)/headers/imp -name "*.c" -type f`
+	
+	@echo "Compiling imp as shared library..."
+	@$(CC) $(CFLAGS) $(INCLUDES) -fPIC -shared -o $(IMP_ROOT)/imp.so `find $(INTERPRETER_PATH)/imp -name "*.c" -type f`
+	
+	@echo "Indexing standard library..."
+	@imp index core $(SOURCE_PATH)/core
+	
+
 
 # Uninstalls the program
 .PHONY: uninstall
 uninstall:
-	@echo "Removing $(DESTDIR)$(INSTALL_PREFIX)/bin/$(BIN_NAME)"
+	@echo "Removing $(DESTDIR)$(INSTALL_PREFIX)/bin/$(BIN_NAME)..."
 	@$(RM) $(DESTDIR)$(INSTALL_PREFIX)/bin/$(BIN_NAME)
+	@echo "Removing $(IMP_ROOT) recursively..."
+	@$(RM) -rf $(IMP_ROOT)
 
 # Removes all build files
 .PHONY: clean
@@ -173,6 +196,7 @@ clean:
 	@echo "Deleting directories"
 	@$(RM) -r build
 	@$(RM) -r bin
+
 
 # Main rule, checks the executable and symlinks to the output
 all: $(BIN_PATH)/$(BIN_NAME)
@@ -194,7 +218,7 @@ $(BIN_PATH)/$(BIN_NAME): $(OBJECTS)
 # Source file rules
 # After the first compilation they will be joined with the rules from the
 # dependency files to provide header dependencies
-$(BUILD_PATH)/%.o: $(SRC_PATH)/%.$(SRC_EXT)
+$(BUILD_PATH)/%.o: $(INTERPRETER_PATH)/%.$(SRC_EXT)
 	@echo "Compiling: $< -> $@"
 	@$(START_TIME)
 	$(CMD_PREFIX)$(CC) $(CFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
