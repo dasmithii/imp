@@ -1,0 +1,39 @@
+Overview
+
+    If you're interested in working on the imp project to any
+    extent, thank you oh so much. This file will help you 
+    acclimate.
+
+
+
+
+Process
+
+    1. Clone this repository.
+    2. Create new branch in which to commit your improvement.
+    3. Make improvements.
+    4. Submit a pull request on GitHub.
+
+
+
+
+Directory Structure
+
+    /bin and /build catch compiler outputs.
+
+    /core holds the standard library, a mix of .c and .imp
+    files.
+
+    /examples displays solutions to popular programming
+    rights of passage. These are meant to introduce passersby
+    to imp, teach the basics, and prove that the language is
+    competent.
+
+    /interpreter contains all C code responsible for the imp
+    command line tool. Subdirectories:
+
+        /imp/builtin is like /core but with only absolutely
+        essential modules required by the interpreter.
+
+        /interpreter/imp/toolbox is a collection of data
+        structures and algorithms written in C.
