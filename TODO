@@ -2,11 +2,8 @@
 
 SCHEDULED:
 
- + Figure out build system for internal modules (i.e. how they
-   are linked with runtime files).
-
- + Move many files in builtins directory to standard libraries
-   which may be imported.
+ + Fix try so that, if first argument is closure, it is executed
+   in parent scope (so that variables are saved & such).
 
  + Make throw command.
 
