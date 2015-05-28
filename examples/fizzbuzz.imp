@@ -1,0 +1,18 @@
+(def i 0)
+
+(while {<= i 100} {
+	(def shouldPrintNumber true)
+	(if (not {% i 3}) {
+		(print 'Fizz')
+		(set shouldPrintNumber false)
+	})
+	(if (not {% i 5}) {
+		(print 'Buzz')
+		(set shouldPrintNumber false)
+	})
+	(if shouldPrintNumber {
+		(print i)
+	})
+	(++ i)
+	(println)
+})

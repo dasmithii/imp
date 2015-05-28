@@ -1,14 +1,23 @@
 SCHEDULED:
 
+ + Make hard brackets blocks and carrots macros.
+
  + Fix try so that, if first argument is closure, it is executed
-   in parent scope (so that variables are saved & such).
+   in parent scope (so that variables are saved & such). Do this
+   for all control structures (i.e. if, while, and more).
+
+   - also, ensure 
+
 
  + Make throw command.
 
 
-
+(if {(return true)} [print ])
 
 DEFINITELY:
+
+	Major:
+	  + Handle cleanups after exception throws.
 
 	Minor:
 	  + Make it so dlclose is called by module context destructors

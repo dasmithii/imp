@@ -6,6 +6,8 @@
 #include "../parser.h"
 
 
+
+
 //// management
 void ImpClosure_init(Object *self);
 void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object *context);
@@ -13,6 +15,8 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 
 //// miscellaneous 
 void ImpClosure_print(Object *self);
+
+
 
 
 #endif
