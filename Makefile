@@ -180,13 +180,21 @@ install:
 	
 
 
-# Uninstalls the program
+# Uninstalls imp
 .PHONY: uninstall
 uninstall:
 	@echo "Removing $(DESTDIR)$(INSTALL_PREFIX)/bin/$(BIN_NAME)..."
 	@$(RM) $(DESTDIR)$(INSTALL_PREFIX)/bin/$(BIN_NAME)
 	@echo "Removing $(IMP_ROOT) recursively..."
 	@$(RM) -rf $(IMP_ROOT)
+
+
+# Reinstalls imp
+.PHONY: reinstall
+reinstall:
+	@make uninstall
+	@make install
+
 
 # Removes all build files
 .PHONY: clean
