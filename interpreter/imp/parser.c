@@ -7,6 +7,9 @@
 #include <imp/toolbox/vector.h>
 
 
+// for injected returns in short-hand closures
+static const Token RETURN_TOKEN = {.type = TOKEN_ROUTE, .data.text = "return"};
+
 
 
 static int ParseNode_init(ParseTree *parent
@@ -27,6 +30,9 @@ static int ParseNode_init(ParseTree *parent
 		node->contents.token = begin;
 		return 0;
 	}
+
+
+	TokenType beginType = begin[0].type;
 
 
 	switch(begin[0].type){
@@ -79,6 +85,7 @@ static int ParseNode_init(ParseTree *parent
 	// find and parse sub-nodes
 	Vector subs;
 	Vector_init(&subs, sizeof(ParseNode));
+
 	int depth = 0;
 	Token *it = begin;
 	Token *prev = NULL;
@@ -125,6 +132,41 @@ static int ParseNode_init(ParseTree *parent
 		return 1;
 	}
 	Vector_append(&subs, &final);
+
+
+	if(beginType == TOKEN_CURLY_OPEN  ||
+	   beginType == TOKEN_HARD_OPEN){
+		for(int i = 0; i < subs.size; i++){
+			ParseNode *sub = Vector_hook(&subs, i);
+			if(sub->type != CALL_NODE){
+				// translate from {<code>} to {(return (<code>))}
+
+
+				node->contents.non_leaf.argc = 1;
+				node->contents.non_leaf.argv = malloc(sizeof(ParseNode));
+				// TODO: check return.
+		
+				ParseNode *rn = node->contents.non_leaf.argv;
+				rn->contents.non_leaf.argc = 2;
+				rn->contents.non_leaf.argv = malloc(2 * sizeof(ParseNode));
+				// TODO: check return.
+				rn->type = CALL_NODE;
+
+				ParseNode *rnav = rn->contents.non_leaf.argv;
+
+
+				rnav[0].type = LEAF_NODE;
+				rnav[0].contents.token = &RETURN_TOKEN;
+
+				rnav[1].type = CALL_NODE;
+				rnav[1].contents.non_leaf.argc = subs.size;
+				rnav[1].contents.non_leaf.argv = (void*)subs.buffer.data;
+	
+				return 0;
+			}
+		}
+	}
+
 	node->contents.non_leaf.argc = subs.size;
 	node->contents.non_leaf.argv = (void*)subs.buffer.data;
 	return 0;

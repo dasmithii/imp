@@ -260,6 +260,9 @@ Object *ImpRoute_submapping(Object *self, Object *context){
 
 
 Object *unrouteInContext(Object *obj, Object *ctx){
+	if(!obj){
+		return NULL;
+	}
 	assert(Object_isValid(obj));
 	assert(Object_isValid(ctx));
 

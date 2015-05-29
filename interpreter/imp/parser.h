@@ -43,7 +43,11 @@ void ParseTree_clean(ParseTree *tree);
 //// miscellaneous
 void ParseTree_print(ParseTree *self);
 void ParseNode_print(ParseNode *self);
+
+// create node without parent tree
 ParseNode ParseNode_deepCopy(ParseNode *self);
+
+// for parse nodes without a parent tree
 void ParseNode_deepClean(ParseNode *self);
 
 

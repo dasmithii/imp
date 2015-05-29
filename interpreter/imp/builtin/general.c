@@ -16,7 +16,10 @@ void BuiltIn_setId(Object *self, BuiltinId id){
 
 
 BuiltinId BuiltIn_id(Object *self){
-	assert(self);
+	if(!self){
+		return BUILTIN_NULL;
+	}
+
 	BuiltinId *id = Object_getDataDeep(self, "__id");
 	if(!id){
 		return NOT_BUILTIN;

@@ -483,21 +483,40 @@ Object *Runtime_executeInContext(Runtime *runtime
 
 	Object_reference(scope);
 
-	// if leaf node, form value
-	if(node.type == LEAF_NODE){
-		r = Runtime_tokenToObject(runtime, scope, node.contents.token);
-	}
-
-	// TODO: check that first sub is function type?
+	// // check if block has only one statement
+	// if(node.type == BLOCK_NODE  && node.contents.non_leaf.argc == 1 &&
+	//    (node.contents.non_leaf.argv[0].type != LEAF_NODE ||
+	//    	node.contents.non_leaf.argv[0].contents.token->type != TOKEN_SOFT_OPEN)){
+	// 	node.contents.non_leaf.argv[0].type = CALL_NODE;
+	// }
 
 	switch(node.type){
+	case LEAF_NODE:
+		{
+			r = Runtime_tokenToObject(runtime, scope, node.contents.token);
+			break;
+		}
 	case BLOCK_NODE:
 		{
 			Runtime_clearReturnValue(runtime);
+
+			// // check if block has only one statement
+			// if(node.contents.non_leaf.argc >= 1  &&
+			//    (node.contents.non_leaf.argv[0].type != LEAF_NODE ||
+			//    	(node.contents.non_leaf.argv[0].contents.token->type != TOKEN_SOFT_OPEN &&
+			//    	 node.contents.non_leaf.argv[0].contents.token->type != TOKEN_HARD_OPEN))){
+			// 	printf("hey\n");
+			// 	ParseNode_print(&node.contents.non_leaf.argv[0]);
+			// }
+
+
 			for(int i = 0; i < node.contents.non_leaf.argc; i++){
 				Runtime_executeInContext(runtime
 					                   , scope
 					                   , node.contents.non_leaf.argv[i]);
+				if(Runtime_returnValue(runtime)){
+					break;
+				}
 			}
 			r = Runtime_returnValue(runtime);
 		}
