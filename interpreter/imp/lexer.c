@@ -24,12 +24,21 @@ int Tokenization_init(Tokenization *tokenization, char *code){
 	Token token;
 	bool afterSpace;
 	int line = 0;
+	char *end = code + strlen(code);
 	while(*code){
 		if(isspace(*code)){
 			++code;
 			afterSpace = true;
 			if(*code == '\n'){
 				line++;
+			}
+			continue;
+		}
+
+		// extract comment
+		if(code[0] == '/' && end - code >= 0 && code[1] == '/'){
+			while(*code && *code != '\n'){
+				++code;
 			}
 			continue;
 		}
