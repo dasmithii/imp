@@ -26,6 +26,8 @@ void Tokenization_clean(Tokenization *tokenization);
 void Tokenization_print(Tokenization *tokenization);
 Token *Tokenization_begin(Tokenization *self);
 Token *Tokenization_end(Tokenization *self);
+bool isValidRouteChar(char c);
+bool isValidRouteBegin(char c);
 
 
 #endif

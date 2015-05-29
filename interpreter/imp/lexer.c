@@ -9,6 +9,33 @@
 #include <imp/token.h>
 
 
+bool isValidRouteChar(char c){
+	return isValidRouteBegin(c) || isdigit(c);
+}
+
+bool isValidRouteBegin(char c){
+	return isalpha(c) ||
+	       c == '~'   ||
+	       c == '!'   ||
+	       c == '@'   ||
+	       c == '#'   ||
+	       c == '$'   ||
+	       c == '%'   ||
+	       c == '^'   ||
+	       c == '&'   ||
+	       c == '*'   ||
+	       c == '_'   ||
+	       c == '-'   ||
+	       c == '+'   ||
+	       c == '='   ||
+	       c == '|'   ||
+	       c == '/'   ||
+	       c == '?'   ||
+	       c == '>'   ||
+	       c == '<'   ||
+	       c == ';'   ||
+	       c == ':';
+}
 
 
 int Tokenization_init(Tokenization *tokenization, char *code){
@@ -63,42 +90,6 @@ int Tokenization_init(Tokenization *tokenization, char *code){
 		case '}':
 			token.type = TOKEN_CURLY_CLOSE;
 			break;
-		case '!':
-			token.type = TOKEN_NOT;
-			break;
-		case '@':
-			token.type = TOKEN_AT;
-			break;
-		case '#':
-			token.type = TOKEN_HASH;
-			break;
-		case '$':
-			token.type = TOKEN_DOLLAR;
-			break;
-		case '%':
-			token.type = TOKEN_PERCENT;
-			break;
-		case '^':
-			token.type = TOKEN_CARROT;
-			break;
-		case '&':
-			token.type = TOKEN_AMP;
-			break;
-		case '*':
-			token.type = TOKEN_STAR;
-			break;
-		case '-':
-			token.type = TOKEN_DASH;
-			break;
-		case '+':
-			token.type = TOKEN_PLUS;
-			break;
-		case '?':
-			token.type = TOKEN_QUESTION;
-			break;
-		case ';':
-			token.type = TOKEN_SEMI;
-			break;
 		default:
 			{
 				char *end = code + 1;
@@ -120,10 +111,10 @@ int Tokenization_init(Tokenization *tokenization, char *code){
 					token.data.text[end - code] = 0;
 					memcpy(token.data.text, code, (end-code));
 					++end;
-				} else if(isalpha(*code) || *code == '_'){
+				} else if(isValidRouteBegin(*code)){
 					token.type = TOKEN_ROUTE;
 					end = code + 1;
-					while(isalnum(*end) || *end == '_' || *end == ':'){
+					while(isValidRouteChar(*end)){
 						++end;
 					}
 					token.data.text = malloc((end - code) + 1);

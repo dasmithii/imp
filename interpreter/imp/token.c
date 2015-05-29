@@ -51,41 +51,8 @@ void Token_print(Token *token){
 	case TOKEN_COMMENT:
 		// TODO: support comments
 		break;
-	case TOKEN_NOT:
-		printf("!");
-		break;
-	case TOKEN_AT:
-		printf("@");
-		break;
-	case TOKEN_HASH:
-		printf("#");
-		break;
-	case TOKEN_DOLLAR:
-		printf("$");
-		break;
-	case TOKEN_PERCENT:
-		printf("%c", '%');
-		break;
-	case TOKEN_CARROT:
-		printf("^");
-		break;
-	case TOKEN_AMP:
-		printf("^");
-		break;
-	case TOKEN_STAR:
-		printf("&");
-		break;
-	case TOKEN_PLUS:
-		printf("+");
-		break;
-	case TOKEN_QUESTION:
-		printf("?");
-		break;
-	case TOKEN_SEMI:
-		printf(";");
-		break;
-	case TOKEN_DASH:
-		printf("-");
+	default:
+		printf("FUCK FUCK FUCK !!!\n");
 		break;
 	}
 }
@@ -151,26 +118,6 @@ bool Token_isClosed(Token *self){
 bool Token_isGrouping(Token *self){
 	assert(self);
 	return Token_isOpen(self) || Token_isClosed(self);
-}
-
-
-bool Token_isUnary(Token *self){
-	assert(self);
-	if(!self){
-		return false;
-	}
-	return self->type == TOKEN_NOT       ||
-		   self->type == TOKEN_AT        ||
-		   self->type == TOKEN_HASH      ||
-		   self->type == TOKEN_DOLLAR    ||
-		   self->type == TOKEN_PERCENT   ||
-		   self->type == TOKEN_CARROT    ||
-		   self->type == TOKEN_AMP       ||
-		   self->type == TOKEN_STAR      ||
-		   self->type == TOKEN_PLUS      ||
-		   self->type == TOKEN_QUESTION  ||
-		   self->type == TOKEN_SEMI      ||
-		   self->type == TOKEN_DASH;
 }
 
 

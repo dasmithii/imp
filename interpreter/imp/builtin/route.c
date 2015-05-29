@@ -4,6 +4,7 @@
 
 #include "general.h"
 #include "route.h"
+#include <imp/lexer.h>
 
 
 
@@ -19,8 +20,11 @@ static bool validRouteText(char *text){
 		return false;
 	}
 	int len = strlen(text);
-	for(int i = 0; i < len; i++){
-		if(!isalnum(text[i]) && text[i] != '_' && text[i] != ':'){
+	if(len > 0 && !isValidRouteBegin(text[0])){
+		return false;
+	}
+	for(int i = 1; i < len; i++){
+		if(!isValidRouteChar(text[i])){
 			return false;
 		}
 	}

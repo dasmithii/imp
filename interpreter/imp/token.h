@@ -18,20 +18,7 @@ typedef enum {
 	TOKEN_SOFT_CLOSE,
 	TOKEN_CURLY_OPEN,
 	TOKEN_CURLY_CLOSE,
-	TOKEN_COMMENT,
-
-	TOKEN_NOT,
-	TOKEN_AT,
-	TOKEN_HASH,
-	TOKEN_DOLLAR,
-	TOKEN_PERCENT,
-	TOKEN_CARROT,
-	TOKEN_AMP,
-	TOKEN_STAR,
-	TOKEN_PLUS,
-	TOKEN_QUESTION,
-	TOKEN_SEMI,
-	TOKEN_DASH
+	TOKEN_COMMENT
 } TokenType;
 
 
@@ -60,7 +47,6 @@ void Token_printVerbose(Token *token);
 bool Token_isOpen(Token *self);
 bool Token_isClosed(Token *self);
 bool Token_isGrouping(Token *self);
-bool Token_isUnary(Token *self);
 bool Token_isTextual(Token *self);
 bool Token_isLiteral(Token *self);
 

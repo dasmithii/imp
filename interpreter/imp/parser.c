@@ -11,6 +11,11 @@
 static const Token RETURN_TOKEN = {.type = TOKEN_ROUTE, .data.text = "return"};
 
 
+// TODO replace this.
+static bool Token_isUnary(Token *t){
+	return false;
+}
+
 
 static int ParseNode_init(ParseTree *parent
 	                    , ParseNode *node
