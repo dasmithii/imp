@@ -1,35 +1,41 @@
-SCHEDULED:
-
- + Make throw command.
-
+MAJOR:
+ + Design and implement standard library.
 
 
-DEFINITELY:
 
-	Major:
-	  + Handle cleanups after exception throws.
 
-	Minor:
-	  + Make it so dlclose is called by module context destructors
-	  + Improve error reporting.
+MEDIUM:
+
+ + Handle exception catch cleanups.
+ 
+ + Replace slot system with legit accessor.
+
+
+
+
+MINOR:
+
+ + Make it so dlclose is called by module context
+   destructors. This is not critical because library 
+   loads are inexpensive and can be left unclosed.
+
+ + Improve internal module code scanner. Use regex
+   or something.
 
 
 
 MAYBE:
-  + make carrots variable expansion operators
-  + give objects reference count fields (instead of slot hackiness)
+ 
+ + Make carrots variable expansion operators.
+
+ + Give objects reference count fields instead of
+   slot hackiness.
+
+ + Prototype multiplexing (multiple inheritance).
 
 
 
-AT SOME POINT:
- + Implement vector slicing
- + TODO: check return codes on builtin calls
- + Make number and string methods search for toNumber and
-   toString methods instead of rejecting other types.
- + Make printer look for toString methods.
- + Replace slot system with legit accessor.
- + Check for mismatched grouping operators and such
- + Finish builtins: (1) hashmap
+
 
 
 

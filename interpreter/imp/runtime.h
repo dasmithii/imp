@@ -75,6 +75,12 @@ int Runtime_objectCount(Runtime *self);
 
 //// miscellaneous
 void Runtime_print(Runtime *self, Object *context, Object *object);
+Object *Runtime_callMethod(Runtime *self
+	                     , Object *context
+	                     , Object *object
+	                     , char *methodName
+	                     , int argc
+	                     , Object **argv);
 
 
 #endif

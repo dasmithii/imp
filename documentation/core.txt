@@ -1,0 +1,33 @@
+Overview
+
+    Package 'core' is the imp standard library. It is 
+    structured as follows:
+
+    /core/* ... a collection of generic functions 
+    widely usable 
+
+
+    /core/io
+            /print.
+            /printf.
+            /println.
+    /core/control
+    /core/crypto
+    /core/func
+              /map.
+              /reduce.
+              /foldl.
+              /foldr.
+              /filter.
+    /core/container
+                   /list.
+                   /vector.
+                   /set.
+                   /stack.
+                   /bst.
+                   /bsa.
+                   /hashmap.
+    /core/net
+    /core/sync
+              /mutex.
+    /core/os

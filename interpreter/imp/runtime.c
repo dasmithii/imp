@@ -733,3 +733,36 @@ bool Runtime_isManaged(Runtime *self, Object *object){
 	}
 	return false;
 }
+
+
+Object *Runtime_callMethod(Runtime *runtime
+	                     , Object *context
+	                     , Object *object
+	                     , char *methodName
+	                     , int argc
+	                     , Object **argv){
+	// try <object>:<methodName>
+	Object *method = Object_getDeep(object, methodName);
+	if(method){
+		return Runtime_activateOn(runtime, context, method, argc, argv, object);
+	}
+
+	// try <object>:_<methodName>
+	char buf[64];
+	sprintf(buf, "_%s", methodName);
+	method = Object_getDeep(object, buf);
+	if(method){
+		return Runtime_activateOn(runtime, context, method, argc, argv, object);
+	}
+
+
+	// try <object>:__<methodName>
+	sprintf(buf, "__%s", methodName);
+	CFunction cf = *((CFunction*) Object_getDataDeep(object, buf));
+	if(cf){
+		return cf(runtime, context, object, argc, argv);
+	}
+
+	Runtime_throwFormatted(runtime, "method '%s' does not exist", methodName);
+	return NULL;
+}
