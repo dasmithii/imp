@@ -1,0 +1,1 @@
+(if {(return true)} {(print '1')} {(return true)} {(print '2')} {(print 'else')})

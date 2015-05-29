@@ -346,28 +346,28 @@ void Imp_import(Runtime *runtime
 
 	char buf[128];
 
-	// check local .imp
+	// check <local>.imp
 	sprintf(buf, "%s.imp", module);
 	if(pathExists(buf)){
 		importRegular(runtime, context, buf);
 		return;
 	}
 
-	// check local .c 
+	// check <local>.c 
 	sprintf(buf, "%s.c", module);
 	if(pathExists(buf)){
 		importInternal(runtime, context, buf);
 		return;
 	}
 
-	// check global .imp
+	// check <global>.imp
 	sprintf(buf, "%s/index/%s.imp", Imp_root(), module);
 	if(pathExists(buf)){
 		importRegular(runtime, context, buf);
 		return;
 	}
 
-	// check global.c
+	// check <global>.c
 	sprintf(buf, "%s/index/%s.c", Imp_root(), module);
 	if(pathExists(buf)){
 		importInternal(runtime, context, buf);
@@ -375,7 +375,7 @@ void Imp_import(Runtime *runtime
 	}
 
 
-	Runtime_throwFormatted(runtime, "failed to import '%s'", module);
+	Runtime_throwFormatted(runtime, "failed to import '%s' (path does not exist)g", module);
 }
 
 
