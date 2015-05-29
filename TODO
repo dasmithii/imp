@@ -1,14 +1,8 @@
 SCHEDULED:
 
- + Setup in-block return commands... 
-
- + (maybe? no?) Make hard brackets blocks and carrots macros.
-
-
  + Make throw command.
 
 
-(if {(return true)} [print ])
 
 DEFINITELY:
 
@@ -22,13 +16,12 @@ DEFINITELY:
 
 
 MAYBE:
-  + make carrotwes variable expansion operators
-  + give objects reference count fields (instead of slots)
+  + make carrots variable expansion operators
+  + give objects reference count fields (instead of slot hackiness)
 
 
 
 AT SOME POINT:
- + Make it so blocks with one statement don't need parens
  + Implement vector slicing
  + TODO: check return codes on builtin calls
  + Make number and string methods search for toNumber and
