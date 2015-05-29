@@ -35,4 +35,6 @@ Object *if_activate(Runtime *runtime
 	if(argc % 2 == 1){
 		Runtime_activate(runtime, context, argv[argc-1], 0, NULL);
 	}
+
+	return NULL;
 }
