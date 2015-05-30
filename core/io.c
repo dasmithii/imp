@@ -42,24 +42,16 @@ Object *io_File_open(Runtime *runtime
 	assert(Object_isValid(context));
 	assert(Object_isValid(caller));
 	
-	if(argc != 1 && argc != 2){
-		Runtime_throwString(runtime, "File:open requires exactly one argument");
+	if(argc != 2){
+		Runtime_throwString(runtime, "File:open requires exactly two arguments (path and mode)");
 	}
 
-	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
+	if(BuiltIn_id(argv[0]) != BUILTIN_STRING || BuiltIn_id(argv[1]) != BUILTIN_STRING){
 		Runtime_throwString(runtime, "File:open requires strings as its arguments");
 	}
-
-	if(argc == 2 && BuiltIn_id(argv[1]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, "File:open requires strings as its arguments");
-	}
-
 
 	char *path = ImpString_getRaw(argv[0]);
-	char *mode = "w";
-	if(argc == 2){
-		mode = ImpString_getRaw(argv[1]);
-	}
+	char *mode = ImpString_getRaw(argv[1]);
 
 	FILE *fp = fopen(path, mode);
 	if(!fp){
@@ -231,6 +223,7 @@ Object *io_File_write(Runtime *runtime
 			fprintf(fp, " ");
 		}
 	}
+	return NULL;
 }
 
 Object *io_onImport(Runtime *runtime
