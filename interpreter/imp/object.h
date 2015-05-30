@@ -68,6 +68,6 @@ void Object_print(Object *self);
 bool Object_canBeActivated(Object *self);
 
 bool Object_hasMethod(Object *self, char *name);
-
+bool Object_hasSpecialMethod(Object *self, char *name);
 
 #endif

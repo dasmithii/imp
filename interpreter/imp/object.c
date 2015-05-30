@@ -451,10 +451,7 @@ bool Object_canBeActivated(Object *self){
 }
 
 
-bool Object_hasMethod(Object *self, char *name){
-	if(Object_hasKeyDeep(self, name)){
-		return true;
-	}
+bool Object_hasSpecialMethod(Object *self, char *name){
 	char buf[64];
 	sprintf(buf, "_%s", name);
 	if(Object_hasKeyDeep(self, buf)){
@@ -466,4 +463,9 @@ bool Object_hasMethod(Object *self, char *name){
 		return Object_hasKeyDeep(self, buf);
 	}
 	return false;
+}
+
+bool Object_hasMethod(Object *self, char *name){
+	return Object_hasKeyDeep(self, name)         || 
+	       Object_hasSpecialMethod(self, name);
 }

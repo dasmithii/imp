@@ -734,23 +734,16 @@ bool Runtime_isManaged(Runtime *self, Object *object){
 	return false;
 }
 
-
-Object *Runtime_callMethod(Runtime *runtime
+Object *Runtime_callSpecialMethod(Runtime *runtime
 	                     , Object *context
 	                     , Object *object
 	                     , char *methodName
 	                     , int argc
 	                     , Object **argv){
-	// try <object>:<methodName>
-	Object *method = Object_getDeep(object, methodName);
-	if(method){
-		return Runtime_activateOn(runtime, context, method, argc, argv, object);
-	}
-
 	// try <object>:_<methodName>
 	char buf[64];
 	sprintf(buf, "_%s", methodName);
-	method = Object_getDeep(object, buf);
+	Object *method = Object_getDeep(object, buf);
 	if(method){
 		return Runtime_activateOn(runtime, context, method, argc, argv, object);
 	}
@@ -765,4 +758,19 @@ Object *Runtime_callMethod(Runtime *runtime
 
 	Runtime_throwFormatted(runtime, "method '%s' does not exist", methodName);
 	return NULL;
+}
+
+
+Object *Runtime_callMethod(Runtime *runtime
+	                     , Object *context
+	                     , Object *object
+	                     , char *methodName
+	                     , int argc
+	                     , Object **argv){
+	// try <object>:<methodName>
+	Object *method = Object_getDeep(object, methodName);
+	if(method){
+		return Runtime_activateOn(runtime, context, method, argc, argv, object);
+	}
+	return Runtime_callSpecialMethod(runtime, context, object, methodName, argc, argv);
 }
