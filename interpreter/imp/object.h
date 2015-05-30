@@ -67,5 +67,7 @@ bool Slot_isValid(Slot *self);
 void Object_print(Object *self);
 bool Object_canBeActivated(Object *self);
 
+bool Object_hasMethod(Object *self, char *name);
+
 
 #endif

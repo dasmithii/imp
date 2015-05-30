@@ -22,6 +22,11 @@ MINOR:
  + Improve internal module code scanner. Use regex
    or something.
 
+ + Forbid using __data as method
+
+ + Allow internal modules to import modules.
+
+
 
 
 MAYBE:

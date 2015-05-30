@@ -449,3 +449,21 @@ bool Object_canBeActivated(Object *self){
 	return Object_hasKeyDeep(self, "_activate") ||
 	       Object_hasKeyDeep(self, "__activate");
 }
+
+
+bool Object_hasMethod(Object *self, char *name){
+	if(Object_hasKeyDeep(self, name)){
+		return true;
+	}
+	char buf[64];
+	sprintf(buf, "_%s", name);
+	if(Object_hasKeyDeep(self, buf)){
+		return true;
+	}
+
+	if(strcmp(name, "data") != 0){
+		sprintf(buf, "__%s", name);
+		return Object_hasKeyDeep(self, buf);
+	}
+	return false;
+}
