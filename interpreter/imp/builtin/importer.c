@@ -166,6 +166,15 @@ static Object *contextForImportPath(Runtime *runtime
 }
 
 
+static bool endswith(char *whole, char *part){
+	int wholeLen = strlen(whole);
+	int partLen = strlen(part);
+	if(wholeLen < partLen){
+		return false;
+	}
+	return strcmp(whole + wholeLen - partLen, part) == 0;
+}
+
 // Internal modules provide an imp interface to C code. They
 // are useful when high performance is required and/or for
 // wrapping existing C libraries.
@@ -245,6 +254,9 @@ static void importInternal(Runtime *runtime
 			strcat(key, wopre);
 
 			Object_registerCMethod(module_ctx, key, sym);
+			if(endswith(key, "onImport")){
+				Runtime_callMethod(runtime, context, module_ctx, "onImport", 0, NULL);
+			}
 		} else if(*wopre >= 'A' && *wopre <= 'Z'){
 			// load method (and its base object, if not yet loaded)
 			// TODO:
@@ -271,6 +283,9 @@ static void importInternal(Runtime *runtime
 			assert(baseObj);
 
 			Object_registerCMethod(baseObj, key, sym);
+			if(endswith(key, "onImport")){
+				Runtime_callMethod(runtime, context, baseObj, "onImport", 0, NULL);
+			}
 		} else {
 			Runtime_throwString(runtime, "BAD SYMBOL");
 		}
