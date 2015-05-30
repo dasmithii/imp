@@ -8,9 +8,15 @@ Overview
 
 
     /core/io
-            /print.
-            /printf.
-            /println.
+            /File
+                 /open
+                 /close
+                 /readCharacter
+                 /readLine
+                 /read
+                 /write
+            /stdin
+            /stdout
     /core/control
     /core/crypto
     /core/func
