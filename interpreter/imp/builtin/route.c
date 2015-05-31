@@ -86,10 +86,10 @@ static Object *ImpRoute_clone_internal(Runtime *runtime
 
 
 static Object *ImpRoute_activate_internal(Runtime *runtime
-	                                   , Object *context
-	                                   , Object *caller
-	                                   , int argc
-	                                   , Object **argv){
+	                                    , Object *context
+	                                    , Object *caller
+	                                    , int argc
+	                                    , Object **argv){
 	assert(runtime);
 	assert(Object_isValid(context));
 	assert(ImpRoute_isValid(caller));
@@ -108,29 +108,11 @@ static Object *ImpRoute_activate_internal(Runtime *runtime
 		r = Runtime_activateOn(runtime, context, mapping, argc, argv, submapping);
 	} else if(submapping){
 		// otherwise, try activating special or internal methods
-		int rargc = ImpRoute_argc(caller);
-
-		char meth[32];
-		meth[0] = 0;
-		strcat(meth, "_");
-		ImpRoute_argv(caller, rargc - 1, meth + strlen(meth));
-		Object *special = Object_getDeep(submapping, meth);
-		if(special){
-			r = Runtime_activateOn(runtime, context, special, argc, argv, submapping);
-		} else {
-			meth[0] = 0;
-			strcat(meth, "__");
-			ImpRoute_argv(caller, rargc - 1, meth + strlen(meth));
-
-			void *f = Object_getDataDeep(submapping, meth);
-			if(f){
-				CFunction cf = *((CFunction*) f);
-				// TODO: put submapping into argv and pass mapping in its place
-				r = cf(runtime, context, submapping, argc, argv);
-			} else {
-				found = false;
-			}
-		}
+		char method[32];
+		ImpRoute_argv(caller
+			        , ImpRoute_argc(caller) - 1
+			        , method);
+		return Runtime_callMethod(runtime, context, submapping, method, argc, argv);
 	}
 	
 	// if activation successful, return
@@ -203,13 +185,13 @@ void ImpRoute_argv(Object *self, int i, char *dest){
 
 
 Object *ImpRoute_submapping_(char *self, Object *context){
-	Object *r = context;
 	int argc = ImpRoute_argc_(self);
 
 	if(argc == 1){
 		return context;
 	}
 
+	Object *r = context;
 	for(int i = 0; i < argc - 1; i++){
 		char cho[64];
 		ImpRoute_argv_(self, i, cho);

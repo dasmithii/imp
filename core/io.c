@@ -2,6 +2,7 @@
 #include <imp/object.h>
 #include <imp/builtin/string.h>
 #include <imp/builtin/general.h>
+#include <imp/builtin/route.h>
 #include <stdio.h>
 
 
@@ -108,7 +109,7 @@ Object *io_File_readCharacter(Runtime *runtime
 	buf[0] = getc(fp);
 	buf[1] = 0;
 
-	Object *r = Runtime_cloneField(runtime, "string");
+	Object *r = Runtime_cloneField(runtime, "String");
 	ImpString_setRaw(r, buf);
 	return r;
 }
@@ -132,7 +133,7 @@ Object *io_File_readLine(Runtime *runtime
 		Runtime_throwString(runtime, "attempted to read from unopened file");
 	}
 
-	Object *r = Runtime_cloneField(runtime, "string");
+	Object *r = Runtime_cloneField(runtime, "String");
 	char *line = NULL;
 		size_t len = 0;
 		ssize_t read;
@@ -176,7 +177,7 @@ Object *io_File_read(Runtime *runtime
 	size_t size=fread(contents,1,fileSize,fp);
 	contents[size]=0; 
 
-	Object *r = Runtime_cloneField(runtime, "string");
+	Object *r = Runtime_cloneField(runtime, "String");
 	ImpString_setRaw(r, contents);
 	free(contents);
 
@@ -206,8 +207,7 @@ Object *io_File_write(Runtime *runtime
 	for(int i = 0; i < argc; i++){
 		if(!argv[i]){
 			fprintf(fp, "NULL");
-		}
-		if(BuiltIn_id(argv[i]) == BUILTIN_STRING){
+		} else if(BuiltIn_id(argv[i]) == BUILTIN_STRING){
 			fprintf(fp, "%s", ImpString_getRaw(argv[i]));
 		} else if(Object_hasMethod(argv[i], "asString")){
 			Object *s = Runtime_callMethod(runtime, context, argv[i], "asString", 0, NULL);
@@ -224,6 +224,19 @@ Object *io_File_write(Runtime *runtime
 		}
 	}
 	return NULL;
+}
+
+
+Object *io_File_writeLine(Runtime *runtime
+	                , Object *context
+	                , Object *caller
+	                , int argc
+	                , Object **argv){
+	if(argc > 0){
+		io_File_write(runtime, context, caller, argc, argv);
+	}
+	FILE *fp = File_getRaw(caller);
+	fprintf(fp, "\n");
 }
 
 Object *io_onImport(Runtime *runtime

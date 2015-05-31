@@ -182,9 +182,9 @@ static bool endswith(char *whole, char *part){
 // An internal module consists primarily of one .c file and 
 // the headers it includes. Soon, multi-file modules will
 // be supported. But for now, this is the way.
-static void importInternal(Runtime *runtime
-	                , Object *context
-	                , char *path){
+static void importInternalModuleTo(Runtime *runtime
+	                , char *path
+	                , Object *context){
 	char *code = readFile(path);
 	if(!code){
 		Runtime_throwFormatted(runtime, "failed to read file: %s", path);
@@ -291,16 +291,16 @@ static void importInternal(Runtime *runtime
 
 	Object_unreference(context);
 
-	// dlclose(so); TODO: make it so module_ctx destructor calls dlclose
+	// dlclose(so); TODO:? make it so module_ctx destructor calls dlclose
 
 	Vector_clean(&symbols);
 	free(code);
 } 
       
 
-static void importRegular(Runtime *runtime
-	               , Object *context
-	               , char *path){
+static void importRegularModuleTo(Runtime *runtime
+	                            , char *path
+	                            , Object *context){
 	assert(runtime);
 	assert(Object_isValid(context));
 	assert(path);
@@ -318,20 +318,19 @@ static void importRegular(Runtime *runtime
 }
 
 
-static void importPackage(Runtime *runtime
-	                    , Object *context
-	                    , char *path){
+static void importPackageTo(Runtime *runtime
+	                      , char *path
+	                      , Object *context){
 	DIR *d;
 	struct dirent *dir;
 	d = opendir(path);
 	if(d){
-		char submodule[128];
+		char submoduleName[128];
 		while ((dir = readdir(d)) != NULL){
 			if(dir->d_name[0] != '.'){
-				sprintf(submodule, "%s/%s", path, dir->d_name);
-				Object *subcontext = contextForImportPath(runtime, context, path);
-				removeModuleFileExtention(submodule);
-				Imp_import(runtime, subcontext, submodule);
+				sprintf(submoduleName, "%s/%s", path, dir->d_name);
+				removeModuleFileExtention(submoduleName);
+				Object_putShallow(context, submoduleName, Imp_import(runtime, submoduleName));
 			}
 		}
 		closedir(d);
@@ -339,54 +338,74 @@ static void importPackage(Runtime *runtime
 }
 
 
-void Imp_import(Runtime *runtime
-	          , Object *context
-	          , char *module){ // module should not have file extention
+static Object *importWithoutUsingCache(Runtime *runtime, char *modulePath){ // module should not have file extention
 	assert(runtime);
-	assert(Object_isValid(context));
-	assert(module);
+	assert(modulePath);
 
-	if(*module == 0){
+	if(*modulePath == 0){
 		Runtime_throwString(runtime, "cannot import empty string.");
 	}
 
-	if(isDirectory(module)){
-		importPackage(runtime, context, module);
-		return;
+	Object *r = Runtime_rawObject(runtime);
+	Object_reference(r); // permanent reference (modules aren't ever collected)
+
+	if(isDirectory(modulePath)){
+		importPackageTo(runtime, modulePath, r);
+		return r;
 	}
 
 	char buf[128];
 
 	// check <local>.imp
-	sprintf(buf, "%s.imp", module);
+	sprintf(buf, "%s.imp", modulePath);
 	if(pathExists(buf)){
-		importRegular(runtime, context, buf);
-		return;
+		importRegularModuleTo(runtime, buf, r);
+		return r;
 	}
 
 	// check <local>.c 
-	sprintf(buf, "%s.c", module);
+	sprintf(buf, "%s.c", modulePath);
 	if(pathExists(buf)){
-		importInternal(runtime, context, buf);
-		return;
+		importInternalModuleTo(runtime, buf, r);
+		return r;
 	}
 
 	// check <global>.imp
-	sprintf(buf, "%s/index/%s.imp", Imp_root(), module);
+	sprintf(buf, "%s/index/%s.imp", Imp_root(), modulePath);
 	if(pathExists(buf)){
-		importRegular(runtime, context, buf);
-		return;
+		importRegularModuleTo(runtime, buf, r);
+		return r;
 	}
 
 	// check <global>.c
-	sprintf(buf, "%s/index/%s.c", Imp_root(), module);
+	sprintf(buf, "%s/index/%s.c", Imp_root(), modulePath
+
+		);
 	if(pathExists(buf)){
-		importInternal(runtime, context, buf);
-		return;
+		importInternalModuleTo(runtime, buf, r);
+		return r;
 	}
 
 
-	Runtime_throwFormatted(runtime, "failed to import '%s' (path does not exist)g", module);
+	Runtime_throwFormatted(runtime, "failed to import '%s' (path does not exist)", modulePath);
+	return NULL;
+}
+
+
+static Object *cache = NULL;
+
+Object *Imp_import(Runtime *runtime, char *modulePath){
+	if(cache){
+		Object *cached = Object_getShallow(cache, modulePath);
+		if(cached){
+			return cached;
+		}
+	} else {
+		cache = Runtime_rawObject(runtime);
+	}
+	Object *r = importWithoutUsingCache(runtime, modulePath);
+	Object_putShallow(cache, modulePath, r);
+	return r;
 }
 
 
@@ -403,18 +422,39 @@ static Object *ImpImporter_activate_internal(Runtime *runtime
 		Runtime_throwString(runtime, "import requires one or two arguments.");
 	} else if(!ImpString_isValid(argv[0])){
 		Runtime_throwString(runtime, "import requires a string as its first argument.");
-	} else {
-		char *module = ImpString_getRaw(argv[0]);
-		if(argc == 1){
-			Imp_import(runtime
-			         , contextForImportPath(runtime, context, module)
-			         , module);
-		} else {
-			Imp_import(runtime, argv[1], module); 
-		}
 	}
 
-	return NULL;
+	char *modulePath = ImpString_getRaw(argv[0]);
+	Object *module = Imp_import(runtime, modulePath);
+	Object_putShallow(caller, "cache", cache);
+
+	if(argc == 1){
+		char importName[32];
+		getNameOfImport(importName, modulePath);
+		Object_putShallow(context, importName, module);
+		return module;
+	} else {
+		Object *dest = argv[1];
+
+		// check that to-context import is possible
+		for(int i = 0; i < module->slotCount; i++){
+			Slot *slot = module->slots + i;
+			if(Slot_isPrimitive(slot) && strcmp(slot->key, "__onImport") != 0){
+				Runtime_throwFormatted(runtime, "failed to import '%s' into context (has internal method)", modulePath);
+			}
+			if(Object_hasKeyShallow(dest, slot->key)){
+				Runtime_throwFormatted(runtime, "failed to import '%s' into context because of conflict", modulePath);
+			}
+		}
+
+		// it is; transfer
+		for(int i = 0; i < module->slotCount; i++){
+			Slot *slot = module->slots + i;
+			Object_putShallow(dest, slot->key, Slot_object(slot));
+		}
+
+		return dest;
+	}
 }
 
 

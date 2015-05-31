@@ -11,7 +11,6 @@
 #include <imp/builtin/def.h>
 #include <imp/builtin/set.h>
 #include <imp/builtin/closure.h>
-#include <imp/builtin/boolean.h>
 #include <imp/builtin/while.h>
 #include <imp/builtin/vector.h>
 #include <imp/builtin/return.h>
@@ -55,12 +54,29 @@ Object *Runtime_activateOn(Runtime *runtime
 	Object *special = Object_getDeep(object, "_activate");
 	void *internal = Object_getDataDeep(object, "__activate");
 	if(special){
+		// execute with dereferenced arguments
+		Object **argv2 = malloc(sizeof(Object*) * argc);
+		if(!argv2){
+			abort();
+		}
+		for(int i = 0; i < argc; i++){
+			argv2[i] = unrouteInContext(argv[i], context);
+			Object_reference(argv2[i]);
+		}
+
 		r = Runtime_activateOn(runtime 
 			                 , context
 			                 , special
 			                 , argc
-			                 , argv
+			                 , argv2
 			                 , origin);
+
+		for(int i = 0; i < argc; i++){
+			Object_unreference(argv2[i]);
+		}
+
+		free(argv2);
+
 	} else if(internal){
 		CFunction cf = *((CFunction*) internal);
 
@@ -295,7 +311,7 @@ void Runtime_init(Runtime *self){
 
 	Object *s = Runtime_rawObject(self);
 	ImpString_init(s);
-	Object_putShallow(self->root_scope, "string", s);
+	Object_putShallow(self->root_scope, "String", s);
 
 	Object *n = Runtime_rawObject(self);
 	ImpNumber_init(n);
@@ -321,19 +337,9 @@ void Runtime_init(Runtime *self){
 	ImpClosure_init(closure);
 	Object_putShallow(self->root_scope, "closure", closure);
 
-	Object *tr = Runtime_rawObject(self);
-	ImpBoolean_init(tr);
-	ImpBoolean_setRaw(tr, true);
-	Object_putShallow(self->root_scope, "true", tr);
-
-	Object *fa = Runtime_rawObject(self);
-	ImpBoolean_init(fa);
-	ImpBoolean_setRaw(fa, false);
-	Object_putShallow(self->root_scope, "false", fa);
-
-	Object *whi = Runtime_rawObject(self);
-	ImpWhile_init(whi);
-	Object_putShallow(self->root_scope, "while", whi);
+	// Object *whi = Runtime_rawObject(self);
+	// ImpWhile_init(whi);
+	// Object_putShallow(self->root_scope, "while", whi);
 
 	Object *vec = Runtime_rawObject(self);
 	ImpVector_init(vec);
@@ -415,7 +421,7 @@ static Object *Runtime_tokenToObject(Runtime *self, Object *scope, Token *token)
 		}
 	case TOKEN_STRING:
 		{
-			Object *str = Runtime_cloneField(self, "string");
+			Object *str = Runtime_cloneField(self, "String");
 			ImpString_setRaw(str, token->data.text);
 			r = str;
 			break;
@@ -660,7 +666,7 @@ void Runtime_throwString(Runtime *runtime, char *exception){
 	assert(runtime);
 	assert(exception);
 
-	Object *obj = Runtime_cloneField(runtime, "string");
+	Object *obj = Runtime_cloneField(runtime, "String");
 	ImpString_setRaw(obj, exception);
 	Runtime_throw(runtime, obj);
 }
@@ -751,9 +757,32 @@ Object *Runtime_callSpecialMethod(Runtime *runtime
 
 	// try <object>:__<methodName>
 	sprintf(buf, "__%s", methodName);
-	CFunction cf = *((CFunction*) Object_getDataDeep(object, buf));
-	if(cf){
-		return cf(runtime, context, object, argc, argv);
+	void *p = Object_getDataDeep(object, buf);
+	if(p){
+		CFunction cf = *((CFunction*) p);
+		Object *r = NULL;
+		// execute with dereferenced arguments
+		Object **argv2 = malloc(sizeof(Object*) * argc);
+		if(!argv2){
+			abort();
+		}
+		Object_reference(context);
+		Object_reference(object);
+		for(int i = 0; i < argc; i++){
+			argv2[i] = unrouteInContext(argv[i], context);
+			Object_reference(argv2[i]);
+		}
+
+		r = cf(runtime, context, object, argc, argv2);
+
+		Object_unreference(context);
+		Object_unreference(object);
+		for(int i = 0; i < argc; i++){
+			Object_unreference(argv2[i]);
+		}
+
+		free(argv2);
+		return r;
 	}
 
 	Runtime_throwFormatted(runtime, "method '%s' does not exist", methodName);

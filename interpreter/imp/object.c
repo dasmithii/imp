@@ -439,6 +439,14 @@ bool Object_canBeActivated(Object *self){
 	       Object_hasKeyDeep(self, "__activate");
 }
 
+bool Object_hasInternalMethod(Object *self, char *name){
+	if(strcmp(name, "data") == 0){
+		return false;
+	}
+	char buf[48];
+	sprintf(buf, "__%s", name);
+	return Object_hasKeyDeep(self, buf);
+}
 
 bool Object_hasSpecialMethod(Object *self, char *name){
 	char buf[64];
@@ -447,11 +455,7 @@ bool Object_hasSpecialMethod(Object *self, char *name){
 		return true;
 	}
 
-	if(strcmp(name, "data") != 0){
-		sprintf(buf, "__%s", name);
-		return Object_hasKeyDeep(self, buf);
-	}
-	return false;
+	return Object_hasInternalMethod(self, name);
 }
 
 bool Object_hasMethod(Object *self, char *name){

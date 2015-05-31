@@ -41,7 +41,7 @@ static Object *ImpString_print_internal(Runtime *runtime
 	assert(ImpString_isValid(caller));
 
 	if(argc > 0){
-		Runtime_throwString(runtime, "string:print does not accept arguments.");
+		Runtime_throwString(runtime, "String:print does not accept arguments.");
 	} else {
 		ImpString_print(caller);
 	}
@@ -67,7 +67,7 @@ static Object *ImpString_clone_internal(Runtime *runtime
 	assert(ImpString_isValid(caller));
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "string:clone does not accept arguments.");
+		Runtime_throwString(runtime, "String:clone does not accept arguments.");
 		return NULL;
 	}
 

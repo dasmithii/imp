@@ -7,6 +7,7 @@
 #include "general.h"
 #include "number.h"
 #include "route.h"
+#include "string.h"
 
 
 
@@ -262,27 +263,44 @@ static Object *ImpNumber_clone_internal(Runtime *runtime
 }
 
 
-static Object *ImpNumber_equals_internal(Runtime *runtime
+
+static Object *ImpNumber_asString_internal(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
 	                       , int argc
 	                       , Object **argv){
-	if(argc == 0){
-		Runtime_throwString(runtime, "equals requires arguments");
-	}
+	assert(runtime);
+	assert(caller);
+	assert(argc == 0);
 
-	for(int i = 0; i < argc; i++){
-		if(ImpNumber_getRaw(caller) != ImpNumber_getRaw(argv[i])){
-			Object *r = Runtime_cloneField(runtime, "false");
-			ImpBoolean_setRaw(r, false);
-			return r;
-		}
-	}
-
-	Object *r = Runtime_cloneField(runtime, "true");
-	ImpBoolean_setRaw(r, true);
+	Object *r = Runtime_cloneField(runtime, "String");
+	char buf[32];
+	sprintf(buf, "%f", ImpNumber_getRaw(caller));
+	ImpString_setRaw(r, buf);
 	return r;
 }
+
+// static Object *ImpNumber_equals_internal(Runtime *runtime
+// 	                       , Object *context
+// 	                       , Object *caller
+// 	                       , int argc
+// 	                       , Object **argv){
+// 	if(argc == 0){
+// 		Runtime_throwString(runtime, "equals requires arguments");
+// 	}
+
+// 	for(int i = 0; i < argc; i++){
+// 		if(ImpNumber_getRaw(caller) != ImpNumber_getRaw(argv[i])){
+// 			Object *r = Obj(runtime, "false");
+// 			ImpBoolean_setRaw(r, false);
+// 			return r;
+// 		}
+// 	}
+
+// 	Object *r = Runtime_cloneField(runtime, "true");
+// 	ImpBoolean_setRaw(r, true);
+// 	return r;
+// }
 
 
 void ImpNumber_init(Object *self){
@@ -298,6 +316,7 @@ void ImpNumber_init(Object *self){
 	Object_registerCMethod(self, "__set", ImpNumber_set_internal);
 
 	Object_registerCMethod(self, "__clone", ImpNumber_clone_internal);
-	Object_registerCMethod(self, "__equals", ImpNumber_equals_internal);
+	Object_registerCMethod(self, "__asString", ImpNumber_asString_internal);
+	// Object_registerCMethod(self, "__equals", ImpNumber_equals_internal);
 	ImpNumber_setRaw(self, 0);
 }

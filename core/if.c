@@ -1,7 +1,60 @@
 #include <imp/runtime.h>
 #include <imp/object.h>
 #include <imp/builtin/general.h>
-#include <imp/builtin/boolean.h>
+#include <imp/builtin/importer.h>
+#include <imp/builtin/number.h>
+#include <imp/builtin/string.h>
+#include <stdbool.h>
+
+
+// references to singleton values in boolean module
+static Object *T = NULL;
+static Object *F = NULL;
+
+static bool isZero(Runtime *runtime
+	             , Object *ctx
+	             , Object *obj){
+	if(!obj || obj == F){
+		return true;
+	}
+
+	if(Object_hasMethod(obj, "asBoolean")){
+		Object *asBoolean = Runtime_callMethod(runtime
+			                                 , ctx
+			                                 , obj
+			                                 , "asBoolean", 0, NULL);
+		if(asBoolean == F){
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	if(BuiltIn_id(obj) == BUILTIN_NUMBER &&
+	   ImpNumber_getRaw(obj) == 0){
+		return true;
+	}
+
+	if(BuiltIn_id(obj) == BUILTIN_STRING &&
+	   ImpString_getRaw(obj) == ""){
+		return true;
+	}
+
+	if(Object_hasMethod(obj, "asNumber")){
+		Object *asNumber = Runtime_callMethod(runtime
+			                                , ctx
+			                                , obj
+			                                , "asNumber", 0, NULL);
+		if(ImpNumber_getRaw(asNumber) == 0){
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	// TODO:? check if a boolean was returned at all
+	return false;
+}
 
 
 // If accepts one or more condition-executable pairs as
@@ -18,15 +71,16 @@ Object *if_activate(Runtime *runtime
 	assert(runtime);
 	assert(Object_isValid(context));
 
-	if(argc == 0){
-		Runtime_throwString(runtime, "if given no arguments");
+	if(argc < 2){
+		Runtime_throwString(runtime, "if given insufficient arguments");
 	}
 
 	for(int i = 0; i < argc - 1; i += 2){
-		Runtime_activate(runtime, context, argv[i], 0, NULL);
-		if(Runtime_returnValue(runtime) == NULL                         ||
-		   BuiltIn_id(Runtime_returnValue(runtime)) != BUILTIN_BOOLEAN  ||
-		   ImpBoolean_getRaw(Runtime_returnValue(runtime)) == true){
+		Object *cond = argv[i];
+		if(Object_canBeActivated(cond)){
+			cond = Runtime_activate(runtime, context, cond, 0, NULL);
+		}
+		if(!isZero(runtime, context, cond)){
 			Runtime_activate(runtime, context, argv[i+1], 0, NULL);
 			return NULL;
 		}
@@ -38,3 +92,16 @@ Object *if_activate(Runtime *runtime
 
 	return NULL;
 }
+
+
+Object *if_onImport(Runtime *runtime
+	              , Object *context
+	              , Object *caller
+	              , int argc
+	              , Object **argv){
+	Object *boolean_module = Imp_import(runtime, "core/Boolean");
+	T = Object_getShallow(boolean_module, "true");
+	F = Object_getShallow(boolean_module, "false");
+	return NULL;
+}
+
