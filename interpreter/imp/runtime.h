@@ -81,6 +81,12 @@ Object *Runtime_callMethod(Runtime *self
 	                     , char *methodName
 	                     , int argc
 	                     , Object **argv);
+Object *Runtime_callSpecialMethod(Runtime *self
+	                     , Object *context
+	                     , Object *object
+	                     , char *methodName
+	                     , int argc
+	                     , Object **argv);
 
 
 #endif

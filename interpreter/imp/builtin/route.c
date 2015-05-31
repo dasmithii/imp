@@ -219,6 +219,11 @@ void ImpRoute_argv(Object *self, int i, char *dest){
 Object *ImpRoute_submapping_(char *self, Object *context){
 	Object *r = context;
 	int argc = ImpRoute_argc_(self);
+
+	if(argc == 1){
+		return context;
+	}
+
 	for(int i = 0; i < argc - 1; i++){
 		char cho[64];
 		ImpRoute_argv_(self, i, cho);
