@@ -11,7 +11,6 @@
 #include <imp/builtin/def.h>
 #include <imp/builtin/set.h>
 #include <imp/builtin/closure.h>
-#include <imp/builtin/while.h>
 #include <imp/builtin/vector.h>
 #include <imp/builtin/return.h>
 #include <imp/builtin/importer.h>
