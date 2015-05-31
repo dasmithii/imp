@@ -315,7 +315,7 @@ void Runtime_init(Runtime *self){
 
 	Object *n = Runtime_rawObject(self);
 	ImpNumber_init(n);
-	Object_putShallow(self->root_scope, "number", n);
+	Object_putShallow(self->root_scope, "Number", n);
 
 	Object *route = Runtime_rawObject(self);
 	ImpRoute_init(route);
@@ -414,7 +414,7 @@ static Object *Runtime_tokenToObject(Runtime *self, Object *scope, Token *token)
 		}
 	case TOKEN_NUMBER:
 		{
-			Object *number = Runtime_cloneField(self, "number");
+			Object *number = Runtime_cloneField(self, "Number");
 			ImpNumber_setRaw(number, token->data.number);
 			r = number;
 			break;

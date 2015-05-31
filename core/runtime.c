@@ -1,6 +1,7 @@
 #include <imp/runtime.h>
 #include <imp/object.h>
 #include <imp/builtin/general.h>
+#include <imp/builtin/number.h>
 #include <imp/builtin/string.h>
 
 
@@ -64,5 +65,7 @@ Object *runtime_objectCount(Runtime *runtime
 	if(argc != 0){
 		Runtime_throwString(runtime, "runtime:objectCount does not accept arguments");
 	}
-	return Runtime_objectCount(runtime);
+	Object *r = Runtime_cloneField(runtime, "Number");
+	ImpNumber_setRaw(r, (double) Runtime_objectCount(runtime));
+	return r;
 }
