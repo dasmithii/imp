@@ -6,24 +6,13 @@
 #include <string.h>
 
 #include <imp/object.h>
+#include <imp/lexer.h>
 
 
 
 
 static bool validKey(char *key){
-	if(!key){
-		return false;
-	}
-	int len = strlen(key);
-	if(len == 0){
-		return false;
-	}
-	for(int i = 0; i < len; i++){
-		if(!isalnum(key[i]) && key[i] != '_'){
-			return false;
-		}
-	}
-	return true;
+	return isValidRouteText(key);
 }
 
 

@@ -28,6 +28,7 @@ Token *Tokenization_begin(Tokenization *self);
 Token *Tokenization_end(Tokenization *self);
 bool isValidRouteChar(char c);
 bool isValidRouteBegin(char c);
+bool isValidRouteText(char *text);
 
 
 #endif

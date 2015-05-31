@@ -1,6 +1,7 @@
 bin
 build
 .release_time
+.debug_time
 test.imp
 
 

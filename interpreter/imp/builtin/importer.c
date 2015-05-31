@@ -231,8 +231,6 @@ static void importInternal(Runtime *runtime
 
 	Object_reference(context);
 
-	Object *module_ctx = contextForImportName(runtime, context, importName);
-
 	for(int i = 0; i < symbols.size; i++){
 		char *wopre = Vector_hook(&symbols, i); // without prefix
  
@@ -253,9 +251,9 @@ static void importInternal(Runtime *runtime
 			strcat(key, "__");
 			strcat(key, wopre);
 
-			Object_registerCMethod(module_ctx, key, sym);
+			Object_registerCMethod(context, key, sym);
 			if(endswith(key, "onImport")){
-				Runtime_callMethod(runtime, context, module_ctx, "onImport", 0, NULL);
+				Runtime_callMethod(runtime, context, context, "onImport", 0, NULL);
 			}
 		} else if(*wopre >= 'A' && *wopre <= 'Z'){
 			// load method (and its base object, if not yet loaded)
@@ -275,11 +273,11 @@ static void importInternal(Runtime *runtime
 			strcat(key, wopre + strlen(baseKey) + 1);
 			
 
-			if(!Object_hasKeyShallow(module_ctx, baseKey)){
-				Object_putShallow(module_ctx, baseKey, Runtime_rawObject(runtime));
+			if(!Object_hasKeyShallow(context, baseKey)){
+				Object_putShallow(context, baseKey, Runtime_rawObject(runtime));
 			}
 
-			Object *baseObj = Object_getShallow(module_ctx, baseKey);
+			Object *baseObj = Object_getShallow(context, baseKey);
 			assert(baseObj);
 
 			Object_registerCMethod(baseObj, key, sym);
@@ -314,8 +312,7 @@ static void importRegular(Runtime *runtime
 		Runtime_throwFormatted(runtime, "failed to read file '%s'", path);
 	}
 
-	Object *module_ctx = contextForImportPath(runtime, context, path);
-	Runtime_executeSourceInContext(runtime, code, module_ctx);
+	Runtime_executeSourceInContext(runtime, code, context);
 
 	free(code);
 }
@@ -324,8 +321,6 @@ static void importRegular(Runtime *runtime
 static void importPackage(Runtime *runtime
 	                    , Object *context
 	                    , char *path){
-	Object *subcontext = contextForImportPath(runtime, context, path);
-
 	DIR *d;
 	struct dirent *dir;
 	d = opendir(path);
@@ -334,6 +329,7 @@ static void importPackage(Runtime *runtime
 		while ((dir = readdir(d)) != NULL){
 			if(dir->d_name[0] != '.'){
 				sprintf(submodule, "%s/%s", path, dir->d_name);
+				Object *subcontext = contextForImportPath(runtime, context, path);
 				removeModuleFileExtention(submodule);
 				Imp_import(runtime, subcontext, submodule);
 			}
@@ -403,13 +399,19 @@ static Object *ImpImporter_activate_internal(Runtime *runtime
 	assert(Object_isValid(context));
 	assert(ImpImporter_isValid(caller));
 
-	if(argc != 1){
-		Runtime_throwString(runtime, "import requires exactly one argument.");
+	if(argc != 1 && argc != 2){
+		Runtime_throwString(runtime, "import requires one or two arguments.");
 	} else if(!ImpString_isValid(argv[0])){
 		Runtime_throwString(runtime, "import requires a string as its first argument.");
 	} else {
 		char *module = ImpString_getRaw(argv[0]);
-		Imp_import(runtime, context, module); // TODO: handle import errors
+		if(argc == 1){
+			Imp_import(runtime
+			         , contextForImportPath(runtime, context, module)
+			         , module);
+		} else {
+			Imp_import(runtime, argv[1], module); 
+		}
 	}
 
 	return NULL;

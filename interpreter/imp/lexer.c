@@ -37,6 +37,22 @@ bool isValidRouteBegin(char c){
 	       c == ':';
 }
 
+bool isValidRouteText(char *text){
+	if(!text || *text == 0){
+		return false;
+	}
+	int len = strlen(text);
+	if(len > 0 && !isValidRouteBegin(text[0])){
+		return false;
+	}
+	for(int i = 1; i < len; i++){
+		if(!isValidRouteChar(text[i])){
+			return false;
+		}
+	}
+	return true;
+}
+
 
 int Tokenization_init(Tokenization *tokenization, char *code){
 	assert(tokenization);

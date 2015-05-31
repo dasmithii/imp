@@ -15,33 +15,19 @@ char *ImpRoute_getRaw(Object *self){
 }
 
 
-static bool validRouteText(char *text){
-	if(!text || *text == 0){
-		return false;
-	}
-	int len = strlen(text);
-	if(len > 0 && !isValidRouteBegin(text[0])){
-		return false;
-	}
-	for(int i = 1; i < len; i++){
-		if(!isValidRouteChar(text[i])){
-			return false;
-		}
-	}
-	return true;
-}
+
 
 
 bool ImpRoute_isValid(Object *obj){
 	return Object_isValid(obj)                      &&
 	       BuiltIn_protoId(obj) == BUILTIN_ROUTE    &&
-	       validRouteText(ImpRoute_getRaw(obj));
+	       isValidRouteText(ImpRoute_getRaw(obj));
 }
 
 
 void ImpRoute_setRaw(Object *self, char *text){
 	assert(self);
-	assert(validRouteText(text));
+	assert(isValidRouteText(text));
 	Object_putDataDeep(self, "__data", strdup(text));
 }
 
