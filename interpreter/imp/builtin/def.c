@@ -45,7 +45,10 @@ static Object *ImpDef_activate_internal(Runtime *runtime
 	}
 	char fbuf[64];
 	ImpRoute_argv(route, rargc - 1, fbuf);
-	Object_putDeep(par, fbuf, value);
+	if(Object_hasKeyShallow(par, fbuf)){
+		Runtime_throwString(runtime, "def would overwrite value");
+	}
+	Object_putShallow(par, fbuf, value);
 
 	Object_unreference(value);
 	return NULL;
