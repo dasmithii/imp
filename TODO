@@ -10,6 +10,8 @@ MEDIUM:
  
  + Replace slot system with legit accessor.
 
+ + Implement macros
+
 
 
 

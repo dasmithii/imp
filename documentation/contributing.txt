@@ -17,7 +17,7 @@ Rules
        your changes do not cause tests to fail.
 
     3. Write nice, readable code with documentation where 
-       necessary and not elsewhere (self-documenting code
+       necessary and not elsewhere; self-documenting code
        is ideal).
 
 

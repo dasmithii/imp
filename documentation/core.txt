@@ -7,7 +7,7 @@ Overview
     widely usable 
 
 
-    /core/io
+    /core/io.
             /File
                  /open
                  /close
@@ -18,13 +18,15 @@ Overview
             /stdin
             /stdout
     /core/control
+                 /if.
+                 /while.
     /core/crypto
-    /core/func
-              /map.
-              /reduce.
-              /foldl.
-              /foldr.
-              /filter.
+    /core/func.
+              /map
+              /reduce
+              /foldl
+              /foldr
+              /filter
     /core/container
                    /list.
                    /vector.
@@ -37,3 +39,5 @@ Overview
     /core/sync
               /mutex.
     /core/os
+    /core/regex.
+                /
