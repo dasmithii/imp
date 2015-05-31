@@ -49,7 +49,7 @@ static Object *ImpRoute_print_internal(Runtime *runtime
 	assert(ImpRoute_isValid(caller));
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "route:print does not accept arguments");
+		Runtime_throwString(runtime, "Route:print does not accept arguments");
 	} else {
 		Runtime_print(runtime, context, ImpRoute_mapping(caller, context));
 	}
@@ -74,7 +74,7 @@ static Object *ImpRoute_clone_internal(Runtime *runtime
 	assert(Object_isValid(caller));
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "route:clone does not accept arguments");
+		Runtime_throwString(runtime, "Route:clone does not accept arguments");
 		return NULL;
 	}
 

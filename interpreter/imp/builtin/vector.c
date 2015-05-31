@@ -27,7 +27,7 @@ static Object *ImpVector_print_internal(Runtime *runtime
 	assert(ImpVector_isValid(caller));
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "vector:print does not accept arguments.");
+		Runtime_throwString(runtime, "Vector:print does not accept arguments.");
 		return NULL;
 	}
 
@@ -50,7 +50,7 @@ static Object *ImpVector_clone_internal(Runtime *runtime
 	assert(Object_isValid(caller));
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "vector:clone does not accept arguments.");
+		Runtime_throwString(runtime, "Vector:clone does not accept arguments.");
 		return NULL;
 	}
 	Object *r = Runtime_rawObject(runtime);
@@ -75,7 +75,7 @@ static Object *ImpVector_append_internal(Runtime *runtime
 	assert(ImpVector_isValid(caller));
 
 	if(argc == 0){
-		Runtime_throwString(runtime, "vector:append requires arguments.");
+		Runtime_throwString(runtime, "Vector:append requires arguments.");
 		return NULL;
 	}
 
@@ -94,7 +94,7 @@ static Object *ImpVector_prepend_internal(Runtime *runtime
 	assert(ImpVector_isValid(caller));
 
 	if(argc != 1){
-		Runtime_throwString(runtime, "vector:prepend requires exactly 1 argument.");
+		Runtime_throwString(runtime, "Vector:prepend requires exactly 1 argument.");
 		return NULL;
 	}
 	Vector_prepend(ImpVector_getRaw(caller), &argv[0]);
@@ -111,14 +111,14 @@ static Object *ImpVector_insert_internal(Runtime *runtime
 	assert(ImpVector_isValid(caller));
 
 	if(argc != 2){
-		Runtime_throwString(runtime, "vector:insert requires exactly 2 arguments.");
+		Runtime_throwString(runtime, "Vector:insert requires exactly 2 arguments.");
 	} else if(!ImpNumber_isValid(argv[0])){
-		Runtime_throwString(runtime, "vector:insert requires a number in its first argument.");
+		Runtime_throwString(runtime, "Vector:insert requires a number in its first argument.");
 	} else {
 		Vector *raw = ImpVector_getRaw(caller);
 		int index   = (int) (ImpNumber_getRaw(argv[0]) + .5);
 		if(index < 0 || index > raw->size){
-			Runtime_throwString(runtime, "vector:insert index out of bounds.");
+			Runtime_throwString(runtime, "Vector:insert index out of bounds.");
 		}
 		Vector_insert(raw
 		            , index
@@ -137,14 +137,14 @@ static Object *ImpVector_remove_internal(Runtime *runtime
 	assert(ImpVector_isValid(caller));
 
 	if(argc != 1){
-		Runtime_throwString(runtime, "vector:remove requires exactly 1 argument.");
+		Runtime_throwString(runtime, "Vector:remove requires exactly 1 argument.");
 	} else if(!ImpNumber_isValid(argv[0])){
-		Runtime_throwString(runtime, "vector:remove requires a number as its argument.");
+		Runtime_throwString(runtime, "Vector:remove requires a number as its argument.");
 	} else {
 		Vector *raw = ImpVector_getRaw(caller);
 		int index   = (int) (ImpNumber_getRaw(argv[0]) + .5);
 		if(index < 0 || index > raw->size){
-			Runtime_throwString(runtime, "vector:remove index out of bounds.");
+			Runtime_throwString(runtime, "Vector:remove index out of bounds.");
 		}
 		Vector_remove(raw
 		            , index);
@@ -164,9 +164,9 @@ static Object *ImpVector_removeBack_internal(Runtime *runtime
 	Vector *raw = ImpVector_getRaw(caller);
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "vector:removeBack does not accept arguments.");
+		Runtime_throwString(runtime, "Vector:removeBack does not accept arguments.");
 	} else if(raw->size == 0){
-		Runtime_throwString(runtime, "vector:removeBack called on empty vector");
+		Runtime_throwString(runtime, "Vector:removeBack called on empty vector");
 	} else{
 		Vector_pop(raw);
 	}
@@ -186,9 +186,9 @@ static Object *ImpVector_removeFront_internal(Runtime *runtime
 	Vector *raw = ImpVector_getRaw(caller);
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "vector:removeFront does not accept arguments.");
+		Runtime_throwString(runtime, "Vector:removeFront does not accept arguments.");
 	} else if(raw->size == 0){
-		Runtime_throwString(runtime, "vector:removeBack called on empty vector");
+		Runtime_throwString(runtime, "Vector:removeBack called on empty vector");
 	} else {
 		Vector_popf(raw);
 	}
@@ -208,7 +208,7 @@ static Object *ImpVector_copy_internal(Runtime *runtime
 	Vector *raw = ImpVector_getRaw(caller);
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "vector:copy does not accept arguments");
+		Runtime_throwString(runtime, "Vector:copy does not accept arguments");
 		return NULL;
 	}
 
@@ -230,14 +230,14 @@ static Object *ImpVector_get_internal(Runtime *runtime
 	assert(ImpVector_isValid(caller));
 
 	if(argc != 1){
-		Runtime_throwString(runtime, "vector:get requires exactly 1 arguments.");
+		Runtime_throwString(runtime, "Vector:get requires exactly 1 arguments.");
 	} else if(!ImpNumber_isValid(argv[0])){
-		Runtime_throwString(runtime, "vector:get requires a number in its first argument.");
+		Runtime_throwString(runtime, "Vector:get requires a number in its first argument.");
 	} else {
 		Vector *raw = ImpVector_getRaw(caller);
 		int index   = (int) (ImpNumber_getRaw(argv[0]) + .5);
 		if(index < 0 || index > raw->size){
-			Runtime_throwString(runtime, "vector:insert index out of bounds.");
+			Runtime_throwString(runtime, "Vector:insert index out of bounds.");
 		} else {
 			return *((Object**) Vector_hook(ImpVector_getRaw(caller), index));
 		}

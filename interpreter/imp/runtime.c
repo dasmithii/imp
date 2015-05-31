@@ -319,7 +319,7 @@ void Runtime_init(Runtime *self){
 
 	Object *route = Runtime_rawObject(self);
 	ImpRoute_init(route);
-	Object_putShallow(self->root_scope, "route", route);
+	Object_putShallow(self->root_scope, "Route", route);
 
 	Object *printer = Runtime_rawObject(self);
 	ImpPrinter_init(printer);
@@ -335,7 +335,7 @@ void Runtime_init(Runtime *self){
 
 	Object *closure = Runtime_rawObject(self);
 	ImpClosure_init(closure);
-	Object_putShallow(self->root_scope, "closure", closure);
+	Object_putShallow(self->root_scope, "Closure", closure);
 
 	// Object *whi = Runtime_rawObject(self);
 	// ImpWhile_init(whi);
@@ -343,7 +343,7 @@ void Runtime_init(Runtime *self){
 
 	Object *vec = Runtime_rawObject(self);
 	ImpVector_init(vec);
-	Object_putShallow(self->root_scope, "vector", vec);
+	Object_putShallow(self->root_scope, "Vector", vec);
 
 	Object *returner = Runtime_rawObject(self);
 	ImpReturn_init(returner);
@@ -406,7 +406,7 @@ static Object *Runtime_tokenToObject(Runtime *self, Object *scope, Token *token)
 	switch(token->type){
 	case TOKEN_ROUTE:
 		{
-			Object *route = Runtime_cloneField(self, "route");
+			Object *route = Runtime_cloneField(self, "Route");
 			assert(token->data.text);
 			ImpRoute_setRaw(route, token->data.text);
 			r = route;
@@ -587,7 +587,7 @@ Object *Runtime_executeInContext(Runtime *runtime
 		break;
 	case CLOSURE_NODE:
 		{
-			r = Runtime_cloneField(runtime, "closure");
+			r = Runtime_cloneField(runtime, "Closure");
 			Runtime_lockGC(runtime);
 			ImpClosure_compile(runtime, r, &node, scope);
 			Runtime_unlockGC(runtime);

@@ -57,7 +57,7 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 	Object *scope = Runtime_clone(runtime, internal->context);
 	Object_reference(scope);
 
-	Object *arguments = Runtime_cloneField(runtime, "vector");
+	Object *arguments = Runtime_cloneField(runtime, "Vector");
 	Object_putShallow(scope, "arguments", arguments);
 
 	if(argc > 0){
