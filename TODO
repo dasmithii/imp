@@ -10,23 +10,13 @@ MEDIUM:
  
  + Replace slot system with legit accessor.
 
- + runtime:objectCount causing segfault
-
 
 
 
 MINOR:
 
- + Make it so dlclose is called by module context
-   destructors. This is not critical because library 
-   loads are inexpensive and can be left unclosed.
-
  + Improve internal module code scanner. Use regex
    or something.
-
- + Forbid using __data as method
-
- + Allow internal modules to import modules.
 
 
 
