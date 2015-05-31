@@ -5,6 +5,8 @@
 #include <imp/builtin/number.h>
 #include <imp/builtin/string.h>
 #include <stdbool.h>
+#include <string.h>
+
 
 
 // references to singleton values in boolean module
@@ -36,7 +38,7 @@ static bool isZero(Runtime *runtime
 	}
 
 	if(BuiltIn_id(obj) == BUILTIN_STRING &&
-	   ImpString_getRaw(obj) == ""){
+	   strcmp(ImpString_getRaw(obj), "") == 0){
 		return true;
 	}
 

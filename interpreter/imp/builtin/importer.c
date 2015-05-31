@@ -305,8 +305,6 @@ static void importRegularModuleTo(Runtime *runtime
 	assert(Object_isValid(context));
 	assert(path);
 
-	const int plen = strlen(path);
-
 	char *code = readFile(path);
 	if(!code){
 		Runtime_throwFormatted(runtime, "failed to read file '%s'", path);
@@ -326,11 +324,13 @@ static void importPackageTo(Runtime *runtime
 	d = opendir(path);
 	if(d){
 		char submoduleName[128];
+		char submodulePath[256];
 		while ((dir = readdir(d)) != NULL){
 			if(dir->d_name[0] != '.'){
-				sprintf(submoduleName, "%s/%s", path, dir->d_name);
-				removeModuleFileExtention(submoduleName);
-				Object_putShallow(context, submoduleName, Imp_import(runtime, submoduleName));
+				getNameOfImport(submoduleName, dir->d_name);
+				sprintf(submodulePath, "%s/%s", path, dir->d_name);
+				removeModuleFileExtention(submodulePath);
+				Object_putShallow(context, submoduleName, Imp_import(runtime, submodulePath));
 			}
 		}
 		closedir(d);
@@ -402,6 +402,7 @@ Object *Imp_import(Runtime *runtime, char *modulePath){
 		}
 	} else {
 		cache = Runtime_rawObject(runtime);
+		Object_reference(cache);
 	}
 	Object *r = importWithoutUsingCache(runtime, modulePath);
 	Object_putShallow(cache, modulePath, r);
@@ -439,17 +440,22 @@ static Object *ImpImporter_activate_internal(Runtime *runtime
 		// check that to-context import is possible
 		for(int i = 0; i < module->slotCount; i++){
 			Slot *slot = module->slots + i;
-			if(Slot_isPrimitive(slot) && strcmp(slot->key, "__onImport") != 0){
-				Runtime_throwFormatted(runtime, "failed to import '%s' into context (has internal method)", modulePath);
-			}
-			if(Object_hasKeyShallow(dest, slot->key)){
-				Runtime_throwFormatted(runtime, "failed to import '%s' into context because of conflict", modulePath);
+			if(Slot_isPrimitive(slot)){
+				if(strcmp(slot->key, "__onImport") != 0  &&     
+			       strcmp(slot->key, "__referenceCount") != 0){
+			       	Runtime_throwFormatted(runtime, "failed to import '%s' into context (has internal method)", modulePath);
+				}
+			} else if(Object_hasKeyShallow(dest, slot->key)){
+				Runtime_throwFormatted(runtime, "failed to import '%s' into context because of conflict '%s'", modulePath, slot->key);
 			}
 		}
 
 		// it is; transfer
 		for(int i = 0; i < module->slotCount; i++){
 			Slot *slot = module->slots + i;
+			if(Slot_isPrimitive(slot)){
+				continue;
+			}
 			Object_putShallow(dest, slot->key, Slot_object(slot));
 		}
 
