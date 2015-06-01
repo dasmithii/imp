@@ -20,11 +20,11 @@ static bool isZero(Runtime *runtime
 		return true;
 	}
 
-	if(Object_hasMethod(obj, "asBoolean")){
+	if(Object_hasMethod(obj, "?")){
 		Object *asBoolean = Runtime_callMethod(runtime
 			                                 , ctx
 			                                 , obj
-			                                 , "asBoolean", 0, NULL);
+			                                 , "?", 0, NULL);
 		if(asBoolean == F){
 			return true;
 		} else {

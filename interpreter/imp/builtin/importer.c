@@ -38,6 +38,9 @@ static bool isFile(const char *path){
 }
 
 static bool isDirectory(const char *path){
+	if(!pathExists(path)){
+		return false;
+	}
 	struct stat s;
 	if(stat(path,&s) == 0){
 	    if(s.st_mode & S_IFDIR){
@@ -378,9 +381,7 @@ static Object *importWithoutUsingCache(Runtime *runtime, char *modulePath){ // m
 	}
 
 	// check <global>.c
-	sprintf(buf, "%s/index/%s.c", Imp_root(), modulePath
-
-		);
+	sprintf(buf, "%s/index/%s.c", Imp_root(), modulePath);
 	if(pathExists(buf)){
 		importInternalModuleTo(runtime, buf, r);
 		return r;

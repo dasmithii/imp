@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include "../runtime.h"
 
@@ -79,7 +80,6 @@ static Object *ImpNumber_sub_internal(Runtime *runtime
 		Runtime_throwString(runtime, "Number:sub requires exactly one argument.");
 	}
 
-	Object *arg = unrouteInContext(argv[0], context);
 	if(!ImpNumber_isValid(argv[0])){
 		Runtime_throwString(runtime, "Number:sub argument must be of number type.");
 	} else {
@@ -280,37 +280,55 @@ static Object *ImpNumber_asString_internal(Runtime *runtime
 	return r;
 }
 
-// static Object *ImpNumber_equals_internal(Runtime *runtime
-// 	                       , Object *context
-// 	                       , Object *caller
-// 	                       , int argc
-// 	                       , Object **argv){
-// 	if(argc == 0){
-// 		Runtime_throwString(runtime, "equals requires arguments");
-// 	}
 
-// 	for(int i = 0; i < argc; i++){
-// 		if(ImpNumber_getRaw(caller) != ImpNumber_getRaw(argv[i])){
-// 			Object *r = Obj(runtime, "false");
-// 			ImpBoolean_setRaw(r, false);
-// 			return r;
-// 		}
-// 	}
 
-// 	Object *r = Runtime_cloneField(runtime, "true");
-// 	ImpBoolean_setRaw(r, true);
-// 	return r;
-// }
+static Object *ImpNumber_cmp_internal(Runtime *runtime
+	                       , Object *context
+	                       , Object *caller
+	                       , int argc
+	                       , Object **argv){
+	if(argc != 1){
+		Runtime_throwString(runtime, "Number:<> requires exactly one argument");
+	}
+
+	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
+		Runtime_throwString(runtime, "Number:<> requires another number as its argument");
+	}
+
+	Object *r = Runtime_cloneField(runtime, "Number");
+	ImpNumber_setRaw(r, ImpNumber_getRaw(caller) - ImpNumber_getRaw(argv[0]));
+	return r;
+}
+
+
+static Object *ImpNumber_mod_internal(Runtime *runtime
+	                       , Object *context
+	                       , Object *caller
+	                       , int argc
+	                       , Object **argv){
+	if(argc != 1){
+		Runtime_throwString(runtime, "Number:%= requires exactly one argument");
+	}
+
+	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
+		Runtime_throwString(runtime, "Number:%= requires another number as its argument");
+	}
+
+	ImpNumber_setRaw(caller, fmod(ImpNumber_getRaw(caller), ImpNumber_getRaw(argv[0])));
+	return NULL;
+}
 
 
 void ImpNumber_init(Object *self){
 	assert(self);
 	BuiltIn_setId(self, BUILTIN_NUMBER);
 
-	Object_registerCMethod(self, "__add", ImpNumber_add_internal);
-	Object_registerCMethod(self, "__sub", ImpNumber_sub_internal);
-	Object_registerCMethod(self, "__mult", ImpNumber_mult_internal);
-	Object_registerCMethod(self, "__div", ImpNumber_div_internal);
+	Object_registerCMethod(self, "__+=", ImpNumber_add_internal);
+	Object_registerCMethod(self, "__-=", ImpNumber_sub_internal);
+	Object_registerCMethod(self, "__*=", ImpNumber_mult_internal);
+	Object_registerCMethod(self, "__/=", ImpNumber_div_internal);
+	Object_registerCMethod(self, "__%=", ImpNumber_mod_internal);
+	Object_registerCMethod(self, "__<>", ImpNumber_cmp_internal);
 
 	Object_registerCMethod(self, "__print", ImpNumber_print_internal);
 	Object_registerCMethod(self, "__set", ImpNumber_set_internal);
