@@ -318,6 +318,32 @@ static Object *ImpNumber_mod_internal(Runtime *runtime
 	return NULL;
 }
 
+static Object *ImpNumber_inc_internal(Runtime *runtime
+	                       , Object *context
+	                       , Object *caller
+	                       , int argc
+	                       , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "Number:++ does not accept");
+	}
+
+	ImpNumber_setRaw(caller, ImpNumber_getRaw(caller) + 1);
+	return caller;
+}
+
+static Object *ImpNumber_dec_internal(Runtime *runtime
+	                       , Object *context
+	                       , Object *caller
+	                       , int argc
+	                       , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "Number:-- does not accept");
+	}
+
+	ImpNumber_setRaw(caller, ImpNumber_getRaw(caller) - 1);
+	return caller;
+}
+
 
 void ImpNumber_init(Object *self){
 	assert(self);
@@ -329,6 +355,9 @@ void ImpNumber_init(Object *self){
 	Object_registerCMethod(self, "__/=", ImpNumber_div_internal);
 	Object_registerCMethod(self, "__%=", ImpNumber_mod_internal);
 	Object_registerCMethod(self, "__<>", ImpNumber_cmp_internal);
+
+	Object_registerCMethod(self, "__++", ImpNumber_inc_internal);
+	Object_registerCMethod(self, "__--", ImpNumber_dec_internal);
 
 	Object_registerCMethod(self, "__print", ImpNumber_print_internal);
 	Object_registerCMethod(self, "__set", ImpNumber_set_internal);
