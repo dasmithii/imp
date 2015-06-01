@@ -393,7 +393,7 @@ static Object *importWithoutUsingCache(Runtime *runtime, char *modulePath){ // m
 }
 
 
-static Object *cache = NULL;
+static Object *cache = NULL; // TODO: store this in runtime struct
 
 Object *Imp_import(Runtime *runtime, char *modulePath){
 	if(cache){

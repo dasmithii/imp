@@ -336,10 +336,6 @@ void Runtime_init(Runtime *self){
 	ImpClosure_init(closure);
 	Object_putShallow(self->root_scope, "Closure", closure);
 
-	// Object *whi = Runtime_rawObject(self);
-	// ImpWhile_init(whi);
-	// Object_putShallow(self->root_scope, "while", whi);
-
 	Object *vec = Runtime_rawObject(self);
 	ImpVector_init(vec);
 	Object_putShallow(self->root_scope, "Vector", vec);
@@ -364,26 +360,20 @@ Object *Runtime_clone(Runtime *runtime, Object *object){
 	Object *r = NULL;
 	Object_reference(object);
 
-	// TODO: check for special and internal methods
-	Object *special = Object_getDeep(object, "_clone");
-	void *internal = Object_getDataDeep(object, "__clone");
-	if(special){
-		r = Runtime_activateOn(runtime 
-			                 , NULL
-			                 , special
-			                 , 0
-			                 , NULL
-			                 , object);
-	} else if(internal){
-		CFunction cf = *((CFunction*) internal);
-		r = cf(runtime, NULL, object, 0, NULL);
+	if(Object_hasSpecialMethod(object, "clone")){
+		return Runtime_callSpecialMethod(runtime
+			                           , NULL
+			                           , object
+			                           , "clone"
+			                           , 0
+			                           , NULL);
 	} else {
-		r = Runtime_rawObject(runtime);
+		Object_reference(object);
+		Object *r = Runtime_rawObject(runtime);
 		Object_putShallow(r, "_prototype", object);
+		Object_unreference(object);
+		return r;
 	}
-
-	Object_unreference(object);
-	return r;
 }
 
 

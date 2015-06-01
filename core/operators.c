@@ -115,7 +115,7 @@ static Object *copy(Runtime *runtime
 		Slot *s = argv[0]->slots + i;
 		Object *o = Slot_object(s);
 		if(strcmp(s->key, "_data") == 0){
-			Object_putShallow(r, "_data", copy(runtime
+			Object_putShallow(r, "_data", copy(runtime  // TODO: investigate
 				                             , context
 				                             , caller
 				                             , 1
@@ -178,8 +178,8 @@ static Object *minus(Runtime *runtime
                          , Object **argv){
 	if(argc == 1){
 		Object *zero = Runtime_cloneField(runtime, "Number");
-		ImpNumber_setRaw(zero, 0);
 		Object_reference(zero);
+		ImpNumber_setRaw(zero, 0);
 		Object *r = copyAndDo(runtime, context, zero, argv[0], "-=");
 		Object_unreference(zero);
 		return r;

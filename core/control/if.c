@@ -21,10 +21,15 @@ static bool isZero(Runtime *runtime
 	}
 
 	if(Object_hasMethod(obj, "?")){
+		Object_reference(ctx);
+		Object_reference(obj);
 		Object *asBoolean = Runtime_callMethod(runtime
 			                                 , ctx
 			                                 , obj
 			                                 , "?", 0, NULL);
+
+		Object_unreference(ctx);
+		Object_unreference(obj);
 		if(asBoolean == F){
 			return true;
 		} else {
@@ -43,10 +48,14 @@ static bool isZero(Runtime *runtime
 	}
 
 	if(Object_hasMethod(obj, "asNumber")){
+		Object_reference(ctx);
+		Object_reference(obj);
 		Object *asNumber = Runtime_callMethod(runtime
 			                                , ctx
 			                                , obj
 			                                , "asNumber", 0, NULL);
+		Object_unreference(ctx);
+		Object_unreference(obj);
 		if(ImpNumber_getRaw(asNumber) == 0){
 			return true;
 		} else {
