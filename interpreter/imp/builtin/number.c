@@ -344,6 +344,22 @@ static Object *ImpNumber_dec_internal(Runtime *runtime
 	return caller;
 }
 
+static Object *ImpNumber_copy_internal(Runtime *runtime
+	                       , Object *context
+	                       , Object *caller
+	                       , int argc
+	                       , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "Number:$ does not accept arguments");
+	}
+
+	Object *r = Runtime_clone(runtime, caller);
+	double *data = malloc(sizeof(double));
+	*data = ImpNumber_getRaw(caller);
+	Object_putDataShallow(r, "__data", data);
+	return r;
+}
+
 
 void ImpNumber_init(Object *self){
 	assert(self);
@@ -358,6 +374,8 @@ void ImpNumber_init(Object *self){
 
 	Object_registerCMethod(self, "__++", ImpNumber_inc_internal);
 	Object_registerCMethod(self, "__--", ImpNumber_dec_internal);
+
+	Object_registerCMethod(self, "__$", ImpNumber_copy_internal);
 
 	Object_registerCMethod(self, "__print", ImpNumber_print_internal);
 	Object_registerCMethod(self, "__set", ImpNumber_set_internal);

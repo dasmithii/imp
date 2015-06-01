@@ -1,18 +1,22 @@
+(import 'core/io')
+(import 'core/operators')
+(import 'core/control')
+
 (def i 0)
 
-(while {<= i 100} {
-	(def shouldPrintNumber true)
-	(if (== 0 (% i 3)) {
-		(print 'Fizz')
-		(set shouldPrintNumber false)
+(control:while {operators:<= i 100} {
+	(def shouldPrintNumber 1)
+	(control:if (operators:== 0 (operators:% i 3)) {
+		(io:stdout:write 'Fizz')
+		(set shouldPrintNumber 0)
 	})
-	(if (== 0 (% i 5)) {
-		(print 'Buzz')
-		(set shouldPrintNumber false)
+	(control:if (operators:== 0 (operators:% i 5)) {
+		(io:stdout:write 'Buzz')
+		(set shouldPrintNumber 0)
 	})
-	(if shouldPrintNumber {
-		(print i)
+	(control:if shouldPrintNumber {
+		(io:stdout:write i)
 	})
-	(++ i)
-	(println)
+	(i:++)
+	(io:stdout:writeLine)
 })

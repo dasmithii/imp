@@ -92,20 +92,20 @@ static Object *copy(Runtime *runtime
 		Runtime_throwString(runtime, "$ requires exactly one argument");
 	}	
 
-	if(Object_hasSpecialMethod(argv[0], "copy")){
+	if(Object_hasMethod(argv[0], "$")){
 		return Runtime_callSpecialMethod(runtime
 			                           , context
 			                           , argv[0]
-			                           , "copy"
-			                           , argc
-			                           , argv);
+			                           , "$"
+			                           , 0
+			                           , NULL);
 	}
 
 	// check if arg is able be copied using default methods
 	for(int i = 0; i < argv[0]->slotCount; i++){
 		Slot *s = argv[0]->slots + i;
 		if(Slot_isPrimitive(s) && strcmp(s->key, "__referenceCount") != 0){
-			Runtime_throwString(runtime, "object not copy-able (contains primitive data)");
+			Runtime_throwFormatted(runtime, "object not copy-able (contains primitive data at: '%s')", s->key);
 		}
 	}
 
