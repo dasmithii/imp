@@ -2,17 +2,17 @@
 (import 'core/operators')
 (import 'core/control')
 
-(def i 0)
+(def i 1)
 
 (control:while {operators:<= i 100} {
 	(def shouldPrintNumber 1)
 	(control:if (operators:== 0 (operators:% i 3)) {
-		(io:stdout:write 'Fizz')
-		(set shouldPrintNumber 0)
+		(io:stdout:write 'Fizz ')
+		(shouldPrintNumber:set 0)
 	})
 	(control:if (operators:== 0 (operators:% i 5)) {
 		(io:stdout:write 'Buzz')
-		(set shouldPrintNumber 0)
+		(shouldPrintNumber:set 0)
 	})
 	(control:if shouldPrintNumber {
 		(io:stdout:write i)
