@@ -182,13 +182,6 @@ static Object *ImpNumber_print_internal(Runtime *runtime
 }
 
 
-void ImpNumber_set(Object *self, Object *value){
-	assert(ImpNumber_isValid(self));
-	assert(ImpNumber_isValid(value));
-	ImpNumber_setRaw(self, ImpNumber_getRaw(value));
-}
-
-
 static Object *ImpNumber_set_internal(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
@@ -206,7 +199,7 @@ static Object *ImpNumber_set_internal(Runtime *runtime
 	if(!ImpNumber_isValid(arg)){
 		Runtime_throwString(runtime, "Number:set requires an argument of type number");
 	} else{
-		ImpNumber_set(caller, arg);
+		ImpNumber_setRaw(caller, ImpNumber_getRaw(argv[0]));
 	}
 
 	return NULL;
@@ -245,9 +238,14 @@ static Object *ImpNumber_clone_internal(Runtime *runtime
 	assert(caller);
 	assert(argc == 0);
 
+	if(argc != 0){
+		Runtime_throwString(runtime, "Number:clone does not accept arguments");
+	}
+
 
 
 	Object_reference(caller);
+	Object_reference(context);
 
 	Object *r = Runtime_rawObject(runtime);
 	Object_putShallow(r, "_prototype", caller);
@@ -259,6 +257,8 @@ static Object *ImpNumber_clone_internal(Runtime *runtime
 	ImpNumber_setRaw(r, ImpNumber_getRaw(caller));
 
 	Object_unreference(caller);
+	Object_reference(context);
+
 	return r;
 }
 

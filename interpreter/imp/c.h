@@ -17,6 +17,10 @@ void *Object_getCData(Object *self);
 void Object_registerCMethod(Object *self
 	                     , char *name
 	                     , CFunction f);
+void Object_registerCMethodAlias(Object *self
+	                     , char *name
+	                     , CFunction f
+	                     , Runtime *runtime);
 CFunction toCFunction(void *addr);
 
 

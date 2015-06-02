@@ -181,7 +181,9 @@ static void Runtime_collectOne(Runtime *runtime, Object *object){
 		void *internal = Object_getDataDeep(object, "__collect");
 		if(internal){
 			CFunction cf = *((CFunction*) internal);
+			Object_reference(object);
 			cf(runtime, NULL, object, 0, NULL);
+			Object_unreference(object);
 		}
 	}
 	Object_free(object);
@@ -197,21 +199,13 @@ void Runtime_markRecursive(Runtime *runtime, Object *object){
 	}
 	object->gc_mark = true;
 
-
-	Object *special = Object_getDeep(object, "_mark");
-	if(special){
-		Runtime_activateOn(runtime 
-			             , NULL
-			             , special
-			             , 0
-			             , NULL
-			             , object);
-	} else {
-		void *internal = Object_getDataDeep(object, "__mark");
-		if(internal){
-			CFunction cf = *((CFunction*) internal);
-			cf(runtime, NULL, object, 0, NULL);
-		}
+	if(Object_hasSpecialMethod(object, "mark")){
+		Runtime_callSpecialMethod(runtime
+			                    , NULL
+			                    , object
+			                    , "mark"
+			                    , 0
+			                    , NULL);
 	}
 
 	for(int i = 0; i < object->slotCount; i++){
@@ -245,8 +239,8 @@ static void Runtime_runGC(Runtime *self){
 		Runtime_markRecursive(self, self->lastReturnValue);
 	}
 
-	// Move all accessible allocations to a new vector. Clean
-	// the others.
+	// Move all accessible allocations to a new vector. Call 
+	// onCollect methods now, before freeing any objects.
 	Vector leftovers;
 	Vector_init(&leftovers, sizeof(Object*));
 	for(int i = 0; i < self->collectables.size; i++){
@@ -255,14 +249,30 @@ static void Runtime_runGC(Runtime *self){
 
 		if(item->gc_mark){
 			Vector_append(&leftovers, &item);
-		} else { 
-			Runtime_collectOne(self, item);
+		} else {
+			if(Object_hasSpecialMethod(item, "collect")){
+				Runtime_callSpecialMethod(self
+					                    , NULL
+					                    , item
+					                    , "collect"
+					                    , 0
+					                    , NULL);
+			}
 		}
 	}
 
 	// Delete old vector of pointers. Replace it.
 	Vector_clean(&self->collectables);
 	self->collectables = leftovers;
+
+	// free old objects
+	for(int i = 0; i < self->collectables.size; i++){
+		Object *item = *((Object**) Vector_hook(&self->collectables, i));
+		if(!item->gc_mark){
+			Object_free(item);
+		}
+	}
+
 	self->gc_on = false;
 }
 
@@ -357,23 +367,22 @@ Object *Runtime_clone(Runtime *runtime, Object *object){
 	assert(Object_isValid(object));
 	assert(Runtime_isManaged(runtime, object));
 
-	Object *r = NULL;
 	Object_reference(object);
+	Object *r = NULL;
 
 	if(Object_hasSpecialMethod(object, "clone")){
-		return Runtime_callSpecialMethod(runtime
+		r = Runtime_callSpecialMethod(runtime
 			                           , NULL
 			                           , object
 			                           , "clone"
 			                           , 0
 			                           , NULL);
 	} else {
-		Object_reference(object);
-		Object *r = Runtime_rawObject(runtime);
+		r = Runtime_rawObject(runtime);
 		Object_putShallow(r, "_prototype", object);
-		Object_unreference(object);
-		return r;
 	}
+	Object_unreference(object);
+	return r;
 }
 
 

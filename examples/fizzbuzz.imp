@@ -4,7 +4,7 @@
 
 (def i 1)
 
-(while {operators:<= i 100} {
+(while {operators:<= i 1000} {
 	(def shouldPrintNumber 1)
 	(if (operators:== 0 (operators:% i 3)) {
 		(io:stdout:write 'Fizz ')
@@ -18,5 +18,4 @@
 		(io:stdout:write i)
 	})
 	(i:++)
-	(io:stdout:writeLine)
 })

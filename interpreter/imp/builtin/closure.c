@@ -189,7 +189,7 @@ static Object *ImpClosure_mark_internal(Runtime *runtime
 	assert(ImpClosure_isValid(caller));
 
 	ImpClosure_internal *raw = ImpClosure_getRaw(caller);
-	if(Object_hasKeyShallow(caller, "_prototype")){
+	if(raw && raw->context){
 		Runtime_markRecursive(runtime, raw->context);
 	}
 	return NULL;

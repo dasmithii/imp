@@ -58,7 +58,7 @@ Object *Slot_object(Slot *self){
 
 bool Slot_isPrimitive(Slot *self){
 	assert(self);
-	return 0 == strncmp("__", self->key, 2);
+	return self->key[0] == '_' && self->key[1] == '_';
 }
 
 

@@ -430,12 +430,12 @@ static Object *ImpImporter_activate_internal(Runtime *runtime
 	Object *module = Imp_import(runtime, modulePath);
 	Object_putShallow(caller, "cache", cache);
 
-	if(argc == 1){
+	if(argc == 1){ //
 		char importName[32];
 		getNameOfImport(importName, modulePath);
 		Object_putShallow(context, importName, module);
 		return module;
-	} else {
+	} else { // copy module contents to specified
 		Object *dest = argv[1];
 
 		// check that to-context import is possible

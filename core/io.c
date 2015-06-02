@@ -84,6 +84,7 @@ Object *io_File_close(Runtime *runtime
 		Runtime_throwString(runtime, "attempted to close non-open file");
 	}
 	fclose(fp);
+	File_setRaw(caller, NULL);
 	return NULL;
 }
 
