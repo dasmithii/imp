@@ -1,51 +1,63 @@
 Overview
 
     Imp is a little scripting language I'm building for fun. It 
-    is dynamic, prototype based, duck typed, and excessively
+    is dynamic, prototype-based, duck-typed, and excessively
     parenthesized.
+
+    The word "imp" is defined as "a mischievous child" and 
+    doubles as the acronym: I Make Programs. Please write code
+    with that in mind. Mess with language internals; don't
+    worry about breaking things. Avoid hyper-focusing on 
+    "idioms" or "best practices". Instead, just think like a
+    child and play around. Be curious. Experiment.
+
+    For serious stuff, you should probably use a more mature
+    language like Go or Python. Though functional, Imp is still
+    rough around the edges (and slow).
 
       >  (print 'Hello, world!')
 
 
 
 
-Introduction
+Tutorial
 
                         Grouping Operators
 
-    Above, parentheses activate the printer object with a single
-    argument. Resulting is an instance of software's greatest
-    cliché.
+    Above, parentheses activate the printer object with a
+    single argument. Resulting is an instance of software's
+    greatest cliché.
 
     The following produces identical output:
 
       >  (print [{(return 'Hello, world')}])
 
-    This is because, in imp, parentheses are function calls; curly
-    braces define code blocks; and hard brackets expand macros. 
-    The macro expands to 'Hello, world', and thus we have 
-    (print 'Hello, world').
+    This is because, in imp, parentheses are function calls;
+    curly braces define code blocks; and hard brackets expand
+    macros. The macro expands to 'Hello, world', and thus we
+    have (print 'Hello, world').
 
-    Take note of the similarity between function calls and macro
-    expansions. Each requires one activate-able object and may
-    accept arbitrary arguments. Accordingly, activate-able objects
-    can be used for either purpose. There is no difference in
-    semantics between macro code and runtime-executed code, as
-    there is in C.
+    Take note of the similarity between function calls and
+    macro expansions. Each requires one activate-able object
+    and may accept arbitrary arguments. Accordingly, activate-
+    able objects can be used for either purpose. There is no
+    difference in semantics between macro code and function
+    code, as there is in C.
 
 
 
                          The Object System
 
-    Imp is dynamic and duck-typed (meaning that there are no 
+    Imp is dynamic and duck-typed (meaning that there are no
     compile-time distinctions between object types, and that,
     instead, objects are permitted wherever they are capable of
     going). So, essentially, there exists only one type: the
     object, which contains arbitrary fields that are themselves 
     nested objects (except in the case of built-in).
 
-    Object fields are accessible via the colon operator and can be
-    managed with the built-in 'def', 'set', and 'rem' functions.
+    Object fields are accessible via the colon operator and can
+    be managed with the built-in 'def', 'set', and 'rem'
+    functions.
 
       >  (def a 2)
       >  (set a 3)
@@ -54,29 +66,34 @@ Introduction
       >  (def myObject:mySlot 'hello')
       >  (rem myObject)
 
-    Exceptions are thrown when code attempts to access fields and
-    methods that do not exist. For example:
+    Exceptions are thrown when code attempts to access fields
+    and methods that do not exist. For example:
 
-      >  (def myObject $)             # Create new (empty) object.
+      >  (def myObject ($))           # Create new object.
       >  (myObject:nonExistentMethod) # Error!
 
     Methods are defined and called as follows:
 
-      >  (def myObject $)
+      >  (def myObject ($))
       >  (def myObject:vocabulary 'hi')
       >  (def myObject:speak {
             (print self:vocabulary)
          })
       >  (myObject:speak)
 
-    The 'self' variable is injected into block scope. Likewise is
-    the 'arguments' variable, a vector of arbitrary length.
+    The 'self' variable is injected into block scope. Likewise
+    is the 'arguments' variable, a vector of arbitrary length.
 
     
 
+
+UNFINISHED
+
+
+
                  Special and Internal Slots
 
-    Where many languages have reserved keywords, imp has a        <<<
+    Where many languages have reserved keywords, imp has a
     reserved keyword space, which comes in two parts.
 
     Anything prefixed with a single underscore is considered
