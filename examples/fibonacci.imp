@@ -1,0 +1,14 @@
+(import 'core/control' self)
+
+(def a 0)
+(def b 1)
+(def i 100)
+
+(while {(return i)} {
+	(print a)
+	(def c (a:$))
+	(c:+= b)
+	(a:set b)
+	(b:set c)	
+	(i:--)
+})

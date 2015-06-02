@@ -1,0 +1,10 @@
+(import 'core/operators')
+(import 'core/control' self)
+
+(def i 100)
+
+(while {(return i)} {
+	(print i)
+
+	(i:--)	
+})
