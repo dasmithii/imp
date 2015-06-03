@@ -277,7 +277,7 @@ static Object *ImpBase_callSpecialMethod_(Runtime *runtime
 		                           , methodName
 		                           , argc - 1
 		                           , argv + 1);
-}       
+} 
 
 
 void ImpBase_init(Object *self){

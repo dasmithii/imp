@@ -32,7 +32,7 @@ void ImpString_print(Object *self){
 }
 
 
-static Object *ImpString_print_internal(Runtime *runtime
+static Object *ImpString_print_(Runtime *runtime
 	                                  , Object *context
 	                                  , Object *caller
 	                                  , int argc
@@ -50,15 +50,7 @@ static Object *ImpString_print_internal(Runtime *runtime
 }
 
 
-void ImpString_set(Object *self, Object *value){
-	assert(ImpString_isValid(self));
-	assert(ImpString_isValid(value));
-
-	ImpString_setRaw(self, ImpString_getRaw(value));
-}
-
-
-static Object *ImpString_clone_internal(Runtime *runtime
+static Object *ImpString_clone_(Runtime *runtime
 	                                  , Object *context
 	                                  , Object *caller
 	                                  , int argc
@@ -79,12 +71,60 @@ static Object *ImpString_clone_internal(Runtime *runtime
 }
 
 
+void ImpString_concatenateRaw(Object *self, char *s2){
+	char *s1 = ImpString_getRaw(self);
+	char *s3 = malloc((1 + strlen(s1) + strlen(s2)) * sizeof(char));
+	if(!s3){
+		abort();
+	}
+	strcpy(s3, s1);
+	strcat(s3, s2);
+	ImpString_setRaw(self, s3);
+	free(s3);
+}
+
+
+Object *ImpString_concatenate_(Runtime *runtime
+	                         , Object *context
+	                         , Object *caller
+	                         , int argc
+	                         , Object **argv){
+	assert(runtime);
+	assert(ImpString_isValid(caller));
+
+	if(argc != 1){
+		Runtime_throwString(runtime, "String:concatenate requires exactly one argument");
+		return NULL;
+	}
+
+	Object *ro;
+	if(BuiltIn_id(argv[0]) == BUILTIN_STRING){
+		ro = argv[0];
+	} else if(Object_hasMethod(argv[0], "asString")){
+		ro = Runtime_callMethod(runtime
+			                  , context
+			                  , argv[0]
+			                  , "asString"
+			                  , 0
+			                  , NULL);
+		if(BuiltIn_id(ro) != BUILTIN_STRING){
+			Runtime_throwString(runtime, ":asString did not return string");
+		}
+	} else {
+		Runtime_throwString(runtime, "String:concatenate requires stringifiable argument");
+	}
+	ImpString_concatenateRaw(caller, ImpString_getRaw(ro));
+	return NULL;
+}
+
+
 void ImpString_init(Object *self){
 	assert(self);
 	BuiltIn_setId(self, BUILTIN_STRING);
 
-	Object_registerCMethod(self, "__print", ImpString_print_internal);
-	Object_registerCMethod(self, "__clone", ImpString_clone_internal);
+	Object_registerCMethod(self, "__print", ImpString_print_);
+	Object_registerCMethod(self, "__clone", ImpString_clone_);
+	Object_registerCMethod(self, "__concatenate", ImpString_concatenate_);
 
 	ImpString_setRaw(self, "");
 }

@@ -11,6 +11,11 @@ void ImpString_print(Object *self);
 char *ImpString_getRaw(Object *self);
 void ImpString_setRaw(Object *self, char *text);
 void ImpString_set(Object *self, Object *other);
-
+void ImpString_concatenateRaw(Object *self, char *text);
+Object *ImpString_concatenate_(Runtime *runtime
+	                         , Object *context
+	                         , Object *caller
+	                         , int argc
+	                         , Object **argv);
 
 #endif

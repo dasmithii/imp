@@ -1,5 +1,6 @@
 #include "general.h"
 #include "number.h"
+#include "string.h"
 #include "vector.h"
 
 
@@ -17,7 +18,7 @@ Vector *ImpVector_getRaw(Object *self){
 }
 
 
-static Object *ImpVector_print_internal(Runtime *runtime
+static Object *ImpVector_print_(Runtime *runtime
 	                                  , Object *context
 	                                  , Object *caller
 	                                  , int argc
@@ -41,7 +42,7 @@ static Object *ImpVector_print_internal(Runtime *runtime
 }
 
 
-static Object *ImpVector_clone_internal(Runtime *runtime
+static Object *ImpVector_clone_(Runtime *runtime
 	                                  , Object *context
 	                                  , Object *caller
 	                                  , int argc
@@ -67,7 +68,7 @@ static Object *ImpVector_clone_internal(Runtime *runtime
 }
 
 
-static Object *ImpVector_append_internal(Runtime *runtime
+static Object *ImpVector_append_(Runtime *runtime
 	                                   , Object *context
 	                                   , Object *caller
 	                                   , int argc
@@ -86,7 +87,7 @@ static Object *ImpVector_append_internal(Runtime *runtime
 }
 
 
-static Object *ImpVector_prepend_internal(Runtime *runtime
+static Object *ImpVector_prepend_(Runtime *runtime
 	                                    , Object *context
 	                                    , Object *caller
 	                                    , int argc
@@ -102,7 +103,7 @@ static Object *ImpVector_prepend_internal(Runtime *runtime
 }
 
 
-static Object *ImpVector_insert_internal(Runtime *runtime
+static Object *ImpVector_insert_(Runtime *runtime
 	                                   , Object *context
 	                                   , Object *caller
 	                                   , int argc
@@ -128,7 +129,7 @@ static Object *ImpVector_insert_internal(Runtime *runtime
 }
 
 
-static Object *ImpVector_remove_internal(Runtime *runtime
+static Object *ImpVector_remove_(Runtime *runtime
 	                                   , Object *context
 	                                   , Object *caller
 	                                   , int argc
@@ -153,7 +154,7 @@ static Object *ImpVector_remove_internal(Runtime *runtime
 }
 
 
-static Object *ImpVector_removeBack_internal(Runtime *runtime
+static Object *ImpVector_removeBack_(Runtime *runtime
 	                                       , Object *context
 	                                       , Object *caller
 	                                       , int argc
@@ -175,7 +176,7 @@ static Object *ImpVector_removeBack_internal(Runtime *runtime
 }
 
 
-static Object *ImpVector_removeFront_internal(Runtime *runtime
+static Object *ImpVector_removeFront_(Runtime *runtime
 	                                        , Object *context
 	                                        , Object *caller
 	                                        , int argc
@@ -197,7 +198,7 @@ static Object *ImpVector_removeFront_internal(Runtime *runtime
 }
 
 
-static Object *ImpVector_copy_internal(Runtime *runtime
+static Object *ImpVector_copy_(Runtime *runtime
 	                                 , Object *context
 	                                 , Object *caller
 	                                 , int argc
@@ -221,7 +222,7 @@ static Object *ImpVector_copy_internal(Runtime *runtime
 }
 
 
-static Object *ImpVector_get_internal(Runtime *runtime
+static Object *ImpVector_get_(Runtime *runtime
 	                                , Object *context
 	                                , Object *caller
 	                                , int argc
@@ -246,7 +247,7 @@ static Object *ImpVector_get_internal(Runtime *runtime
 }
 
 
-static Object *ImpVector_collect_internal(Runtime *runtime
+static Object *ImpVector_collect_(Runtime *runtime
 	                                , Object *context
 	                                , Object *caller
 	                                , int argc
@@ -257,7 +258,7 @@ static Object *ImpVector_collect_internal(Runtime *runtime
 }
 
 
-static Object *ImpVector_mark_internal(Runtime *runtime
+static Object *ImpVector_mark_(Runtime *runtime
 	                                , Object *context
 	                                , Object *caller
 	                                , int argc
@@ -279,24 +280,51 @@ static Object *ImpVector_mark_internal(Runtime *runtime
 	return NULL;
 }
 
+static Object *ImpVector_asString_(Runtime *runtime
+	                                     , Object *context
+	                                     , Object *caller
+	                                     , int argc
+	                                     , Object **argv){
+	assert(runtime);
+	assert(ImpVector_isValid(caller));
+
+	if(argc != 0){
+		Runtime_throwString(runtime, "Vector:asString does not accept arguments");
+	}
+	Vector *internal = ImpVector_getRaw(caller);
+	Object *r = Runtime_cloneField(runtime, "String");
+	ImpString_setRaw(r, "[");
+	for(int i = 0; i < internal->size; i++){
+		Object *item = *((Object**) Vector_hook(internal, i));
+		ImpString_concatenate_(runtime, context, r, 1, &item);
+		if(i != internal->size - 1){
+			ImpString_concatenateRaw(r, ", ");
+		}
+	}
+	ImpString_concatenateRaw(r, "]");
+	return r;
+}
+
 
 void ImpVector_init(Object *self){
 	assert(self);
 
 	BuiltIn_setId(self, BUILTIN_VECTOR);
 
-	Object_registerCMethod(self, "__collect", ImpVector_collect_internal);
-	Object_registerCMethod(self, "__mark", ImpVector_mark_internal);
+	Object_registerCMethod(self, "__collect", ImpVector_collect_);
+	Object_registerCMethod(self, "__mark", ImpVector_mark_);
 
 
-	Object_registerCMethod(self, "__print", ImpVector_print_internal);
-	Object_registerCMethod(self, "__clone", ImpVector_clone_internal);
-	Object_registerCMethod(self, "__append", ImpVector_append_internal);
-	Object_registerCMethod(self, "__prepend", ImpVector_prepend_internal);
-	Object_registerCMethod(self, "__insert", ImpVector_insert_internal);
-	Object_registerCMethod(self, "__remove", ImpVector_remove_internal);
-	Object_registerCMethod(self, "__removeBack", ImpVector_removeBack_internal);
-	Object_registerCMethod(self, "__removeFront", ImpVector_removeFront_internal);
-	Object_registerCMethod(self, "__copy", ImpVector_copy_internal);
-	Object_registerCMethod(self, "__get", ImpVector_get_internal);
+	Object_registerCMethod(self, "__print", ImpVector_print_);
+	Object_registerCMethod(self, "__clone", ImpVector_clone_);
+	Object_registerCMethod(self, "__append", ImpVector_append_);
+	Object_registerCMethod(self, "__prepend", ImpVector_prepend_);
+	Object_registerCMethod(self, "__insert", ImpVector_insert_);
+	Object_registerCMethod(self, "__remove", ImpVector_remove_);
+	Object_registerCMethod(self, "__removeBack", ImpVector_removeBack_);
+	Object_registerCMethod(self, "__removeFront", ImpVector_removeFront_);
+	Object_registerCMethod(self, "__copy", ImpVector_copy_);
+	Object_registerCMethod(self, "__get", ImpVector_get_);
+
+	Object_registerCMethod(self, "__asString", ImpVector_asString_);
 }

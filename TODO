@@ -3,10 +3,14 @@ NOW:
  + Screw boolean type.
 
  + Instead of Runtime_cloneField, reference builtins statically
+   with Runtime_getBaseNumber, Runtime_getNumber, and et cetera.
 
  + Scrap builtin printer
  
  + Update control structures to use numbers rather than booleans.
+
+ + Have Runtime_callMethod check for methods and throw exceptions
+   if necessary. Don't bother checking before hand when possible.
 
 
 
