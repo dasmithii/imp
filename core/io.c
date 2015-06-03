@@ -32,8 +32,6 @@ static void File_setRaw(Object *self, FILE *fp){
 }
 
 
-
-
 Object *io_File_open(Runtime *runtime
 	               , Object *context
 	               , Object *caller
@@ -240,6 +238,7 @@ Object *io_File_writeLine(Runtime *runtime
 	fprintf(fp, "\n");
 	return NULL;
 }
+
 
 Object *io_onImport(Runtime *runtime
 	              , Object *context

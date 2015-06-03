@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "base.h"
 #include "number.h"
@@ -279,6 +280,330 @@ static Object *ImpBase_callSpecialMethod_(Runtime *runtime
 		                           , argv + 1);
 } 
 
+
+static Object *compare(Runtime *runtime
+	                 , Object *context
+	                 , Object *lo
+                     , Object *ro){
+	if(Object_hasMethod(lo, "<>")){
+		return Runtime_callMethod(runtime
+			                    , context
+			                    , lo
+			                    , "<>"
+			                    , 1
+			                    , &ro);
+	} else if(Object_hasMethod(ro, "<>")){
+		Object *c = Runtime_callMethod(runtime
+			                         , context
+			                         , ro
+			                         , "<>"
+			                         , 1
+			                         , &lo);
+		ImpNumber_setRaw(c, -1 * ImpNumber_getRaw(c));
+		return c;
+	} else {
+		Runtime_throwString(runtime, "<> method not found");
+	}
+	return NULL;
+}
+
+
+static Object *ImpBase_above_(Runtime *runtime
+	                        , Object *context
+	                        , Object *self
+	                        , int argc
+	                        , Object **argv){
+	if(argc != 1){
+		Runtime_throwString(runtime, "Object:> requires exactly 1 argument");
+	}
+	Object *c = compare(runtime, context, self, argv[0]);
+	ImpNumber_setRaw(c, ImpNumber_getRaw(c) > 0? 1:0);
+	return c;
+} 
+
+static Object *ImpBase_aboveEq_(Runtime *runtime
+	                          , Object *context
+	                          , Object *self
+	                          , int argc
+	                          , Object **argv){
+	if(argc != 1){
+		Runtime_throwString(runtime, "Object:>= requires exactly 1 argument");
+	}
+	Object *c = compare(runtime, context, self, argv[0]);
+	ImpNumber_setRaw(c, ImpNumber_getRaw(c) >= 0? 1:0);
+	return c;
+} 
+
+static Object *ImpBase_below_(Runtime *runtime
+	                        , Object *context
+	                        , Object *self
+	                        , int argc
+	                        , Object **argv){
+	if(argc != 1){
+		Runtime_throwString(runtime, "Object:< requires exactly 1 argument");
+	}
+	Object *c = compare(runtime, context, self, argv[0]);
+	ImpNumber_setRaw(c, ImpNumber_getRaw(c) < 0? 1:0);
+	return c;
+} 
+
+static Object *ImpBase_belowEq_(Runtime *runtime
+	                          , Object *context
+	                          , Object *self
+	                          , int argc
+	                          , Object **argv){
+	if(argc != 1){
+		Runtime_throwString(runtime, "Object:<= requires exactly 1 argument");
+	}
+	Object *c = compare(runtime, context, self, argv[0]);
+	ImpNumber_setRaw(c, ImpNumber_getRaw(c) <= 0? 1:0);
+	return c;
+} 
+
+static Object *ImpBase_not_(Runtime *runtime
+	                      , Object *context
+	                      , Object *self
+	                      , int argc
+	                      , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "Object:! accepts no arguments");
+	}
+	Object *b = Runtime_callMethod(runtime
+		                         , context
+		                         , self
+		                         , "?"
+		                         , 0
+		                         , NULL);
+	ImpNumber_setRaw(b, ImpString_getRaw(b)? 0:1);
+	return b;
+} 
+
+static Object *ImpBase_clone_(Runtime *runtime
+	                        , Object *context
+	                        , Object *self
+	                        , int argc
+	                        , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "Object:~ accepts no arguments");
+	}
+	Object *r = Runtime_rawObject(runtime);
+	Object_putShallow(r, "_prototype", self);
+	return r;
+} 
+
+
+
+static Object *copyAndDo(Runtime *runtime
+	                   , Object *context
+	                   , Object *lo
+	                   , Object *ro
+	                   , char *op){
+	if(!Object_hasMethod(lo, op)){
+		Runtime_throwFormatted(runtime, "'%s' method not found", op);
+	}
+
+	Object *cp = Runtime_callMethod(runtime
+		                          , context
+		                          , lo
+		                          , "$"
+		                          , 0
+		                          , NULL);
+	if(!cp){
+		Runtime_throwString(runtime, "copy returned NULL");
+	}
+	Object_reference(cp);
+	Runtime_callMethod(runtime, context, cp, op, 1, &ro);
+	Object_unreference(cp);
+	return cp;
+}
+
+
+static Object *ImpBase_plus_(Runtime *runtime
+	                       , Object *context
+	                       , Object *self
+	                       , int argc
+	                       , Object **argv){
+	if(argc != 1){
+		Runtime_throwString(runtime, "Object:+ requires exactly 1 arguments");
+	}
+	return copyAndDo(runtime, context, self, argv[0], "+=");
+} 
+
+static Object *ImpBase_minus_(Runtime *runtime
+	                        , Object *context
+	                        , Object *self
+	                        , int argc
+	                        , Object **argv){
+	if(argc != 1){
+		Runtime_throwString(runtime, "Object:- requires exactly 1 arguments");
+	}
+	return copyAndDo(runtime, context, self, argv[0], "-=");
+} 
+
+static Object *ImpBase_div_(Runtime *runtime
+	                      , Object *context
+	                      , Object *self
+	                      , int argc
+	                      , Object **argv){
+	if(argc != 1){
+		Runtime_throwString(runtime, "Object:/ requires exactly 1 arguments");
+	}
+	return copyAndDo(runtime, context, self, argv[0], "/=");
+} 
+
+static Object *ImpBase_times_(Runtime *runtime
+	                      , Object *context
+	                      , Object *self
+	                      , int argc
+	                      , Object **argv){
+	if(argc != 1){
+		Runtime_throwString(runtime, "Object:* requires exactly 1 arguments");
+	}
+	return copyAndDo(runtime, context, self, argv[0], "*=");
+} 
+
+static Object *ImpBase_mod_(Runtime *runtime
+	                      , Object *context
+	                      , Object *self
+	                      , int argc
+	                      , Object **argv){
+	if(argc != 1){
+		Runtime_throwString(runtime, "Object:% requires exactly 1 arguments");
+	}
+	return copyAndDo(runtime, context, self, argv[0], "%=");
+} 
+
+static Object *ImpBase_value_(Runtime *runtime
+	                        , Object *context
+	                        , Object *self
+	                        , int argc
+	                        , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "$ does not accept arguments");
+	}
+
+	// check if arg is able be copied using default methods
+	for(int i = 0; i < self->slotCount; i++){
+		Slot *s = self->slots + i;
+		if(Slot_isPrimitive(s) && strcmp(s->key, "__referenceCount") != 0){
+			Runtime_throwFormatted(runtime, "object not copy-able (contains primitive data at: '%s')", s->key);
+		}
+	}
+
+	Object *r = Runtime_rawObject(runtime);
+	Object_reference(r);
+	for(int i = 0; i < self->slotCount; i++){
+		Slot *s = self->slots + i;
+		Object *o = Slot_object(s);
+		if(strcmp(s->key, "_data") == 0){
+			Object_putShallow(r, "_data", Runtime_callMethod(runtime
+				                              , context
+				                              , o
+				                              , "$"
+				                              , 0
+				                              , NULL));
+		} else {
+			Object_putShallow(r, s->key, o);
+		}
+	}
+	Object_unreference(r);
+	return r;
+} 
+
+static bool slotsAreEqual(Runtime *runtime
+	                    , Object *context
+	                    , Slot *s0
+	                    , Slot *s1){
+	if(s0 == s1){
+		return true;
+	}
+
+	if(Slot_isPrimitive(s0)){
+		if(!Slot_isPrimitive(s1)){
+			return false;
+		}
+		return Slot_data(s0) == Slot_data(s1);
+	} else {
+		Object *arg = Slot_object(s1);
+		return Runtime_callMethod(runtime
+			                    , context
+			                    , Slot_object(s0)
+			                    , "=="
+			                    , 1
+			                    , &arg);
+	}
+}
+
+
+static bool objectsAreEqual(Runtime *runtime
+	                      , Object *context
+	                      , Object *o0
+	                      , Object *o1){
+	if(o0 == o1){
+		return true;
+	}
+	if(!o0 || !o1){
+		return false;
+	}
+	if(o0->slotCount != o1->slotCount){
+		return false;
+	}
+	for(int i = 0; i < o0->slotCount; i++){
+		if(!slotsAreEqual(runtime
+			            , context
+			            , o0->slots + i
+			            , o1->slots + i)){
+			return false;
+		}
+	}
+	return true;
+}
+
+static Object *ImpBase_equals_(Runtime *runtime
+	                         , Object *context
+	                         , Object *self
+	                         , int argc
+	                         , Object **argv){
+	if(argc < 1){
+		Runtime_throwString(runtime, "Object:== requires arguments");
+	}
+
+	if(Object_hasMethod(self, "<>")){
+		Object *c = compare(runtime, context, self, argv[0]);
+		ImpNumber_setRaw(c, ImpNumber_getRaw(c) == 0? 1:0);
+		return c;
+	}
+
+
+	Object *r = Runtime_cloneField(runtime, "Number");
+	ImpNumber_setRaw(r, 1);
+	Object_reference(r);
+	for(int i = 0; i < argc; i++){
+		if(!objectsAreEqual(runtime
+			              , context
+			              , self
+			              , argv[i])){
+			ImpNumber_setRaw(r, 0);
+			break;
+		}
+	}
+	Object_unreference(r);
+	return r;
+} 
+
+static Object *ImpBase_is_(Runtime *runtime
+	                     , Object *context
+	                     , Object *caller
+	                     , int argc
+	                     , Object **argv){
+	if(argc != 1){
+		Runtime_throwString(runtime, "Object:is requires exactly one argument");
+	}
+	Object *r = Runtime_cloneField(runtime, "Number");
+	ImpNumber_setRaw(r, caller == argv[0]? 1:0);
+	return r;
+} 
+
 static Object *ImpBase_asBoolean_(Runtime *runtime
 	                            , Object *context
 	                            , Object *caller
@@ -288,7 +613,8 @@ static Object *ImpBase_asBoolean_(Runtime *runtime
 		Runtime_throwString(runtime, "Object:? does not accept arguments");
 	}
 
-	Object *r;
+	Object *r = Runtime_cloneField(runtime, "Number");
+	Object_reference(r);
 
 	if(Object_hasMethod(caller, "asNumber")){
 		Object *n = Runtime_callMethod(runtime
@@ -297,17 +623,12 @@ static Object *ImpBase_asBoolean_(Runtime *runtime
 			                         , "asNumber"
 			                         , 0
 			                         , NULL);
-		r = Runtime_callMethod(runtime
-			                 , context
-			                 , n
-			                 , "?"
-			                 , 0
-			                 , NULL);
+		ImpNumber_setRaw(r, ImpNumber_getRaw(n)? 1:0);
 	} else {
-		r = Runtime_cloneField(runtime, "Number");
-		ImpNumber_setRaw(r, 1);
+		ImpNumber_setRaw(r, 1); // default to 1 on non-NULL objects
 	}
 
+	Object_unreference(r);
 	return r;
 } 
 
@@ -332,4 +653,19 @@ void ImpBase_init(Object *self){
 	Object_registerCMethod(self, "__asString", ImpBase_asString_);
 
 	Object_registerCMethod(self, "__?", ImpBase_asBoolean_);
+
+	Object_registerCMethod(self, "__>", ImpBase_above_);
+	Object_registerCMethod(self, "__>=", ImpBase_aboveEq_);
+	Object_registerCMethod(self, "__<", ImpBase_below_);
+	Object_registerCMethod(self, "__<=", ImpBase_belowEq_);
+	Object_registerCMethod(self, "__!", ImpBase_not_);
+	Object_registerCMethod(self, "__~", ImpBase_clone_);
+	Object_registerCMethod(self, "__+", ImpBase_plus_);
+	Object_registerCMethod(self, "__-", ImpBase_minus_);
+	Object_registerCMethod(self, "__*", ImpBase_times_);
+	Object_registerCMethod(self, "__/", ImpBase_div_);
+	Object_registerCMethod(self, "__%", ImpBase_mod_);
+	Object_registerCMethod(self, "__$", ImpBase_value_);
+	Object_registerCMethod(self, "__==", ImpBase_equals_);
+	Object_registerCMethod(self, "__is", ImpBase_is_);
 }
