@@ -238,6 +238,7 @@ Object *io_File_writeLine(Runtime *runtime
 	}
 	FILE *fp = File_getRaw(caller);
 	fprintf(fp, "\n");
+	return NULL;
 }
 
 Object *io_onImport(Runtime *runtime

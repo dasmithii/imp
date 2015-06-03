@@ -1,12 +1,12 @@
-BUG:
+NOW:
 
- + Closure scope prototype (internal->context) is being
-   collected prematurely.
+ + Screw boolean type.
 
- + Seems that the collection, when running fizzbuzz, 
-   fails during Number:clone.
+ + Instead of Runtime_cloneField, reference builtins statically
 
- + Problem is that collectOne functions 
+ + Scrap builtin printer
+ 
+ + Update control structures to use numbers rather than booleans.
 
 
 

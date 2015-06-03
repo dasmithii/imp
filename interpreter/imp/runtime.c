@@ -14,6 +14,7 @@
 #include <imp/builtin/vector.h>
 #include <imp/builtin/return.h>
 #include <imp/builtin/importer.h>
+#include <imp/builtin/base.h>
 #include <imp/c.h>
 #include <imp/parser.h>
 #include <imp/runtime.h>
@@ -31,11 +32,11 @@ typedef struct {
 // object. This is particularly useful for method-type
 // objects.
 Object *Runtime_activateOn(Runtime *runtime
-	                            , Object *context
-	                            , Object *object
-	                            , int argc
-	                            , Object **argv
-	                            , Object *origin){
+	                     , Object *context
+	                     , Object *object
+	                     , int argc
+	                     , Object **argv
+	                     , Object *origin){
 	assert(runtime);
 	assert(context);
 	assert(Object_isValid(object));
@@ -165,31 +166,6 @@ static void unmark(void *addr){
 }
 
 
-static void Runtime_collectOne(Runtime *runtime, Object *object){
-	assert(runtime);
-	assert(Object_isValid(object));
-
-	Object *special = Object_getDeep(object, "_collect");
-	if(special){
-		Runtime_activateOn(runtime 
-			             , NULL
-			             , special
-			             , 0
-			             , NULL
-			             , object);
-	} else {
-		void *internal = Object_getDataDeep(object, "__collect");
-		if(internal){
-			CFunction cf = *((CFunction*) internal);
-			Object_reference(object);
-			cf(runtime, NULL, object, 0, NULL);
-			Object_unreference(object);
-		}
-	}
-	Object_free(object);
-}
-
-
 void Runtime_markRecursive(Runtime *runtime, Object *object){
 	assert(runtime);
 	assert(Object_isValid(object));
@@ -314,9 +290,11 @@ void Runtime_init(Runtime *self){
 	Vector_init(&self->collectables, sizeof(Object*));
 
 	self->root_scope = Runtime_rawObject(self);
-
 	Object_putShallow(self->root_scope, "self", self->root_scope);
 
+	Object *base = Runtime_rawObject(self);
+	ImpBase_init(base);
+	Object_putShallow(self->root_scope, "Object", base);
 
 	Object *s = Runtime_rawObject(self);
 	ImpString_init(s);
