@@ -33,7 +33,7 @@ void ImpNumber_add(Object *self, Object *other){
 }
 
 
-static Object *ImpNumber_add_internal(Runtime *runtime
+static Object *ImpNumber_add_(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
 	                       , int argc
@@ -67,7 +67,7 @@ void ImpNumber_sub(Object *self, Object *other){
 }
 
 
-static Object *ImpNumber_sub_internal(Runtime *runtime
+static Object *ImpNumber_sub_(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
 	                       , int argc
@@ -99,7 +99,7 @@ void ImpNumber_mult(Object *self, Object *other){
 }
 
 
-static Object *ImpNumber_mult_internal(Runtime *runtime
+static Object *ImpNumber_mult_(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
 	                       , int argc
@@ -132,7 +132,7 @@ void ImpNumber_div(Object *self, Object *other){
 }
 
 
-static Object *ImpNumber_div_internal(Runtime *runtime
+static Object *ImpNumber_div_(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
 	                       , int argc
@@ -166,7 +166,7 @@ void ImpNumber_print(Object *self){
 }
 
 
-static Object *ImpNumber_print_internal(Runtime *runtime
+static Object *ImpNumber_print_(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
 	                       , int argc
@@ -182,7 +182,7 @@ static Object *ImpNumber_print_internal(Runtime *runtime
 }
 
 
-static Object *ImpNumber_set_internal(Runtime *runtime
+static Object *ImpNumber_set_(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
 	                       , int argc
@@ -229,7 +229,7 @@ double ImpNumber_getRaw(Object *self){
 }
 
 
-static Object *ImpNumber_clone_internal(Runtime *runtime
+static Object *ImpNumber_clone_(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
 	                       , int argc
@@ -264,7 +264,7 @@ static Object *ImpNumber_clone_internal(Runtime *runtime
 
 
 
-static Object *ImpNumber_asString_internal(Runtime *runtime
+static Object *ImpNumber_asString_(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
 	                       , int argc
@@ -282,7 +282,7 @@ static Object *ImpNumber_asString_internal(Runtime *runtime
 
 
 
-static Object *ImpNumber_cmp_internal(Runtime *runtime
+static Object *ImpNumber_cmp_(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
 	                       , int argc
@@ -301,7 +301,7 @@ static Object *ImpNumber_cmp_internal(Runtime *runtime
 }
 
 
-static Object *ImpNumber_mod_internal(Runtime *runtime
+static Object *ImpNumber_mod_(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
 	                       , int argc
@@ -318,7 +318,7 @@ static Object *ImpNumber_mod_internal(Runtime *runtime
 	return NULL;
 }
 
-static Object *ImpNumber_inc_internal(Runtime *runtime
+static Object *ImpNumber_inc_(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
 	                       , int argc
@@ -331,7 +331,7 @@ static Object *ImpNumber_inc_internal(Runtime *runtime
 	return caller;
 }
 
-static Object *ImpNumber_dec_internal(Runtime *runtime
+static Object *ImpNumber_dec_(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
 	                       , int argc
@@ -344,7 +344,7 @@ static Object *ImpNumber_dec_internal(Runtime *runtime
 	return caller;
 }
 
-static Object *ImpNumber_copy_internal(Runtime *runtime
+static Object *ImpNumber_copy_(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
 	                       , int argc
@@ -353,10 +353,29 @@ static Object *ImpNumber_copy_internal(Runtime *runtime
 		Runtime_throwString(runtime, "Number:$ does not accept arguments");
 	}
 
-	Object *r = Runtime_clone(runtime, caller);
+	Object *r = Runtime_clone(runtime, caller); // TODO: fix clone
 	double *data = malloc(sizeof(double));
 	*data = ImpNumber_getRaw(caller);
 	Object_putDataShallow(r, "__data", data);
+	return r;
+}
+
+
+static Object *ImpNumber_asBoolean_(Runtime *runtime
+	                              , Object *context
+	                              , Object *caller
+	                              , int argc
+	                              , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "Number:? does not accept arguments");
+	}
+
+	Object *r = Runtime_cloneField(runtime, "Number");
+	if(ImpNumber_getRaw(caller) == 0){
+		ImpNumber_setRaw(r, 0);
+	} else {
+		ImpNumber_setRaw(r, 1);
+	}
 	return r;
 }
 
@@ -365,23 +384,24 @@ void ImpNumber_init(Object *self){
 	assert(self);
 	BuiltIn_setId(self, BUILTIN_NUMBER);
 
-	Object_registerCMethod(self, "__+=", ImpNumber_add_internal);
-	Object_registerCMethod(self, "__-=", ImpNumber_sub_internal);
-	Object_registerCMethod(self, "__*=", ImpNumber_mult_internal);
-	Object_registerCMethod(self, "__/=", ImpNumber_div_internal);
-	Object_registerCMethod(self, "__%=", ImpNumber_mod_internal);
-	Object_registerCMethod(self, "__<>", ImpNumber_cmp_internal);
+	Object_registerCMethod(self, "__+=", ImpNumber_add_);
+	Object_registerCMethod(self, "__-=", ImpNumber_sub_);
+	Object_registerCMethod(self, "__*=", ImpNumber_mult_);
+	Object_registerCMethod(self, "__/=", ImpNumber_div_);
+	Object_registerCMethod(self, "__%=", ImpNumber_mod_);
+	Object_registerCMethod(self, "__<>", ImpNumber_cmp_);
 
-	Object_registerCMethod(self, "__++", ImpNumber_inc_internal);
-	Object_registerCMethod(self, "__--", ImpNumber_dec_internal);
+	Object_registerCMethod(self, "__++", ImpNumber_inc_);
+	Object_registerCMethod(self, "__--", ImpNumber_dec_);
 
-	Object_registerCMethod(self, "__$", ImpNumber_copy_internal);
+	Object_registerCMethod(self, "__$", ImpNumber_copy_);
+	Object_registerCMethod(self, "__?", ImpNumber_asBoolean_);
 
-	Object_registerCMethod(self, "__print", ImpNumber_print_internal);
-	Object_registerCMethod(self, "__set", ImpNumber_set_internal);
+	Object_registerCMethod(self, "__print", ImpNumber_print_);
+	Object_registerCMethod(self, "__set", ImpNumber_set_);
 
-	Object_registerCMethod(self, "__clone", ImpNumber_clone_internal);
-	Object_registerCMethod(self, "__asString", ImpNumber_asString_internal);
-	// Object_registerCMethod(self, "__equals", ImpNumber_equals_internal);
+	Object_registerCMethod(self, "__clone", ImpNumber_clone_);
+	Object_registerCMethod(self, "__asString", ImpNumber_asString_);
+	// Object_registerCMethod(self, "__equals", ImpNumber_equals_);
 	ImpNumber_setRaw(self, 0);
 }

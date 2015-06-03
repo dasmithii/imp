@@ -1,9 +1,9 @@
-(import 'core/operators')
+(import 'core/io')
 (import 'core/control' self)
 
 (def i 100)
 
-(while {(return i)} {
-	(print i)
+(while i {
+	(io:stdout:writeLine i)
 	(i:--)	
 })

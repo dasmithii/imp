@@ -279,6 +279,38 @@ static Object *ImpBase_callSpecialMethod_(Runtime *runtime
 		                           , argv + 1);
 } 
 
+static Object *ImpBase_asBoolean_(Runtime *runtime
+	                            , Object *context
+	                            , Object *caller
+	                            , int argc
+	                            , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "Object:? does not accept arguments");
+	}
+
+	Object *r;
+
+	if(Object_hasMethod(caller, "asNumber")){
+		Object *n = Runtime_callMethod(runtime
+			                         , context
+			                         , caller
+			                         , "asNumber"
+			                         , 0
+			                         , NULL);
+		r = Runtime_callMethod(runtime
+			                 , context
+			                 , n
+			                 , "?"
+			                 , 0
+			                 , NULL);
+	} else {
+		r = Runtime_cloneField(runtime, "Number");
+		ImpNumber_setRaw(r, 1);
+	}
+
+	return r;
+} 
+
 
 void ImpBase_init(Object *self){
 	assert(self);
@@ -298,4 +330,6 @@ void ImpBase_init(Object *self){
 	Object_registerCMethod(self, "__slotNames", ImpBase_slotNames_);
 	Object_registerCMethod(self, "__slotCount", ImpBase_slotCount_);
 	Object_registerCMethod(self, "__asString", ImpBase_asString_);
+
+	Object_registerCMethod(self, "__?", ImpBase_asBoolean_);
 }

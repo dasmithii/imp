@@ -9,15 +9,15 @@
 
 
 
-// references to singleton values in boolean module
-static Object *T = NULL;
-static Object *F = NULL;
-
 static bool isZero(Runtime *runtime
 	             , Object *ctx
 	             , Object *obj){
-	if(!obj || obj == F){
+	if(!obj){
 		return true;
+	}
+
+	if(BuiltIn_id(obj) == BUILTIN_NUMBER){
+		return ImpNumber_getRaw(obj) == 0;
 	}
 
 	if(Object_hasMethod(obj, "?")){
@@ -30,40 +30,10 @@ static bool isZero(Runtime *runtime
 
 		Object_unreference(ctx);
 		Object_unreference(obj);
-		if(asBoolean == F){
-			return true;
-		} else {
-			return false;
-		}
+		return ImpNumber_getRaw(asBoolean) == 0;
 	}
 
-	if(BuiltIn_id(obj) == BUILTIN_NUMBER &&
-	   ImpNumber_getRaw(obj) == 0){
-		return true;
-	}
-
-	if(BuiltIn_id(obj) == BUILTIN_STRING &&
-	   strcmp(ImpString_getRaw(obj), "") == 0){
-		return true;
-	}
-
-	if(Object_hasMethod(obj, "asNumber")){
-		Object_reference(ctx);
-		Object_reference(obj);
-		Object *asNumber = Runtime_callMethod(runtime
-			                                , ctx
-			                                , obj
-			                                , "asNumber", 0, NULL);
-		Object_unreference(ctx);
-		Object_unreference(obj);
-		if(ImpNumber_getRaw(asNumber) == 0){
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	// TODO:? check if a boolean was returned at all
+	Runtime_throwString(runtime, "object not boolean");
 	return false;
 }
 
@@ -103,16 +73,3 @@ Object *if_activate(Runtime *runtime
 
 	return NULL;
 }
-
-
-Object *if_onImport(Runtime *runtime
-	              , Object *context
-	              , Object *caller
-	              , int argc
-	              , Object **argv){
-	Object *boolean_module = Imp_import(runtime, "core/Boolean");
-	T = Object_getShallow(boolean_module, "true");
-	F = Object_getShallow(boolean_module, "false");
-	return NULL;
-}
-

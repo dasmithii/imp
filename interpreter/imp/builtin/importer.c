@@ -446,7 +446,8 @@ static Object *ImpImporter_activate_internal(Runtime *runtime
 			       strcmp(slot->key, "__referenceCount") != 0){
 			       	Runtime_throwFormatted(runtime, "failed to import '%s' into context (has internal method)", modulePath);
 				}
-			} else if(Object_hasKeyShallow(dest, slot->key)){
+			} else if(Object_hasKeyShallow(dest, slot->key) &&
+				      slot->data != Object_getShallow(module, slot->key)){
 				Runtime_throwFormatted(runtime, "failed to import '%s' into context because of conflict '%s'", modulePath, slot->key);
 			}
 		}

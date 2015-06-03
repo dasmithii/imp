@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "general.h"
+#include "number.h"
 #include "string.h"
 
 
@@ -97,7 +98,7 @@ Object *ImpString_concatenate_(Runtime *runtime
 		return NULL;
 	}
 
-	Object *ro;
+	Object *ro = NULL;
 	if(BuiltIn_id(argv[0]) == BUILTIN_STRING){
 		ro = argv[0];
 	} else if(Object_hasMethod(argv[0], "asString")){
@@ -118,6 +119,30 @@ Object *ImpString_concatenate_(Runtime *runtime
 }
 
 
+static Object *ImpString_asBoolean_(Runtime *runtime
+	                              , Object *context
+	                              , Object *caller
+	                              , int argc
+	                              , Object **argv){
+	assert(runtime);
+	assert(ImpString_isValid(caller));
+
+	if(argc != 0){
+		Runtime_throwString(runtime, "String:? does not accept arguments.");
+		return NULL;
+	}
+
+	Object *r = Runtime_cloneField(runtime, "Number");
+	if(*ImpString_getRaw(caller) == 0){
+		ImpNumber_setRaw(r, 0);
+	} else {
+		ImpNumber_setRaw(r, 1);
+	}
+	return r;	
+}
+
+
+
 void ImpString_init(Object *self){
 	assert(self);
 	BuiltIn_setId(self, BUILTIN_STRING);
@@ -125,6 +150,7 @@ void ImpString_init(Object *self){
 	Object_registerCMethod(self, "__print", ImpString_print_);
 	Object_registerCMethod(self, "__clone", ImpString_clone_);
 	Object_registerCMethod(self, "__concatenate", ImpString_concatenate_);
+	Object_registerCMethod(self, "__?", ImpString_asBoolean_);
 
 	ImpString_setRaw(self, "");
 }

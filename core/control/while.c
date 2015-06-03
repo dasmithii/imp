@@ -7,54 +7,35 @@
 #include <stdbool.h>
 #include <string.h>
 
-// references to singleton values in boolean module
-static Object *T = NULL;
-static Object *F = NULL;
 
 static bool isZero(Runtime *runtime
 	             , Object *ctx
 	             , Object *obj){
-	if(!obj || obj == F){
+	if(!obj){
 		return true;
 	}
 
-	if(Object_hasMethod(obj, "?")){ // asBoolean
+	if(BuiltIn_id(obj) == BUILTIN_NUMBER){
+		return ImpNumber_getRaw(obj) == 0;
+	}
+
+	if(Object_hasMethod(obj, "?")){
+		Object_reference(ctx);
+		Object_reference(obj);
 		Object *asBoolean = Runtime_callMethod(runtime
 			                                 , ctx
 			                                 , obj
 			                                 , "?", 0, NULL);
-		if(asBoolean == F){
-			return true;
-		} else {
-			return false;
-		}
+
+		Object_unreference(ctx);
+		Object_unreference(obj);
+		return ImpNumber_getRaw(asBoolean) == 0;
 	}
 
-	if(BuiltIn_id(obj) == BUILTIN_NUMBER &&
-	   ImpNumber_getRaw(obj) == 0){
-		return true;
-	}
-
-	if(BuiltIn_id(obj) == BUILTIN_STRING &&
-	   strcmp(ImpString_getRaw(obj), "") == 0){
-		return true;
-	}
-
-	if(Object_hasMethod(obj, "asNumber")){
-		Object *asNumber = Runtime_callMethod(runtime
-			                                , ctx
-			                                , obj
-			                                , "asNumber", 0, NULL);
-		if(ImpNumber_getRaw(asNumber) == 0){
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	// TODO:? check if a boolean was returned at all
+	Runtime_throwString(runtime, "object not boolean");
 	return false;
 }
+
 
 
 // If accepts one or more condition-executable pairs as
@@ -76,16 +57,18 @@ Object *while_activate(Runtime *runtime
 
 	if(argc != 2){
 		Runtime_throwString(runtime, "while accepts exactly 2 arguments.");
-	} else if(!Object_canBeActivated(condition)){
-		Runtime_throwString(runtime, "while condition must be activatable");
-	} else if(!Object_canBeActivated(step)){
+	} 
+	if(!Object_canBeActivated(step)){
 		Runtime_throwString(runtime, "while step must be activatable");
 	}
 
 	for(;;){
 		// check condition
-		Runtime_activate(runtime, context, condition, 0, NULL);
-		if(isZero(runtime, context, Runtime_returnValue(runtime))){
+		Object *c = condition;
+		if(Object_canBeActivated(c)){
+			c = Runtime_activate(runtime, context, condition, 0, NULL);
+		}
+		if(isZero(runtime, context, c)){
 			break;
 		}
 
@@ -97,15 +80,4 @@ Object *while_activate(Runtime *runtime
 	return NULL;
 }
 
-
-Object *while_onImport(Runtime *runtime
-	              , Object *context
-	              , Object *caller
-	              , int argc
-	              , Object **argv){
-	Object *boolean_module = Imp_import(runtime, "core/Boolean");
-	T = Object_getShallow(boolean_module, "true");
-	F = Object_getShallow(boolean_module, "false");
-	return NULL;
-}
 
