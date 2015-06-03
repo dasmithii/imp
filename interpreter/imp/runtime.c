@@ -7,7 +7,6 @@
 #include <imp/builtin/route.h>
 #include <imp/builtin/number.h>
 #include <imp/builtin/string.h>
-#include <imp/builtin/print.h>
 #include <imp/builtin/def.h>
 #include <imp/builtin/set.h>
 #include <imp/builtin/closure.h>
@@ -307,10 +306,6 @@ void Runtime_init(Runtime *self){
 	Object *route = Runtime_rawObject(self);
 	ImpRoute_init(route);
 	Object_putShallow(self->root_scope, "Route", route);
-
-	Object *printer = Runtime_rawObject(self);
-	ImpPrinter_init(printer);
-	Object_putShallow(self->root_scope, "print", printer);
 
 	Object *setter = Runtime_rawObject(self);
 	ImpSet_init(setter);
