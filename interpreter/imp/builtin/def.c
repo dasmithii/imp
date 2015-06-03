@@ -39,7 +39,7 @@ static Object *ImpDef_activate_internal(Runtime *runtime
 		Object *ppar = par;
 		par = Object_getDeep(par, buf);
 		if(!par){
-			par = Runtime_rawObject(runtime);
+			par = Runtime_newObject(runtime);
 			Object_putShallow(ppar, buf, par);
 		}
 	}

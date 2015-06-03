@@ -30,6 +30,7 @@ void Runtime_clean(Runtime *self);
 
 //// object creation
 Object *Runtime_rawObject(Runtime *self);
+Object *Runtime_newObject(Runtime *self); // clone of base object
 Object *Runtime_clone(Runtime *self, Object *base);
 Object *Runtime_cloneField(Runtime *self, char *name);
 

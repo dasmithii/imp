@@ -16,8 +16,6 @@ MAJOR:
 
  + Design and implement standard library.
 
- + Make Runtime_rawObject return objects of common descent
-
  + Consolidate memory using a hybrid free list instead of
    fragmented malloc calls all over the place. Capitalize
    on repeat object sizes.

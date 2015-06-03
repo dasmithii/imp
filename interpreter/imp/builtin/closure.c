@@ -122,7 +122,7 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 	if(!internal){
 		abort();
 	}
-	internal->context = Runtime_rawObject(runtime);
+	internal->context = Runtime_newObject(runtime);
 	Object_reference(internal->context);
 	internal->code = malloc(sizeof(ParseNode));
 	if(!internal->code){

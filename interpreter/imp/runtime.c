@@ -277,6 +277,11 @@ Object *Runtime_rawObject(Runtime *self){
 }
 
 
+Object *Runtime_newObject(Runtime *self){
+	return Runtime_cloneField(self, "Object");
+}
+
+
 void Runtime_init(Runtime *self){
 	assert(self);
 	self->gc_locks = 0;
@@ -288,46 +293,50 @@ void Runtime_init(Runtime *self){
 	self->error = NULL;
 	Vector_init(&self->collectables, sizeof(Object*));
 
-	self->root_scope = Runtime_rawObject(self);
-	Object_putShallow(self->root_scope, "self", self->root_scope);
+	// IMPORTANT: be careful while messing with the order of 
+	// builtin initializations (!).
 
 	Object *base = Runtime_rawObject(self);
 	ImpBase_init(base);
+
+	self->root_scope = Runtime_clone(self, base);
+	Object_putShallow(self->root_scope, "self", self->root_scope);
+
 	Object_putShallow(self->root_scope, "Object", base);
 
-	Object *s = Runtime_rawObject(self);
+	Object *s = Runtime_newObject(self);
 	ImpString_init(s);
 	Object_putShallow(self->root_scope, "String", s);
 
-	Object *n = Runtime_rawObject(self);
+	Object *n = Runtime_newObject(self);
 	ImpNumber_init(n);
 	Object_putShallow(self->root_scope, "Number", n);
 
-	Object *route = Runtime_rawObject(self);
+	Object *route = Runtime_newObject(self);
 	ImpRoute_init(route);
 	Object_putShallow(self->root_scope, "Route", route);
 
-	Object *setter = Runtime_rawObject(self);
+	Object *setter = Runtime_newObject(self);
 	ImpSet_init(setter);
 	Object_putShallow(self->root_scope, "set", setter);
 
-	Object *definer = Runtime_rawObject(self);
+	Object *definer = Runtime_newObject(self);
 	ImpDef_init(definer);
 	Object_putShallow(self->root_scope, "def", definer);
 
-	Object *closure = Runtime_rawObject(self);
+	Object *closure = Runtime_newObject(self);
 	ImpClosure_init(closure);
 	Object_putShallow(self->root_scope, "Closure", closure);
 
-	Object *vec = Runtime_rawObject(self);
+	Object *vec = Runtime_newObject(self);
 	ImpVector_init(vec);
 	Object_putShallow(self->root_scope, "Vector", vec);
 
-	Object *returner = Runtime_rawObject(self);
+	Object *returner = Runtime_newObject(self);
 	ImpReturn_init(returner);
 	Object_putShallow(self->root_scope, "return", returner);
 
-	Object *importer = Runtime_rawObject(self);
+	Object *importer = Runtime_newObject(self);
 	ImpImporter_init(importer);
 	Object_putShallow(self->root_scope, "import", importer);
 
