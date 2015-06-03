@@ -51,7 +51,7 @@ static Object *ImpVector_clone_(Runtime *runtime
 	assert(Object_isValid(caller));
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "Vector:clone does not accept arguments.");
+		Runtime_throwString(runtime, "Vector:~ does not accept arguments.");
 		return NULL;
 	}
 	Object *r = Runtime_rawObject(runtime);
@@ -316,14 +316,14 @@ void ImpVector_init(Object *self){
 
 
 	Object_registerCMethod(self, "__print", ImpVector_print_);
-	Object_registerCMethod(self, "__clone", ImpVector_clone_);
+	Object_registerCMethod(self, "__~", ImpVector_clone_);
 	Object_registerCMethod(self, "__append", ImpVector_append_);
 	Object_registerCMethod(self, "__prepend", ImpVector_prepend_);
 	Object_registerCMethod(self, "__insert", ImpVector_insert_);
 	Object_registerCMethod(self, "__remove", ImpVector_remove_);
 	Object_registerCMethod(self, "__removeBack", ImpVector_removeBack_);
 	Object_registerCMethod(self, "__removeFront", ImpVector_removeFront_);
-	Object_registerCMethod(self, "__copy", ImpVector_copy_);
+	Object_registerCMethod(self, "__$", ImpVector_copy_);
 	Object_registerCMethod(self, "__get", ImpVector_get_);
 
 	Object_registerCMethod(self, "__asString", ImpVector_asString_);

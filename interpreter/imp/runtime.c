@@ -278,7 +278,7 @@ Object *Runtime_rawObject(Runtime *self){
 
 
 Object *Runtime_newObject(Runtime *self){
-	return Runtime_cloneField(self, "Object");
+	return Runtime_cloneField(self, "#");
 }
 
 
@@ -302,7 +302,7 @@ void Runtime_init(Runtime *self){
 	self->root_scope = Runtime_clone(self, base);
 	Object_putShallow(self->root_scope, "self", self->root_scope);
 
-	Object_putShallow(self->root_scope, "Object", base);
+	Object_putShallow(self->root_scope, "#", base);
 
 	Object *s = Runtime_newObject(self);
 	ImpString_init(s);
@@ -352,11 +352,11 @@ Object *Runtime_clone(Runtime *runtime, Object *object){
 	Object_reference(object);
 	Object *r = NULL;
 
-	if(Object_hasSpecialMethod(object, "clone")){
+	if(Object_hasSpecialMethod(object, "~")){
 		r = Runtime_callSpecialMethod(runtime
 			                           , NULL
 			                           , object
-			                           , "clone"
+			                           , "~"
 			                           , 0
 			                           , NULL);
 	} else {

@@ -74,7 +74,7 @@ static Object *ImpRoute_clone_internal(Runtime *runtime
 	assert(Object_isValid(caller));
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "Route:clone does not accept arguments");
+		Runtime_throwString(runtime, "Route:~ does not accept arguments");
 		return NULL;
 	}
 
@@ -131,7 +131,7 @@ void ImpRoute_init(Object *self){
 	assert(self);
 	BuiltIn_setId(self, BUILTIN_ROUTE);
 	Object_registerCMethod(self, "__print", ImpRoute_print_internal);
-	Object_registerCMethod(self, "__clone", ImpRoute_clone_internal);
+	Object_registerCMethod(self, "__~", ImpRoute_clone_internal);
 	Object_registerCMethod(self, "__activate", ImpRoute_activate_internal);
 	ImpRoute_setRaw(self, "defaultRoute");
 }

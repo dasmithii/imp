@@ -60,7 +60,7 @@ static Object *ImpString_clone_(Runtime *runtime
 	assert(ImpString_isValid(caller));
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "String:clone does not accept arguments.");
+		Runtime_throwString(runtime, "String:~ does not accept arguments.");
 		return NULL;
 	}
 
@@ -148,7 +148,7 @@ void ImpString_init(Object *self){
 	BuiltIn_setId(self, BUILTIN_STRING);
 
 	Object_registerCMethod(self, "__print", ImpString_print_);
-	Object_registerCMethod(self, "__clone", ImpString_clone_);
+	Object_registerCMethod(self, "__~", ImpString_clone_);
 	Object_registerCMethod(self, "__concatenate", ImpString_concatenate_);
 	Object_registerCMethod(self, "__?", ImpString_asBoolean_);
 

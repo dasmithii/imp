@@ -143,23 +143,6 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 }
 
 
-// static Object *ImpClosure_clone_internal(Runtime *runtime
-// 	                       , Object *context
-// 	                       , Object *caller
-// 	                       , int argc
-// 	                       , Object **argv){
-// 	assert(runtime);
-// 	assert(Object_isValid(caller));
-// 	assert(argc == 0);
-
-// 	Object_reference(caller);
-// 	Object *r = Runtime_rawObject(runtime);
-// 	Object_putShallow(r, "_prototype", Object_rootPrototype(caller));
-// 	Object_unreference(caller);
-// 	return r;
-// }
-
-
 static Object *ImpClosure_collect_internal(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
@@ -201,9 +184,6 @@ void ImpClosure_init(Object *self){
 
 	BuiltIn_setId(self, BUILTIN_CLOSURE);
 	Object_registerCMethod(self, "__activate", ImpClosure_activate_internal);
-	// Object_registerCMethod(self, "__clone", ImpClosure_clone_internal);
 	Object_registerCMethod(self, "__collect", ImpClosure_collect_internal);
 	Object_registerCMethod(self, "__mark", ImpClosure_mark_internal);
-
-	assert(Object_isValid(self));
 }

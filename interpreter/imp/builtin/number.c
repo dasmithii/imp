@@ -239,7 +239,7 @@ static Object *ImpNumber_clone_(Runtime *runtime
 	assert(argc == 0);
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "Number:clone does not accept arguments");
+		Runtime_throwString(runtime, "Number:~ does not accept arguments");
 	}
 
 
@@ -400,7 +400,7 @@ void ImpNumber_init(Object *self){
 	Object_registerCMethod(self, "__print", ImpNumber_print_);
 	Object_registerCMethod(self, "__set", ImpNumber_set_);
 
-	Object_registerCMethod(self, "__clone", ImpNumber_clone_);
+	Object_registerCMethod(self, "__~", ImpNumber_clone_);
 	Object_registerCMethod(self, "__asString", ImpNumber_asString_);
 	// Object_registerCMethod(self, "__equals", ImpNumber_equals_);
 	ImpNumber_setRaw(self, 0);

@@ -17,18 +17,6 @@ Object *runtime_rawObject(Runtime *runtime
 }
 
 
-Object *runtime_cloneObject(Runtime *runtime
-	                      , Object *call_context
-	                      , Object *module
-	                      , int argc
-                          , Object **argv){
-	if(argc != 1){
-		Runtime_throwString(runtime, "runtime:cloneObject requires exactly one argument");
-	}
-	return Runtime_clone(runtime, argv[0]);
-}
-
-
 Object *runtime_executeSource(Runtime *runtime
 	                        , Object *call_context
 	                        , Object *module

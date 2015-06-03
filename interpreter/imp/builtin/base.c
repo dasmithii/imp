@@ -14,10 +14,10 @@ static Object *ImpBase_hasKeyShallow_(Runtime *runtime
 	                                        , int argc
 	                                        , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Object:hasKeyShallow requires exactly one argument" );
+		Runtime_throwString(runtime, "#:hasKeyShallow requires exactly one argument" );
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, "Object:hasKeyShallow requires a String as its argument" );
+		Runtime_throwString(runtime, "#:hasKeyShallow requires a String as its argument" );
 	}
 	bool rawr = Object_hasKeyShallow(caller, ImpString_getRaw(argv[0]));
 	Object *r = Runtime_cloneField(runtime, "Number");
@@ -36,10 +36,10 @@ static Object *ImpBase_hasKeyDeep_(Runtime *runtime
 	                                      , int argc
 	                                      , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Object:hasKeyDeep requires exactly one argument" );
+		Runtime_throwString(runtime, "#:hasKeyDeep requires exactly one argument" );
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, "Object:hasKeyDeep requires a String as its argument" );
+		Runtime_throwString(runtime, "#:hasKeyDeep requires a String as its argument" );
 	}
 	bool rawr = Object_hasKeyDeep(caller, ImpString_getRaw(argv[0]));
 	Object *r = Runtime_cloneField(runtime, "Number");
@@ -57,10 +57,10 @@ static Object *ImpBase_removeKeyShallow_(Runtime *runtime
 	                                        , int argc
 	                                        , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Object:removeKeyShallow requires exactly one argument" );
+		Runtime_throwString(runtime, "#:removeKeyShallow requires exactly one argument" );
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, "Object:removeKeyShallow requires a String as its argument" );
+		Runtime_throwString(runtime, "#:removeKeyShallow requires a String as its argument" );
 	}
 	Object_remShallow(caller, ImpString_getRaw(argv[0]));
 	return NULL;
@@ -73,14 +73,14 @@ static Object *ImpBase_getDeep_(Runtime *runtime
 	                                  , int argc
 	                                  , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Object:getDeep requires exactly one argument" );
+		Runtime_throwString(runtime, "#:getDeep requires exactly one argument" );
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, "Object:getDeep requires a String as its argument" );
+		Runtime_throwString(runtime, "#:getDeep requires a String as its argument" );
 	}
 	char *raw = ImpString_getRaw(argv[0]);
 	if(!Object_hasKeyDeep(caller, raw)){
-		Runtime_throwFormatted(runtime, "Object:getDeep - field does not exist %s", raw);
+		Runtime_throwFormatted(runtime, "#:getDeep - field does not exist %s", raw);
 	}
 	return Object_getDeep(caller, raw);
 }
@@ -93,14 +93,14 @@ static Object *ImpBase_getShallow_(Runtime *runtime
 	                                     , int argc
 	                                     , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Object:getShallow requires exactly one argument" );
+		Runtime_throwString(runtime, "#:getShallow requires exactly one argument" );
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, "Object:getShallow requires a String as its argument" );
+		Runtime_throwString(runtime, "#:getShallow requires a String as its argument" );
 	}
 	char *raw = ImpString_getRaw(argv[0]);
 	if(!Object_hasKeyShallow(caller, raw)){
-		Runtime_throwFormatted(runtime, "Object:getShallow - field does not exist %s", raw);
+		Runtime_throwFormatted(runtime, "#:getShallow - field does not exist %s", raw);
 	}
 	return Object_getShallow(caller, raw);
 }
@@ -113,10 +113,10 @@ static Object *ImpBase_putDeep_(Runtime *runtime
 	                                  , int argc
 	                                  , Object **argv){
 	if(argc != 2){
-		Runtime_throwString(runtime, "Object:putDeep requires exactly 2 arguments" );
+		Runtime_throwString(runtime, "#:putDeep requires exactly 2 arguments" );
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, "Object:putDeep requires a String as its first argument" );
+		Runtime_throwString(runtime, "#:putDeep requires a String as its first argument" );
 	}
 	Object_putDeep(caller, ImpString_getRaw(argv[0]), argv[1]);
 	return NULL;
@@ -130,10 +130,10 @@ static Object *ImpBase_putShallow_(Runtime *runtime
 	                                     , int argc
 	                                     , Object **argv){
 	if(argc != 2){
-		Runtime_throwString(runtime, "Object:putShallow requires exactly 2 arguments" );
+		Runtime_throwString(runtime, "#:putShallow requires exactly 2 arguments" );
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, "Object:putShallow requires a String as its first argument" );
+		Runtime_throwString(runtime, "#:putShallow requires a String as its first argument" );
 	}
 	Object_putShallow(caller, ImpString_getRaw(argv[0]), argv[1]);
 	return NULL;
@@ -146,7 +146,7 @@ static Object *ImpBase_slotNames_(Runtime *runtime
 	                            , int argc
 	                            , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Object:slotNames does not accept arguments");
+		Runtime_throwString(runtime, "#:slotNames does not accept arguments");
 	}
 	Object *r = Runtime_cloneField(runtime, "Vector");
 	Object_reference(r);
@@ -167,7 +167,7 @@ static Object *ImpBase_slotCount_(Runtime *runtime
 	                            , int argc
 	                            , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Object:slotCount does not accept arguments");
+		Runtime_throwString(runtime, "#:slotCount does not accept arguments");
 	}
 	Object *r = Runtime_cloneField(runtime, "Number");
 	ImpNumber_setRaw(r, (double) caller->slotCount);
@@ -181,10 +181,10 @@ static Object *ImpBase_asString_(Runtime *runtime
 	                           , int argc
 	                           , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Object:asString does not accept arguments");
+		Runtime_throwString(runtime, "#:asString does not accept arguments");
 	}
 	char temp[128];
-	sprintf(temp, "Object[%p]", caller);
+	sprintf(temp, "#[%p]", caller);
 	Object *r = Runtime_cloneField(runtime, "String");	
 	ImpString_setRaw(r, temp);
 	return r;
@@ -196,10 +196,10 @@ static Object *ImpBase_hasMethod_(Runtime *runtime
 	                            , int argc
 	                            , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Object:hasMethod requires exactly one argument");
+		Runtime_throwString(runtime, "#:hasMethod requires exactly one argument");
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, "Object:hasMethod requires its argument to be a string");
+		Runtime_throwString(runtime, "#:hasMethod requires its argument to be a string");
 	}
 	bool rawr = Object_hasMethod(caller, ImpString_getRaw(argv[0]));
 	Object *r = Runtime_cloneField(runtime, "Number");
@@ -217,10 +217,10 @@ static Object *ImpBase_hasSpecialMethod_(Runtime *runtime
 	                                   , int argc
 	                                   , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Object:hasSpecialMethod requires exactly one argument");
+		Runtime_throwString(runtime, "#:hasSpecialMethod requires exactly one argument");
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, "Object:hasSpecialMethod requires its argument to be a string");
+		Runtime_throwString(runtime, "#:hasSpecialMethod requires its argument to be a string");
 	}
 	bool rawr = Object_hasSpecialMethod(caller, ImpString_getRaw(argv[0]));
 	Object *r = Runtime_cloneField(runtime, "Number");
@@ -239,14 +239,14 @@ static Object *ImpBase_callMethod_(Runtime *runtime
 	                                   , int argc
 	                                   , Object **argv){
 	if(argc == 0){
-		Runtime_throwString(runtime, "Object:callMethod requires arguments");
+		Runtime_throwString(runtime, "#:callMethod requires arguments");
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, "Object:callMethod requires its argument to be a string");
+		Runtime_throwString(runtime, "#:callMethod requires its argument to be a string");
 	}
 	char *methodName = ImpString_getRaw(argv[0]);
 	if(!Object_hasMethod(caller, methodName)){
-		Runtime_throwFormatted(runtime, "Object:callMethod could not find method: '%s'", methodName);
+		Runtime_throwFormatted(runtime, "#:callMethod could not find method: '%s'", methodName);
 	}
 	return Runtime_callMethod(runtime
 		                    , context
@@ -263,14 +263,14 @@ static Object *ImpBase_callSpecialMethod_(Runtime *runtime
 	                                   , int argc
 	                                   , Object **argv){
 	if(argc == 0){
-		Runtime_throwString(runtime, "Object:callSpecialMethod requires arguments");
+		Runtime_throwString(runtime, "#:callSpecialMethod requires arguments");
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, "Object:callSpecialMethod requires its argument to be a string");
+		Runtime_throwString(runtime, "#:callSpecialMethod requires its argument to be a string");
 	}
 	char *methodName = ImpString_getRaw(argv[0]);
 	if(!Object_hasMethod(caller, methodName)){
-		Runtime_throwFormatted(runtime, "Object:callSpecialMethod could not find method: '%s'", methodName);
+		Runtime_throwFormatted(runtime, "#:callSpecialMethod could not find method: '%s'", methodName);
 	}
 	return Runtime_callSpecialMethod(runtime
 		                           , context
@@ -314,7 +314,7 @@ static Object *ImpBase_above_(Runtime *runtime
 	                        , int argc
 	                        , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Object:> requires exactly 1 argument");
+		Runtime_throwString(runtime, "#:> requires exactly 1 argument");
 	}
 	Object *c = compare(runtime, context, self, argv[0]);
 	ImpNumber_setRaw(c, ImpNumber_getRaw(c) > 0? 1:0);
@@ -327,7 +327,7 @@ static Object *ImpBase_aboveEq_(Runtime *runtime
 	                          , int argc
 	                          , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Object:>= requires exactly 1 argument");
+		Runtime_throwString(runtime, "#:>= requires exactly 1 argument");
 	}
 	Object *c = compare(runtime, context, self, argv[0]);
 	ImpNumber_setRaw(c, ImpNumber_getRaw(c) >= 0? 1:0);
@@ -340,7 +340,7 @@ static Object *ImpBase_below_(Runtime *runtime
 	                        , int argc
 	                        , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Object:< requires exactly 1 argument");
+		Runtime_throwString(runtime, "#:< requires exactly 1 argument");
 	}
 	Object *c = compare(runtime, context, self, argv[0]);
 	ImpNumber_setRaw(c, ImpNumber_getRaw(c) < 0? 1:0);
@@ -353,7 +353,7 @@ static Object *ImpBase_belowEq_(Runtime *runtime
 	                          , int argc
 	                          , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Object:<= requires exactly 1 argument");
+		Runtime_throwString(runtime, "#:<= requires exactly 1 argument");
 	}
 	Object *c = compare(runtime, context, self, argv[0]);
 	ImpNumber_setRaw(c, ImpNumber_getRaw(c) <= 0? 1:0);
@@ -366,7 +366,7 @@ static Object *ImpBase_not_(Runtime *runtime
 	                      , int argc
 	                      , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Object:! accepts no arguments");
+		Runtime_throwString(runtime, "#:! accepts no arguments");
 	}
 	Object *b = Runtime_callMethod(runtime
 		                         , context
@@ -384,7 +384,7 @@ static Object *ImpBase_clone_(Runtime *runtime
 	                        , int argc
 	                        , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Object:~ accepts no arguments");
+		Runtime_throwString(runtime, "#:~ accepts no arguments");
 	}
 	Object *r = Runtime_rawObject(runtime);
 	Object_putShallow(r, "_prototype", self);
@@ -424,7 +424,7 @@ static Object *ImpBase_plus_(Runtime *runtime
 	                       , int argc
 	                       , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Object:+ requires exactly 1 arguments");
+		Runtime_throwString(runtime, "#:+ requires exactly 1 arguments");
 	}
 	return copyAndDo(runtime, context, self, argv[0], "+=");
 } 
@@ -435,7 +435,7 @@ static Object *ImpBase_minus_(Runtime *runtime
 	                        , int argc
 	                        , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Object:- requires exactly 1 arguments");
+		Runtime_throwString(runtime, "#:- requires exactly 1 arguments");
 	}
 	return copyAndDo(runtime, context, self, argv[0], "-=");
 } 
@@ -446,7 +446,7 @@ static Object *ImpBase_div_(Runtime *runtime
 	                      , int argc
 	                      , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Object:/ requires exactly 1 arguments");
+		Runtime_throwString(runtime, "#:/ requires exactly 1 arguments");
 	}
 	return copyAndDo(runtime, context, self, argv[0], "/=");
 } 
@@ -457,7 +457,7 @@ static Object *ImpBase_times_(Runtime *runtime
 	                      , int argc
 	                      , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Object:* requires exactly 1 arguments");
+		Runtime_throwString(runtime, "#:* requires exactly 1 arguments");
 	}
 	return copyAndDo(runtime, context, self, argv[0], "*=");
 } 
@@ -468,7 +468,7 @@ static Object *ImpBase_mod_(Runtime *runtime
 	                      , int argc
 	                      , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Object:% requires exactly 1 arguments");
+		Runtime_throwString(runtime, "#:% requires exactly 1 arguments");
 	}
 	return copyAndDo(runtime, context, self, argv[0], "%=");
 } 
@@ -565,7 +565,7 @@ static Object *ImpBase_equals_(Runtime *runtime
 	                         , int argc
 	                         , Object **argv){
 	if(argc < 1){
-		Runtime_throwString(runtime, "Object:== requires arguments");
+		Runtime_throwString(runtime, "#:== requires arguments");
 	}
 
 	if(Object_hasMethod(self, "<>")){
@@ -597,7 +597,7 @@ static Object *ImpBase_is_(Runtime *runtime
 	                     , int argc
 	                     , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Object:is requires exactly one argument");
+		Runtime_throwString(runtime, "#:is requires exactly one argument");
 	}
 	Object *r = Runtime_cloneField(runtime, "Number");
 	ImpNumber_setRaw(r, caller == argv[0]? 1:0);
@@ -610,7 +610,7 @@ static Object *ImpBase_asBoolean_(Runtime *runtime
 	                            , int argc
 	                            , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Object:? does not accept arguments");
+		Runtime_throwString(runtime, "#:? does not accept arguments");
 	}
 
 	Object *r = Runtime_cloneField(runtime, "Number");
