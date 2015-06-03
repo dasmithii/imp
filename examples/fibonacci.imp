@@ -1,11 +1,12 @@
 (import 'core/control' self)
+(import 'core/io')
 
 (def a 0)
 (def b 1)
 (def i 100)
 
-(while {(return i)} {
-	(print a)
+(while i {
+	(io:stdout:writeLine a)
 	(def c (a:$))
 	(c:+= b)
 	(a:set b)
