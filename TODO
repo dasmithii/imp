@@ -4,8 +4,6 @@ NOW:
 
  + Instead of Runtime_cloneField, reference builtins statically
    with Runtime_getBaseNumber, Runtime_getNumber, and et cetera.
-
- + Scrap builtin printer
  
  + Update control structures to use numbers rather than booleans.
 
