@@ -6,6 +6,9 @@ NOW:
  + Have Runtime_callMethod check for methods and throw exceptions
    if necessary. Don't bother checking before hand when possible.
 
+ + Handle return value register and stuff. fuuuuuuck
+
+
 
 
 MAJOR:
