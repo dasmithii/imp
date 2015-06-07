@@ -144,7 +144,7 @@ static Bucket *Map_bucketFor(Map *map, Object *key, Runtime *runtime){
 
 
 static Map *getRaw(Object *self){
-	return Object_getDataDeep(self, "__data");
+	return (Map*) Object_getDataDeep(self, "__data");
 }
 
 

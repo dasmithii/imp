@@ -296,7 +296,15 @@ static Object *ImpNumber_cmp_(Runtime *runtime
 	}
 
 	Object *r = Runtime_cloneField(runtime, "Number");
-	ImpNumber_setRaw(r, ImpNumber_getRaw(caller) - ImpNumber_getRaw(argv[0]));
+	const double n0 = ImpNumber_getRaw(caller);
+	const double n1 = ImpNumber_getRaw(argv[0]);
+	if(n0 == n1){
+		ImpNumber_setRaw(r, 0);
+	} else if(n0 > n1){
+		ImpNumber_setRaw(r, 1);
+	} else if(n0 < n1){
+		ImpNumber_setRaw(r, -1);
+	}
 	return r;
 }
 

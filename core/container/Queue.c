@@ -105,7 +105,7 @@ Object *Queue_pop(Runtime *runtime
 	free(internal->head);
 	internal->head = n;
 	if(!n){
-		internal->tail = NULL;
+		internal->tail = NULL;r
 	}
 	return r;
 }

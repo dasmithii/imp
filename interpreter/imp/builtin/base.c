@@ -553,10 +553,9 @@ static bool objectsAreEqual(Runtime *runtime
 		return true;
 	}
 
-	if(Object_hasMethod(o1, "<>")){
-		Object *n = Runtime_callMethod(runtime, context, o1, "<>", 1, &o1);
-		double raw = ImpNumber_getRaw(n);
-		return n == 0;
+	if(Object_hasMethod(o0, "<>")){
+		Object *n = Runtime_callMethod(runtime, context, o0, "<>", 1, &o1);
+		return ImpNumber_getRaw(n) == 0;
 	}
 
 	if(!o0 || !o1){

@@ -24,6 +24,8 @@ NOW:
 
  + Make $ operator check for special copy method
 
+ + Make cli module
+
 
 
 
