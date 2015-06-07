@@ -66,6 +66,7 @@ void Slot_clean(Slot *self){
 	assert(self);
 	if(Slot_isPrimitive(self) && self->data){
 		free(self->data);
+		self->data = NULL;
 	}
 	free(self->key);
 	self->key = NULL;

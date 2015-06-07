@@ -148,7 +148,7 @@ static Object *ImpString_hashCode_(Runtime *runtime
 	                           , int argc
 	                           , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "#:hashCode does not accept arguments");
+		Runtime_throwString(runtime, "String:hashCode does not accept arguments");
 	}
 
 	Object *r = Runtime_cloneField(runtime, "Number");
@@ -161,7 +161,6 @@ static Object *ImpString_hashCode_(Runtime *runtime
 
 	// raw string
 	const char *str = ImpString_getRaw(self);
-	const int len = strlen(str);
 
 	while (*str) {
 		hash = (hash * p1) ^ (str[0] * p2);
@@ -169,6 +168,25 @@ static Object *ImpString_hashCode_(Runtime *runtime
 	}
 
 	ImpNumber_setRaw(r, (double) (hash % p3));
+	return r;
+} 
+
+static Object *ImpString_compare_(Runtime *runtime
+	                            , Object *context
+	                            , Object *self
+	                            , int argc
+	                            , Object **argv){
+	if(argc != 1){
+		Runtime_throwString(runtime, "String:<> requires one argument");
+	}
+
+	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
+		Runtime_throwString(runtime, "String:<> requires string argument");
+	}
+
+	Object *r = Runtime_cloneField(runtime, "Number");
+	ImpNumber_setRaw(r, (double) strcmp(ImpString_getRaw(self),
+		                                ImpString_getRaw(argv[0])));
 	return r;
 } 
 
@@ -181,6 +199,8 @@ void ImpString_init(Object *self){
 	Object_registerCMethod(self, "__~", ImpString_clone_);
 	Object_registerCMethod(self, "__concatenate", ImpString_concatenate_);
 	Object_registerCMethod(self, "__?", ImpString_asBoolean_);
+
+	Object_registerCMethod(self, "__<>", ImpString_compare_);
 
 	Object_registerCMethod(self, "__hashCode", ImpString_hashCode_);
 

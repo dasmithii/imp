@@ -40,7 +40,7 @@ typedef struct Node {
 	Object *key;
 	Object *value;
 	struct Node *next;
-} Node; // key-value pair
+} Node;
 
 
 static bool Node_hasKey(Node *node, Object *key, Runtime *runtime){

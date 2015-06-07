@@ -42,7 +42,7 @@ bool isValidRouteText(char *text){
 		return false;
 	}
 	int len = strlen(text);
-	if(len > 0 && !isValidRouteBegin(text[0])){
+	if(len == 0 || !isValidRouteBegin(text[0])){
 		return false;
 	}
 	for(int i = 1; i < len; i++){
