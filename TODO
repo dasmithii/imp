@@ -22,6 +22,8 @@ NOW:
 
  + Fix hashmap.
 
+ + Make $ operator check for special copy method
+
 
 
 
