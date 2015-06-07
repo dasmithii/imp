@@ -20,6 +20,8 @@ NOW:
 
  + Add implements function for interface checking.
 
+ + Fix hashmap.
+
 
 
 
