@@ -273,6 +273,9 @@ Object *Hashmap_collect(Runtime *runtime
 	                  , int argc
 	                  , Object **argv){
 	Map *const map = getRaw(self);
+	if(!map){
+		return NULL;
+	}
 	for(int i = 0; i < map->buckC; i++){
 		Bucket_clean(map->bucks + i);
 	}
