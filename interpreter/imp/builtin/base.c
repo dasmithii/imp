@@ -386,6 +386,16 @@ static Object *ImpBase_clone_(Runtime *runtime
 	if(argc != 0){
 		Runtime_throwString(runtime, "#:~ accepts no arguments");
 	}
+
+	if(Object_hasSpecialMethod(self, "clone")){
+		return Runtime_callSpecialMethod(runtime
+			                           , context
+			                           , self
+			                           , "clone"
+			                           , 0
+			                           , NULL);
+	}
+
 	Object *r = Runtime_rawObject(runtime);
 	Object_putShallow(r, "_prototype", self);
 	return r;
@@ -542,6 +552,13 @@ static bool objectsAreEqual(Runtime *runtime
 	if(o0 == o1){
 		return true;
 	}
+
+	if(Object_hasMethod(o1, "<>")){
+		Object *n = Runtime_callMethod(runtime, context, o1, "<>", 1, &o1);
+		double raw = ImpNumber_getRaw(n);
+		return n == 0;
+	}
+
 	if(!o0 || !o1){
 		return false;
 	}
@@ -567,13 +584,6 @@ static Object *ImpBase_equals_(Runtime *runtime
 	if(argc < 1){
 		Runtime_throwString(runtime, "#:== requires arguments");
 	}
-
-	if(Object_hasMethod(self, "<>")){
-		Object *c = compare(runtime, context, self, argv[0]);
-		ImpNumber_setRaw(c, ImpNumber_getRaw(c) == 0? 1:0);
-		return c;
-	}
-
 
 	Object *r = Runtime_cloneField(runtime, "Number");
 	ImpNumber_setRaw(r, 1);
@@ -633,6 +643,26 @@ static Object *ImpBase_asBoolean_(Runtime *runtime
 } 
 
 
+
+// Default hashCode implementation: returns a non-zero
+// deterministic value based on address in memory.
+static Object *ImpBase_hashCode_(Runtime *runtime
+	                           , Object *context
+	                           , Object *self
+	                           , int argc
+	                           , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "#:hashCode does not accept arguments");
+	}
+
+	Object *r = Runtime_cloneField(runtime, "Number");
+	const unsigned long constant = 2147483647;
+	const unsigned long address  = (unsigned long) &self;
+	ImpNumber_setRaw(r, (double) (constant ^ address));
+	return r;
+} 
+
+
 void ImpBase_init(Object *self){
 	assert(self);
 	BuiltIn_setId(self, BUILTIN_OBJECT);
@@ -668,4 +698,6 @@ void ImpBase_init(Object *self){
 	Object_registerCMethod(self, "__$", ImpBase_value_);
 	Object_registerCMethod(self, "__==", ImpBase_equals_);
 	Object_registerCMethod(self, "__is", ImpBase_is_);
+
+	Object_registerCMethod(self, "__hashCode", ImpBase_hashCode_);
 }

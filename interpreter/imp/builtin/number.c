@@ -380,6 +380,23 @@ static Object *ImpNumber_asBoolean_(Runtime *runtime
 }
 
 
+static Object *ImpNumber_hashCode_(Runtime *runtime
+	                           , Object *context
+	                           , Object *self
+	                           , int argc
+	                           , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "#:hashCode does not accept arguments");
+	}
+
+	Object *r = Runtime_cloneField(runtime, "Number");
+	const unsigned long constant = 654188429;
+	const unsigned long raw = (unsigned long) ImpNumber_getRaw(self);
+	ImpNumber_setRaw(r, (double) ((constant ^ raw)));
+	return r;
+} 
+
+
 void ImpNumber_init(Object *self){
 	assert(self);
 	BuiltIn_setId(self, BUILTIN_NUMBER);
@@ -402,6 +419,8 @@ void ImpNumber_init(Object *self){
 
 	Object_registerCMethod(self, "__~", ImpNumber_clone_);
 	Object_registerCMethod(self, "__asString", ImpNumber_asString_);
-	// Object_registerCMethod(self, "__equals", ImpNumber_equals_);
+
+	Object_registerCMethod(self, "__hashCode", ImpNumber_hashCode_);
+
 	ImpNumber_setRaw(self, 0);
 }

@@ -169,7 +169,6 @@ static Object *ImpClosure_mark_internal(Runtime *runtime
 	                       , int argc
 	                       , Object **argv){
 	assert(runtime);
-	assert(ImpClosure_isValid(caller));
 
 	ImpClosure_internal *raw = ImpClosure_getRaw(caller);
 	if(raw && raw->context){

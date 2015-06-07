@@ -142,6 +142,36 @@ static Object *ImpString_asBoolean_(Runtime *runtime
 }
 
 
+static Object *ImpString_hashCode_(Runtime *runtime
+	                           , Object *context
+	                           , Object *self
+	                           , int argc
+	                           , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "#:hashCode does not accept arguments");
+	}
+
+	Object *r = Runtime_cloneField(runtime, "Number");
+
+	// some prime numbers
+	const unsigned long p1 = 54059; //
+	const unsigned long p2 = 13;
+	const unsigned long p3 = 961748941;
+	unsigned long hash = 86969;
+
+	// raw string
+	const char *str = ImpString_getRaw(self);
+	const int len = strlen(str);
+
+	while (*str) {
+		hash = (hash * p1) ^ (str[0] * p2);
+		str++;
+	}
+
+	ImpNumber_setRaw(r, (double) (hash % p3));
+	return r;
+} 
+
 
 void ImpString_init(Object *self){
 	assert(self);
@@ -151,6 +181,8 @@ void ImpString_init(Object *self){
 	Object_registerCMethod(self, "__~", ImpString_clone_);
 	Object_registerCMethod(self, "__concatenate", ImpString_concatenate_);
 	Object_registerCMethod(self, "__?", ImpString_asBoolean_);
+
+	Object_registerCMethod(self, "__hashCode", ImpString_hashCode_);
 
 	ImpString_setRaw(self, "");
 }

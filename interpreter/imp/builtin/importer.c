@@ -249,7 +249,7 @@ static void importInternalModuleTo(Runtime *runtime
 			Runtime_throwFormatted(runtime, "failed to find symbol '%s'", full);
 		}
 
-		if(*wopre >= 'a' && *wopre <= 'z'){
+		if((*wopre >= 'a' && *wopre <= 'z') || *wopre == '_'){
 			char key[64]; *key = 0;
 			strcat(key, "__");
 			strcat(key, wopre);
