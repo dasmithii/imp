@@ -1,0 +1,34 @@
+(import 'core/control' self)
+(import 'core/io')
+
+(def max 100)
+(io:stdout:writeLine 'Printing all prime numbers below' max '...')
+(io:stdout:writeLine 2)
+
+(def primes (Vector:~))
+
+(def check {
+	(def n (arguments:get 0))
+	(def i 0)
+	(while {i:< (primes:size)} {
+		(def p (primes:get i))
+		(def mp (n:% p))
+		(if (mp:!) {
+			(return 0)
+		})
+		(i:++)
+	})
+	(return 1)
+})
+
+(def i 3)
+(while {i:< 100} {
+	(io:stdout:writeLine i)
+	(if (check i) {
+		(primes:append (i:$))
+		(io:stdout:writeLine i)
+	})
+	(io:stdout:writeLine 'pre: ' i)
+	(i:+= 2)
+	(io:stdout:writeLine 'post:' i)
+})

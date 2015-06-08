@@ -305,6 +305,23 @@ static Object *ImpVector_asString_(Runtime *runtime
 	return r;
 }
 
+static Object *ImpVector_size_(Runtime *runtime
+	                         , Object *context
+	                         , Object *caller
+	                         , int argc
+	                         , Object **argv){
+	assert(runtime);
+	assert(ImpVector_isValid(caller));
+
+	if(argc != 0){
+		Runtime_throwString(runtime, "Vector:size does not accept arguments");
+	}
+	Vector *internal = ImpVector_getRaw(caller);
+	Object *r = Runtime_cloneField(runtime, "Number");
+	ImpNumber_setRaw(r, (double) internal->size);
+	return r;
+}
+
 
 void ImpVector_init(Object *self){
 	assert(self);
@@ -325,6 +342,7 @@ void ImpVector_init(Object *self){
 	Object_registerCMethod(self, "__removeFront", ImpVector_removeFront_);
 	Object_registerCMethod(self, "__$", ImpVector_copy_);
 	Object_registerCMethod(self, "__get", ImpVector_get_);
+	Object_registerCMethod(self, "__size", ImpVector_size_);
 
 	Object_registerCMethod(self, "__asString", ImpVector_asString_);
 }

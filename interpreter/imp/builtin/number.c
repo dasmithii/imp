@@ -24,15 +24,6 @@ static double *ImpNumber_data(Object *self){
 }
 
 
-void ImpNumber_add(Object *self, Object *other){
-	assert(ImpNumber_isValid(self));
-	assert(ImpNumber_isValid(other));
-
-	double *data = ImpNumber_data(self);
-	*data += ImpNumber_getRaw(other);
-}
-
-
 static Object *ImpNumber_add_(Runtime *runtime
 	                       , Object *context
 	                       , Object *caller
@@ -46,14 +37,16 @@ static Object *ImpNumber_add_(Runtime *runtime
 		return NULL;
 	}
 
+	double val = ImpNumber_getRaw(caller);
 	for(int i = 0; i < argc; i++){
 		Object *arg = unrouteInContext(argv[i], context);
 		if(!ImpNumber_isValid(arg)){
 			Runtime_throwString(runtime, "Number:add accepts only numbers as arguments");
 			return NULL;
 		}
-		ImpNumber_add(caller, arg);
+		val += ImpNumber_getRaw(argv[i]);
 	}
+	ImpNumber_setRaw(caller, val);
 
 	return NULL;
 }

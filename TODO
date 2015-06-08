@@ -2,9 +2,6 @@ NOW:
 
  + Instead of Runtime_cloneField, reference builtins statically
    with Runtime_getBaseNumber, Runtime_getNumber, and et cetera.
- 
- + Have Runtime_callMethod check for methods and throw exceptions
-   if necessary. Don't bother checking before hand when possible.
 
  + Handle return value register and stuff. fuuuuuuck
 
@@ -12,19 +9,21 @@ NOW:
 
  + Make legit ':' operator.
 
- + Make core/random module
-
  + Form iterator idioms
 
  + Implement break and continue for while loop.
 
- + Add implements function for interface checking.
+ + Add (implements x y) function for interface checking.
 
  + Fix hashmap.
 
  + Make $ operator check for special copy method
 
  + Make cli module
+
+ + Make regex module
+
+ + Make data structure: (1) set, (2) list, (3) and more
 
 
 
