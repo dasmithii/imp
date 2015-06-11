@@ -3,8 +3,6 @@ NOW:
  + Instead of Runtime_cloneField, reference builtins statically
    with Runtime_getBaseNumber, Runtime_getNumber, and et cetera.
 
- + Handle return value register and stuff. fuuuuuuck
-
  + Make address type
 
  + Make legit ':' operator.
@@ -24,8 +22,6 @@ NOW:
  + Make Go-inspired defer
 
  + Make time module (w/ sleep and etc)
-
- + Make break and continue built ins
 
  + Give objects reference count fields instead of
    slot hackiness. (do this using 3 bytes to complement 
