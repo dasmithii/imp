@@ -17,18 +17,19 @@ NOW:
 
  + Fix hashmap.
 
- + Make $ operator check for special copy method
-
  + Make cli module
 
  + Make regex module
-
- + Make data structure: (1) set, (2) list, (3) and more
 
  + Make Go-inspired defer
 
  + Make time module (w/ sleep and etc)
 
+ + Make break and continue built ins
+
+ + Give objects reference count fields instead of
+   slot hackiness. (do this using 3 bytes to complement 
+   1 byte gc_mark field).
 
 
 
@@ -65,9 +66,6 @@ MINOR:
 MAYBE:
  
  + Make carrots variable expansion operators.
-
- + Give objects reference count fields instead of
-   slot hackiness.
 
  + Prototype multiplexing (multiple inheritance).
 
