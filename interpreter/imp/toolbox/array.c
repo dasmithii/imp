@@ -14,22 +14,26 @@ int Array_init(Array *const arr
 	            , const size_t elem_size){
 	assume_ptr(arr);
 	assume_m(elem_size > 0, "Non-positive Array element size.");
+	assume_m(num_elems > 0, "Non-positive Array element count.");
 	arr->num_elems = num_elems;
 	arr->elem_size = elem_size;
-	arr->data = calloc(num_elems, elem_size);
+	arr->data = malloc(num_elems * elem_size);
 	return arr->data? 0:1;
 }
 
 // --------------------------------------------------------------- //
 void Array_clean(Array *const arr){
 	assume_ptr(arr);
-	if(arr->data)
+	if(arr->data){
 		free(arr->data);
+		arr->data = NULL;
+		arr->num_elems = 0;
+	}
 }
 
 // --------------------------------------------------------------- //
 Array *Array_new(const size_t num_elems
-	                 , const size_t elem_size){
+	           , const size_t elem_size){
 	Array *ret = malloc(sizeof(Array));
 	if(!ret)
 		return NULL;
@@ -77,7 +81,7 @@ void Array_zero(Array *const arr){
 
 // --------------------------------------------------------------- //
 void Array_fill(Array *const arr
-	              , const void *const val){
+	          , const void *const val){
 	assume_ptrs(arr, val);
 	for(int i = 0; i < arr->num_elems; ++i)
 		Array_set(arr, i, val);

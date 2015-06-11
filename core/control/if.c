@@ -62,13 +62,20 @@ Object *if_activate(Runtime *runtime
 			cond = Runtime_activate(runtime, context, cond, 0, NULL);
 		}
 		if(!isZero(runtime, context, cond)){
-			Runtime_activate(runtime, context, argv[i+1], 0, NULL);
-			return NULL;
+			Object *r = Runtime_activate(runtime, context, argv[i+1], 0, NULL);
+			if(r){
+				Runtime_setReturnValue(runtime, r);
+			}
+			return r;
 		}
 	}
 	
 	if(argc % 2 == 1){
-		Runtime_activate(runtime, context, argv[argc-1], 0, NULL);
+		Object *r = Runtime_activate(runtime, context, argv[argc-1], 0, NULL);
+		if(r){
+			Runtime_setReturnValue(runtime, r);
+		}
+		return r;
 	}
 
 	return NULL;

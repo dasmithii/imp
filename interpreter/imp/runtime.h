@@ -6,6 +6,8 @@
 #include <imp/object.h>
 #include <imp/parser.h>
 
+#include <setjmp.h>
+
 
 
 
@@ -15,6 +17,7 @@ typedef struct {
 	Vector collectables;  // TODO: use queue or something lockless instead of vector
 
 	Object *lastReturnValue; // TODO: track return values for each coroutine
+	bool    returnWasCalled; 
 
 	int gc_locks;
 	bool gc_on;
@@ -57,7 +60,6 @@ Object *Runtime_executeInContext(Runtime *runtime
 //// return value 'register'
 void Runtime_setReturnValue(Runtime *self, Object *value);
 void Runtime_clearReturnValue(Runtime *self);
-Object *Runtime_returnValue(Runtime *self);
 
 
 //// exception handling

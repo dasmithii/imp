@@ -17,7 +17,6 @@ static Object *ImpDef_activate_internal(Runtime *runtime
 	assert(Object_isValid(context));
 	assert(Object_isValid(caller));
 	assert(Object_isValid(argv[0]));
-	assert(Object_isValid(argv[1]));
 
 	Object *route = argv[0];
 	Object *value = unrouteInContext(argv[1], context);

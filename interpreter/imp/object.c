@@ -360,16 +360,16 @@ bool Slot_isValid(Slot *self){
 	if(!validKey(self->key)){
 		return false;
 	}
-	if(!Slot_isPrimitive(self) && !self->data){  //TODO?: make recursive?
-		return false;
-	}
+	// if(!Slot_isPrimitive(self) && !self->data){  //TODO?: make recursive?
+	// 	return false;
+	// }
 	return true;
 }
 
 
 bool Object_isValid(Object *self){
 	if(!self){
-		return false;
+		return true;
 	}
 	for(int i = 0; i < self->slotCount; i++){
 		if(!Slot_isValid(self->slots + i)){

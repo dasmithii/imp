@@ -30,6 +30,7 @@ static Object *ImpReturn_activate_internal(Runtime *runtime
 			value = ImpRoute_mapping(value, context);
 		}
 		Runtime_setReturnValue(runtime, value);
+		return value;
 	}
 	return NULL;
 }

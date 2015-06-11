@@ -25,6 +25,10 @@ NOW:
 
  + Make data structure: (1) set, (2) list, (3) and more
 
+ + Make Go-inspired defer
+
+ + Make time module (w/ sleep and etc)
+
 
 
 

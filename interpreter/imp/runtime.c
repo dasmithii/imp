@@ -84,7 +84,6 @@ Object *Runtime_activateOn(Runtime *runtime
 			// execute with arguments that haven't yet been 
 			// dereferenced
 			r = cf(runtime, context, object, argc, argv);
-
 		} else if(BuiltIn_id(object) == BUILTIN_CLOSURE){
 
 			// execute with dereferenced arguments prefixed
@@ -99,7 +98,9 @@ Object *Runtime_activateOn(Runtime *runtime
 				argv2[i] = unrouteInContext(argv[i - 1], context);
 				Object_reference(argv2[i]);
 			}
+
 			r = cf(runtime, context, object, argc2, argv2);  // TODO: deal with this
+
 			for(int i = 1; i < argc2; i++){
 				Object_unreference(argv2[i]);
 			}
@@ -116,12 +117,13 @@ Object *Runtime_activateOn(Runtime *runtime
 				argv2[i] = unrouteInContext(argv[i], context);
 				Object_reference(argv2[i]);
 			}
+
 			r = cf(runtime, context, object, argc, argv2);  // TODO: deal with this
+			
 			for(int i = 0; i < argc; i++){
 				Object_unreference(argv2[i]);
 			}
 			free(argv2);
-		
 		}
 	}
 
@@ -132,7 +134,6 @@ Object *Runtime_activateOn(Runtime *runtime
 		Object_unreference(argv[i]);
 	}
 	Object_unreference(origin);
-
 
 	if(special || internal){
 		return r;
@@ -445,18 +446,14 @@ void Runtime_setReturnValue(Runtime *self, Object *value){
 	assert(self);
 	// value == null is allowed
 	self->lastReturnValue = value;
+	self->returnWasCalled = true;
 }
 
 
 void Runtime_clearReturnValue(Runtime *self){
 	assert(self);
-	Runtime_setReturnValue(self, NULL);
-}
-
-
-Object *Runtime_returnValue(Runtime *self){
-	assert(self);
-	return self->lastReturnValue;
+	self->lastReturnValue = NULL;
+	self->returnWasCalled = false;
 }
 
 
@@ -500,11 +497,12 @@ Object *Runtime_executeInContext(Runtime *runtime
 				Runtime_executeInContext(runtime
 					                   , scope
 					                   , node.contents.non_leaf.argv[i]);
-				if(Runtime_returnValue(runtime)){
+				if(runtime->returnWasCalled){
 					break;
 				}
 			}
-			r = Runtime_returnValue(runtime);
+			r = runtime->lastReturnValue;
+			Runtime_clearReturnValue(runtime);
 		}
 		break;
 	case CALL_NODE:
@@ -783,3 +781,4 @@ Object *Runtime_callMethod(Runtime *runtime
 	}
 	return Runtime_callSpecialMethod(runtime, context, object, methodName, argc, argv);
 }
+

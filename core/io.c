@@ -192,7 +192,6 @@ Object *io_File_write(Runtime *runtime
 	                , Object **argv){
 	assert(runtime);
 	assert(Object_isValid(caller));
-	assert(Object_isValid(context));
 
 	if(argc == 0){
 		Runtime_throwString(runtime, "File:write requires at least one argument");

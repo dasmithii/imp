@@ -73,8 +73,11 @@ Object *while_activate(Runtime *runtime
 		}
 
 		// execute block
-		Object *subcontext = Runtime_clone(runtime, context);
-		Runtime_activate(runtime, subcontext, step, 0, NULL);
+		Object *stepR = Runtime_activate(runtime, context, step, 0, NULL);
+		if(stepR){
+			Runtime_setReturnValue(runtime, stepR);
+			return stepR;
+		}
 	}
 
 	return NULL;
