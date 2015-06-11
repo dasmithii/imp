@@ -2,7 +2,7 @@
 (import 'core/io')
 
 (def max 100)
-(io:stdout:writeLine 'Printing all prime numbers below' max '...')
+(io:stdout:writeLine 'Printing prime numbers below' max '...')
 (io:stdout:writeLine 2)
 
 (def primes (Vector:~))
@@ -23,12 +23,9 @@
 
 (def i 3)
 (while {i:< 100} {
-	(io:stdout:writeLine i)
 	(if (check i) {
 		(primes:append (i:$))
 		(io:stdout:writeLine i)
 	})
-	(io:stdout:writeLine 'pre: ' i)
 	(i:+= 2)
-	(io:stdout:writeLine 'post:' i)
 })

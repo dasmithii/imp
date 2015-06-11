@@ -13,6 +13,8 @@
 #include <imp/builtin/vector.h>
 #include <imp/builtin/return.h>
 #include <imp/builtin/importer.h>
+#include <imp/builtin/break.h>
+#include <imp/builtin/continue.h>
 #include <imp/builtin/base.h>
 #include <imp/c.h>
 #include <imp/parser.h>
@@ -340,6 +342,14 @@ void Runtime_init(Runtime *self){
 	Object *importer = Runtime_newObject(self);
 	ImpImporter_init(importer);
 	Object_putShallow(self->root_scope, "import", importer);
+
+	Object *breaker = Runtime_newObject(self);
+	ImpBreak_init(breaker);
+	Object_putShallow(self->root_scope, "break", breaker);
+
+	Object *continuer = Runtime_newObject(self);
+	ImpImporter_init(continuer);
+	Object_putShallow(self->root_scope, "continue", continuer);
 
 	Runtime_unlockGC(self);
 }

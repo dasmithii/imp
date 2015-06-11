@@ -75,7 +75,13 @@ Object *while_activate(Runtime *runtime
 		// execute block
 		Object *stepR = Runtime_activate(runtime, context, step, 0, NULL);
 		if(stepR){
-			Runtime_setReturnValue(runtime, stepR);
+			if(BuiltIn_id(stepR) == BUILTIN_BREAK){
+				break;
+			} else if(BuiltIn_id(stepR) == BUILTIN_CONTINUE) {
+				continue;
+			} else {
+				Runtime_setReturnValue(runtime, stepR);
+			}
 			return stepR;
 		}
 	}

@@ -364,7 +364,7 @@ static Object *ImpNumber_copy_(Runtime *runtime
 
 static Object *ImpNumber_asBoolean_(Runtime *runtime
 	                              , Object *context
-	                              , Object *caller
+	                              , Object *self
 	                              , int argc
 	                              , Object **argv){
 	if(argc != 0){
@@ -372,11 +372,7 @@ static Object *ImpNumber_asBoolean_(Runtime *runtime
 	}
 
 	Object *r = Runtime_cloneField(runtime, "Number");
-	if(ImpNumber_getRaw(caller) == 0){
-		ImpNumber_setRaw(r, 0);
-	} else {
-		ImpNumber_setRaw(r, 1);
-	}
+	ImpNumber_setRaw(r, ImpNumber_getRaw(self)? 1:0);
 	return r;
 }
 

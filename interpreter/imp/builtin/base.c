@@ -374,7 +374,7 @@ static Object *ImpBase_not_(Runtime *runtime
 		                         , "?"
 		                         , 0
 		                         , NULL);
-	ImpNumber_setRaw(b, ImpString_getRaw(b)? 0:1);
+	ImpNumber_setRaw(b, ImpNumber_getRaw(b)? 0:1);
 	return b;
 } 
 
