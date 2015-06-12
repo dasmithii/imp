@@ -8,8 +8,6 @@
 #include <sys/stat.h>
 #include <time.h>
 
-#include "../commands.h"
-
 #include "general.h"
 #include "importer.h"
 #include "string.h"
@@ -98,12 +96,12 @@ static void *fileToDL(Runtime *runtime, char *path){
 	code = NULL;
 
 	char dest[128];
-	sprintf(dest, "%s/cache/%lu.so", Imp_root(), checksum);
+	sprintf(dest, "%s/cache/%lu.so", runtime->root, checksum);
 	if(!pathExists(dest)){
 		char buf[512];
 
 		// ensure that cache directory is set up
-		sprintf(buf, "mkdir -p %s/cache", Imp_root());
+		sprintf(buf, "mkdir -p %s/cache", runtime->root);
 		if(system(buf)){
 			Runtime_throwString(runtime, "failed to make .so cache dir");
 		}
@@ -374,14 +372,14 @@ static Object *importWithoutUsingCache(Runtime *runtime, char *modulePath){ // m
 	}
 
 	// check <global>.imp
-	sprintf(buf, "%s/index/%s.imp", Imp_root(), modulePath);
+	sprintf(buf, "%s/index/%s.imp", runtime->root, modulePath);
 	if(pathExists(buf)){
 		importRegularModuleTo(runtime, buf, r);
 		return r;
 	}
 
 	// check <global>.c
-	sprintf(buf, "%s/index/%s.c", Imp_root(), modulePath);
+	sprintf(buf, "%s/index/%s.c", runtime->root, modulePath);
 	if(pathExists(buf)){
 		importInternalModuleTo(runtime, buf, r);
 		return r;

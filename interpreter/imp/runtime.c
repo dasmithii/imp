@@ -285,8 +285,14 @@ Object *Runtime_newObject(Runtime *self){
 }
 
 
-void Runtime_init(Runtime *self){
+void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 	assert(self);
+
+	self->root = root;
+	self->argc = argc;
+	self->argv = argv;
+
+
 	self->gc_locks = 0;
 	self->gc_on = false;
 	Runtime_lockGC(self);

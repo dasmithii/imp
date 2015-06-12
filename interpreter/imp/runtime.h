@@ -23,11 +23,16 @@ typedef struct {
 	bool gc_on;
 
 	Stack tryStack; // stack of try calls
+
+	// configuration
+	char *root;
+	int argc;
+	char **argv;
 } Runtime;
 
 
 //// management
-void Runtime_init(Runtime *self);
+void Runtime_init(Runtime *self, char *root, int argc, char **argv);
 void Runtime_clean(Runtime *self);
 
 

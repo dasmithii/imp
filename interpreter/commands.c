@@ -3,26 +3,18 @@
 #include <string.h>
 #include <sys/stat.h>
 
-#include <imp/commands.h>
 #include <imp/runtime.h>
+
+#include "commands.h"
+#include "version.h"
 
 static char *root = "/usr/local/imp";
 
 
 
 
-void Imp_debugMode(bool status){
-	// TODO
-}
-
-
 void Imp_useRoot(char *path){
 	root = path;
-}
-
-
-char *Imp_root(){
-	return root;
 }
 
 
@@ -48,40 +40,28 @@ static char *readFile(char *path){
 
 void Imp_launchREPL(){
 	Runtime runtime;
-	Runtime_init(&runtime);
+	Runtime_init(&runtime, root, 0, NULL);
 
 	for(;;){
 		char input[128];
 		printf(" > ");
 		fgets(input, 128, stdin);
-		// char code[256];
-		// sprintf(code, "(try {%s} {(print 'Uncaught exception:' (arguments:get 0) '.')})", input);
-		// Runtime_executeSource(&runtime, code);
 		Runtime_executeSource(&runtime, input);
+		// TODO: check for exceptions
 	}
 }
 
 
-void Imp_executeString(char *code){
-	Runtime runtime;
-	Runtime_init(&runtime);
-	Runtime_executeSource(&runtime, code);
-}
-
-
-void Imp_executeFile(char *path){
+void Imp_executeFile(char *path, int argc, char **argv){
 	char *contents = readFile(path);
 	if(!contents){
 		printf("Failed to read file %s.\n", path);
 		exit(1);
 	}
-	Imp_executeString(contents);
-}
-
-
-void Imp_fetch(char *source){
-	printf("TODO: not yet implemented.");
-	// TODO: either fetch tarbal or do git pull
+	Runtime runtime;
+	Runtime_init(&runtime, root, argc, argv);
+	Runtime_executeSource(&runtime, contents);
+	// TODO: check for exceptions
 }
 
 
@@ -94,12 +74,12 @@ static bool fileExists(const char *path) {
 
 void Imp_index(char *dest, char *src){
 	char full_dest[64];
-	sprintf(full_dest, "%s/%s/%s", Imp_root(), "index", dest);
+	sprintf(full_dest, "%s/%s/%s", root, "index", dest);
 
 
 	if(fileExists(full_dest)){
-		printf("Code is already indexed at that destination. Please choose another destination, or delete the existing code first.");
-		exit(1); 
+		fprintf(stderr, "Code is already indexed at that destination. Please choose another destination, or delete the existing code first.");
+		exit(1);
 	}
 
 
@@ -149,7 +129,7 @@ void Imp_index(char *dest, char *src){
 
 void Imp_remove(char *id){
 	char command[128];
-	sprintf(command, "rm -rf %s/%s/%s", Imp_root(), "index", id);
+	sprintf(command, "rm -rf %s/%s/%s", root, "index", id);
 	if(system(command)){
 		printf("Failed to remove indexed code.\n");
 		exit(1);
@@ -157,22 +137,32 @@ void Imp_remove(char *id){
 }
 
 
-void Imp_update(char *id){
-	printf("TODO: not yet implemented.");
-	// TODO: if git repo, pull
-	//       if std, pull
-}
-
-
-void Imp_installProject(char *root){
-	printf("TODO: not yet implemented.");
-}
-
-
 void Imp_printEnvironment(){
 	printf("\n\tImp environment:"
-	     "\n\t\troot:     /usr/local/imp"
-	     "\n\t\tversion:  0.0.1"
-	     "\n\n");
+	     "\n\t\troot:     %s"
+	     "\n\t\tversion:  v%s"
+	     "\n\n", root, IMP_VERSION);
+}
+
+
+void Imp_printUsage(){
+	const char *const intro = 
+	"\tImp - the programming language.";
+
+	const char *const usage = 
+	"\tusage:"
+	"\n\t	imp ---------------------- Launch REPL."
+	"\n\t	imp <path> --------------- Interpret file."
+	"\n\t	imp index <path> <as> ---- Include local module in registry."
+	"\n\t	imp remove <id> ---------- Remove package from registry."
+	"\n\t	imp install <id> --------- Install project globally."
+	"\n\t	imp help ----------------- Display this text."
+	"\n\t	imp environment ---------- Check version and stuff.";
+
+	const char *const options = 
+		"\toptions:"
+	"\n\t	-r <path> ---------------- Specify package registry location.";
+
+	printf("\n%s\n\n%s\n\n%s\n\n", intro, usage, options);
 }
 
