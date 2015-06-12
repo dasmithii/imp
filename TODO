@@ -30,6 +30,8 @@ NOW:
  + Make break and continue accept arguments to deal with
    nested loops.
 
+ + Maybe make '#' field proto
+
 
 
 MAJOR:
