@@ -21,16 +21,12 @@ NOW:
 
  + Make Go-inspired defer
 
- + Make time module (w/ sleep and etc)
-
  + Give objects reference count fields instead of
    slot hackiness. (do this using 3 bytes to complement 
    1 byte gc_mark field).
 
  + Make break and continue accept arguments to deal with
    nested loops.
-
- + Maybe make '#' field proto
 
  + Protect against circular prototype linkage.
 
