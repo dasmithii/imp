@@ -378,7 +378,7 @@ Object *Runtime_clone(Runtime *runtime, Object *object){
 			                           , NULL);
 	} else {
 		r = Runtime_rawObject(runtime);
-		Object_putShallow(r, "_prototype", object);
+		Object_putShallow(r, "#", object);
 	}
 	Object_unreference(object);
 	return r;

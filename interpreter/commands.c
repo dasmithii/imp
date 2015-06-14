@@ -140,7 +140,7 @@ void Imp_remove(char *id){
 void Imp_printEnvironment(){
 	printf("\n\tImp environment:"
 	     "\n\t\troot:     %s"
-	     "\n\t\tversion:  v%s"
+	     "\n\t\tversion:  %s"
 	     "\n\n", root, IMP_VERSION);
 }
 

@@ -65,7 +65,7 @@ static Object *ImpString_clone_(Runtime *runtime
 	}
 
 	Object *r = Runtime_rawObject(runtime);
-	Object_putShallow(r, "_prototype", caller);
+	Object_putShallow(r, "#", caller);
 	Object_putDataShallow(r, "__data", strdup(ImpString_getRaw(caller))); // TODO: check pointer from strdup
 
 	return r;	

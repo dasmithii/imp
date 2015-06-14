@@ -89,7 +89,7 @@ static void *fileToDL(Runtime *runtime, char *path){
 
 	char *code = readFile(path);
 	if(!code){
-		Runtime_throwFormatted(runtime, "failed to read file '%s'", path);
+		Runtime_throwFormatted(runtime, "failed to read file: '%s'", path);
 	}
 	unsigned long checksum = hash((unsigned char*) code);
 	free(code);

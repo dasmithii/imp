@@ -58,6 +58,7 @@ int main (int argc, char **argv){
 		Imp_printUsage();
 	} else if(strcmp("environment", argv[0]) == 0){
 		Imp_printEnvironment();
+	} else {
+		Imp_executeFile(argv[0], argc-1, argv+1);
 	}
-	Imp_executeFile(argv[0], argc-1, argv+1);
 }

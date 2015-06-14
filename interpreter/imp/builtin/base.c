@@ -397,7 +397,7 @@ static Object *ImpBase_clone_(Runtime *runtime
 	}
 
 	Object *r = Runtime_rawObject(runtime);
-	Object_putShallow(r, "_prototype", self);
+	Object_putShallow(r, "#", self);
 	return r;
 } 
 

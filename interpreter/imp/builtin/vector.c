@@ -55,7 +55,7 @@ static Object *ImpVector_clone_(Runtime *runtime
 		return NULL;
 	}
 	Object *r = Runtime_rawObject(runtime);
-	Object_putShallow(r, "_prototype", caller);
+	Object_putShallow(r, "#", caller);
 
 	Vector *internal = malloc(sizeof(Vector));
 	if(!internal){
@@ -217,7 +217,7 @@ static Object *ImpVector_copy_(Runtime *runtime
 	Object *r = Runtime_rawObject(runtime);
 
 	Object_putDataShallow(r, "__data", newInternal);
-	Object_putShallow(r, "_prototype", Object_rootPrototype(caller));
+	Object_putShallow(r, "#", Object_rootPrototype(caller));
 	return r;
 }
 
@@ -249,30 +249,29 @@ static Object *ImpVector_get_(Runtime *runtime
 
 static Object *ImpVector_collect_(Runtime *runtime
 	                                , Object *context
-	                                , Object *caller
+	                                , Object *self
 	                                , int argc
 	                                , Object **argv){
-	assert(ImpVector_isValid(caller));
-	Vector_clean(ImpVector_getRaw(caller));
+	assert(ImpVector_isValid(self));
+	Vector_clean(ImpVector_getRaw(self));
 	return NULL;
 }
 
 
 static Object *ImpVector_mark_(Runtime *runtime
-	                                , Object *context
-	                                , Object *caller
-	                                , int argc
-	                                , Object **argv){
+	                         , Object *context
+	                         , Object *caller
+	                         , int argc
+	                         , Object **argv){
 	assert(runtime);
 	assert(ImpVector_isValid(caller));
 
-	// base vector is empty
-	if(Object_hasKeyShallow(caller, "__id")){
+	Vector *internal = ImpVector_getRaw(caller);
+	
+	if(!internal){
 		return NULL;
 	}
 
-	Vector *internal = ImpVector_getRaw(caller);
-	assert(internal);
 	for(int i = 0; i < internal->size; i++){
 		Object *element = *((Object**) Vector_hook(internal, i));
 		Runtime_markRecursive(runtime, element);

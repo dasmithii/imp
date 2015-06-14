@@ -241,7 +241,7 @@ static Object *ImpNumber_clone_(Runtime *runtime
 	Object_reference(context);
 
 	Object *r = Runtime_rawObject(runtime);
-	Object_putShallow(r, "_prototype", caller);
+	Object_putShallow(r, "#", caller);
 	void *data = malloc(sizeof(double));
 	if(!data){
 		abort();

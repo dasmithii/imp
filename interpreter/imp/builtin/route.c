@@ -79,7 +79,7 @@ static Object *ImpRoute_clone_internal(Runtime *runtime
 	}
 
 	Object *r = Runtime_rawObject(runtime);
-	Object_putShallow(r, "_prototype", caller);
+	Object_putShallow(r, "#", caller);
 	Object_putDataShallow(r, "__data", strdup(ImpRoute_getRaw(caller)));
 	return r;
 }

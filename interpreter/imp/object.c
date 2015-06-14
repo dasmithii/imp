@@ -113,7 +113,7 @@ Slot *Object_getSlotDeep(Object *self, char *key){
 	if(shallow){
 		return shallow;
 	}
-	Object *prototype = Object_getShallow(self, "_prototype");
+	Object *prototype = Object_getShallow(self, "#");
 	if(!prototype){
 		return NULL;
 	}
@@ -220,7 +220,7 @@ static void Object_insertDeep(Object *self, char *key, void *data){
 			Object_insertShallow(object, key, data);
 			return;
 		}
-		object = Object_getShallow(object, "_prototype");
+		object = Object_getShallow(object, "#");
 	} 
 
 	Object_insertShallow(self, key, data);
@@ -331,14 +331,14 @@ void Object_free(Object *self){
 
 
 Object *Object_prototype(Object *self){
-	return Object_getShallow(self, "_prototype");
+	return Object_getShallow(self, "#");
 }
 
 
 Object *Object_rootPrototype(Object *self){
 	assert(Object_isValid(self));
 
-	Object *proto = Object_getShallow(self, "_prototype");
+	Object *proto = Object_getShallow(self, "#");
 	if(!proto){
 		return self;
 	}

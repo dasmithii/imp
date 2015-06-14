@@ -29,7 +29,7 @@ bool ImpClosure_isValid(Object *obj){
 		return false;
 	}
 
-	if(Object_hasKeyShallow(obj, "_prototype")){
+	if(Object_hasKeyShallow(obj, "#")){
 		return Object_isValid(ImpClosure_getRaw(obj)->context);
 	}
 	return true;

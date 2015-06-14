@@ -36,7 +36,7 @@ bool BuiltIn_hasId(Object *self, BuiltinId id){
 
 BuiltinId BuiltIn_protoId(Object *self){
 	assert(self);
-	Object *prototype = Object_getShallow(self, "_prototype");
+	Object *prototype = Object_getShallow(self, "#");
 	if(!prototype){
 		return NOT_BUILTIN;
 	}
