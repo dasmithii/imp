@@ -43,10 +43,10 @@ static Object *ImpVector_print_(Runtime *runtime
 
 
 static Object *ImpVector_clone_(Runtime *runtime
-	                                  , Object *context
-	                                  , Object *caller
-	                                  , int argc
-	                                  , Object **argv){
+	                          , Object *context
+	                          , Object *caller
+	                          , int argc
+	                          , Object **argv){
 	assert(runtime);
 	assert(Object_isValid(caller));
 
@@ -69,10 +69,10 @@ static Object *ImpVector_clone_(Runtime *runtime
 
 
 static Object *ImpVector_append_(Runtime *runtime
-	                                   , Object *context
-	                                   , Object *caller
-	                                   , int argc
-	                                   , Object **argv){
+	                           , Object *context
+	                           , Object *caller
+	                           , int argc
+	                           , Object **argv){
 	assert(ImpVector_isValid(caller));
 
 	if(argc == 0){
@@ -88,10 +88,10 @@ static Object *ImpVector_append_(Runtime *runtime
 
 
 static Object *ImpVector_prepend_(Runtime *runtime
-	                                    , Object *context
-	                                    , Object *caller
-	                                    , int argc
-	                                    , Object **argv){
+	                            , Object *context
+	                            , Object *caller
+	                            , int argc
+	                            , Object **argv){
 	assert(ImpVector_isValid(caller));
 
 	if(argc != 1){
@@ -104,10 +104,10 @@ static Object *ImpVector_prepend_(Runtime *runtime
 
 
 static Object *ImpVector_insert_(Runtime *runtime
-	                                   , Object *context
-	                                   , Object *caller
-	                                   , int argc
-	                                   , Object **argv){
+	                           , Object *context
+	                           , Object *caller
+	                           , int argc
+	                           , Object **argv){
 	assert(runtime);
 	assert(ImpVector_isValid(caller));
 
@@ -130,10 +130,10 @@ static Object *ImpVector_insert_(Runtime *runtime
 
 
 static Object *ImpVector_remove_(Runtime *runtime
-	                                   , Object *context
-	                                   , Object *caller
-	                                   , int argc
-	                                   , Object **argv){
+	                           , Object *context
+	                           , Object *caller
+	                           , int argc
+	                           , Object **argv){
 	assert(runtime);
 	assert(ImpVector_isValid(caller));
 
@@ -155,10 +155,10 @@ static Object *ImpVector_remove_(Runtime *runtime
 
 
 static Object *ImpVector_removeBack_(Runtime *runtime
-	                                       , Object *context
-	                                       , Object *caller
-	                                       , int argc
-	                                       , Object **argv){
+	                               , Object *context
+	                               , Object *caller
+	                               , int argc
+	                               , Object **argv){
 	assert(runtime);
 	assert(ImpVector_isValid(caller));
 
@@ -177,10 +177,10 @@ static Object *ImpVector_removeBack_(Runtime *runtime
 
 
 static Object *ImpVector_removeFront_(Runtime *runtime
-	                                        , Object *context
-	                                        , Object *caller
-	                                        , int argc
-	                                        , Object **argv){
+	                                , Object *context
+	                                , Object *caller
+	                                , int argc
+	                                , Object **argv){
 	assert(runtime);
 	assert(ImpVector_isValid(caller));
 
@@ -199,10 +199,10 @@ static Object *ImpVector_removeFront_(Runtime *runtime
 
 
 static Object *ImpVector_copy_(Runtime *runtime
-	                                 , Object *context
-	                                 , Object *caller
-	                                 , int argc
-	                                 , Object **argv){
+	                         , Object *context
+	                         , Object *caller
+	                         , int argc
+	                         , Object **argv){
 	assert(runtime);
 	assert(ImpVector_isValid(caller));
 
@@ -280,10 +280,10 @@ static Object *ImpVector_mark_(Runtime *runtime
 }
 
 static Object *ImpVector_asString_(Runtime *runtime
-	                                     , Object *context
-	                                     , Object *caller
-	                                     , int argc
-	                                     , Object **argv){
+	                             , Object *context
+	                             , Object *caller
+	                             , int argc
+	                             , Object **argv){
 	assert(runtime);
 	assert(ImpVector_isValid(caller));
 
@@ -292,6 +292,7 @@ static Object *ImpVector_asString_(Runtime *runtime
 	}
 	Vector *internal = ImpVector_getRaw(caller);
 	Object *r = Runtime_cloneField(runtime, "String");
+	Object_reference(r);
 	ImpString_setRaw(r, "[");
 	for(int i = 0; i < internal->size; i++){
 		Object *item = *((Object**) Vector_hook(internal, i));
@@ -301,6 +302,7 @@ static Object *ImpVector_asString_(Runtime *runtime
 		}
 	}
 	ImpString_concatenateRaw(r, "]");
+	Object_unreference(r);
 	return r;
 }
 

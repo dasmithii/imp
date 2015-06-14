@@ -7,12 +7,11 @@
 
 
 
-Object *cli_onImport(Runtime *runtime
+Object *os_onImport(Runtime *runtime
 	               , Object *context
 	               , Object *module
 	               , int argc
 	               , Object **argv){
-	printf("argc: %d\n", runtime->argc);
 	Object *obj = Runtime_cloneField(runtime, "Vector");
 	Object_reference(obj);
 
@@ -21,9 +20,8 @@ Object *cli_onImport(Runtime *runtime
 		printf("%s\n", runtime->argv[i]);
 		Object *arg = Runtime_cloneField(runtime, "String");
 		ImpString_setRaw(arg, runtime->argv[i]);
-		Vector_append(vec, arg);
+		Vector_append(vec, &arg);
 	}
-	printf("what\n");
 	Object_putShallow(module, "arguments", obj);
 	Object_unreference(obj);
 	return NULL;
