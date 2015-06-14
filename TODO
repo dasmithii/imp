@@ -32,6 +32,8 @@ NOW:
 
  + Maybe make '#' field proto
 
+ + Protect against circular prototype linkage.
+
 
 
 MAJOR:
