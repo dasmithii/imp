@@ -17,6 +17,7 @@ typedef struct Object {
 	Slot *slots;
 	int slotCount;
 	bool gc_mark;
+	unsigned short refcount;
 } Object;
 
 

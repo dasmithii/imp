@@ -20,11 +20,7 @@ NOW:
  + Make regex module
 
  + Make Go-inspired defer
-
- + Give objects reference count fields instead of
-   slot hackiness. (do this using 3 bytes to complement 
-   1 byte gc_mark field).
-
+ 
  + Make break and continue accept arguments to deal with
    nested loops.
 
