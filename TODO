@@ -9,18 +9,14 @@ NOW:
 
  + Form iterator idioms
 
- + Implement break and continue for while loop.
-
  + Add (implements x y) function for interface checking.
 
  + Fix hashmap.
 
- + Make cli module
-
  + Make regex module
 
  + Make Go-inspired defer
- 
+
  + Make break and continue accept arguments to deal with
    nested loops.
 
