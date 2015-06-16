@@ -29,8 +29,7 @@ Object *Queue_clone(Runtime *runtime
 	if(argc != 0){
 		Runtime_throwString(runtime, "Queue:clone does not accept arguments");
 	}
-	Object *r = Runtime_rawObject(runtime);
-	Object_putShallow(r, "#", base);
+	Object *r = Runtime_simpleClone(runtime, base);
 	Internal *data = calloc(1, sizeof(Internal));
 	if(!data){
 		abort();

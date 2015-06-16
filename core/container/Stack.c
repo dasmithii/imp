@@ -71,8 +71,7 @@ Object *Stack_clone(Runtime *runtime
 	              , Object *base
 	              , int argc
 	              , Object **argv){
-	Object *r = Runtime_rawObject(runtime);
-	Object_putShallow(r, "#", base);
+	Object *r = Runtime_simpleClone(runtime, base);
 	Internal *data = malloc(sizeof(Internal));
 	if(!data){
 		abort();

@@ -224,34 +224,24 @@ double ImpNumber_getRaw(Object *self){
 
 static Object *ImpNumber_clone_(Runtime *runtime
 	                       , Object *context
-	                       , Object *caller
+	                       , Object *self
 	                       , int argc
 	                       , Object **argv){
 	assert(runtime);
-	assert(caller);
+	assert(self);
 	assert(argc == 0);
 
 	if(argc != 0){
 		Runtime_throwString(runtime, "Number:~ does not accept arguments");
 	}
 
-
-
-	Object_reference(caller);
-	Object_reference(context);
-
-	Object *r = Runtime_rawObject(runtime);
-	Object_putShallow(r, "#", caller);
+	Object *r = Runtime_simpleClone(runtime, self);
 	void *data = malloc(sizeof(double));
 	if(!data){
 		abort();
 	}
 	Object_putDataShallow(r, "__data", data);
-	ImpNumber_setRaw(r, ImpNumber_getRaw(caller));
-
-	Object_unreference(caller);
-	Object_reference(context);
-
+	ImpNumber_setRaw(r, ImpNumber_getRaw(self));
 	return r;
 }
 
@@ -346,17 +336,17 @@ static Object *ImpNumber_dec_(Runtime *runtime
 }
 
 static Object *ImpNumber_copy_(Runtime *runtime
-	                       , Object *context
-	                       , Object *caller
-	                       , int argc
-	                       , Object **argv){
+	                         , Object *context
+	                         , Object *self
+	                         , int argc
+	                         , Object **argv){
 	if(argc != 0){
 		Runtime_throwString(runtime, "Number:$ does not accept arguments");
 	}
 
-	Object *r = Runtime_clone(runtime, caller); // TODO: fix clone
+	Object *r = Runtime_simpleClone(runtime, self); 
 	double *data = malloc(sizeof(double));
-	*data = ImpNumber_getRaw(caller);
+	*data = ImpNumber_getRaw(self);
 	Object_putDataShallow(r, "__data", data);
 	return r;
 }

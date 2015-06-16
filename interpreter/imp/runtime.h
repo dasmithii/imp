@@ -25,9 +25,14 @@ typedef struct {
 	Stack tryStack; // stack of try calls
 
 	// configuration
-	char *root;
+	char *root; // importer search path
 	int argc;
 	char **argv;
+
+	// built-ins
+	Object baseNumber;
+	Object baseString;
+	Object baseVector;
 } Runtime;
 
 
@@ -40,6 +45,7 @@ void Runtime_clean(Runtime *self);
 Object *Runtime_rawObject(Runtime *self);
 Object *Runtime_newObject(Runtime *self); // clone of base object
 Object *Runtime_clone(Runtime *self, Object *base);
+Object *Runtime_simpleClone(Runtime *self, Object *base);
 Object *Runtime_cloneField(Runtime *self, char *name);
 
 

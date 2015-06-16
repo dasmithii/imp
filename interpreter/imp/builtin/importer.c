@@ -151,7 +151,7 @@ static Object *contextForImportName(Runtime *runtime
 	}
 
 	Object_reference(context);
-	Object *r = Runtime_clone(runtime, context);
+	Object *r = Runtime_simpleClone(runtime, context);
 	Object_putShallow(context, importName, r);
 	Object_unreference(context);
 	return r;

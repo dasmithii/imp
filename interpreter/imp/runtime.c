@@ -308,7 +308,7 @@ void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 	Object *base = Runtime_rawObject(self);
 	ImpBase_init(base);
 
-	self->root_scope = Runtime_clone(self, base);
+	self->root_scope = Runtime_simpleClone(self, base);
 	Object_putShallow(self->root_scope, "self", self->root_scope);
 
 	Object_putShallow(self->root_scope, "#", base);
@@ -361,27 +361,31 @@ void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 }
 
 
-Object *Runtime_clone(Runtime *runtime, Object *object){
-	assert(runtime);
-	assert(Object_isValid(object));
-	assert(Runtime_isManaged(runtime, object));
+Object *Runtime_simpleClone(Runtime *runtime, Object *base){
+	Object_reference(base);
+	Object *r = Runtime_rawObject(runtime);
+	Object_unreference(base);
 
-	Object_reference(object);
-	Object *r = NULL;
-
-	if(Object_hasSpecialMethod(object, "~")){
-		r = Runtime_callSpecialMethod(runtime
-			                           , NULL
-			                           , object
-			                           , "~"
-			                           , 0
-			                           , NULL);
-	} else {
-		r = Runtime_rawObject(runtime);
-		Object_putShallow(r, "#", object);
-	}
-	Object_unreference(object);
+	Object_putShallow(r, "#", base);
 	return r;
+}
+
+
+Object *Runtime_clone(Runtime *runtime, Object *base){
+	assert(runtime);
+	assert(Object_isValid(base));
+	assert(Runtime_isManaged(runtime, base));
+
+	if(Object_hasSpecialMethod(base, "~")){
+		return Runtime_callSpecialMethod(runtime
+			                        , NULL
+			                        , base
+			                        , "~"
+			                        , 0
+			                        , NULL);
+	} else {
+		return Runtime_simpleClone(runtime, base);
+	}
 }
 
 
@@ -423,32 +427,6 @@ static Object *Runtime_tokenToObject(Runtime *self, Object *scope, Token *token)
 			r = str;
 			break;
 		}
-	// case TOKEN_NOT:
-	// 	return newOf(self, scope, "!");
-	// case TOKEN_AT:
-	// 	return newOf(self, scope, "@");
-	// case TOKEN_HASH:
-	// 	return newOf(self, scope, "#");
-	// case TOKEN_DOLLAR:
-	// 	return newOf(self, scope, "$");
-	// case TOKEN_PERCENT:
-	// 	return newOf(self, scope, "%");
-	// case TOKEN_CARROT:
-	// 	return newOf(self, scope, "^");
-	// case TOKEN_AMP:
-	// 	return newOf(self, scope, "&");
-	// case TOKEN_STAR:
-	// 	return newOf(self, scope, "*");
-	// case TOKEN_PLUS:
-	// 	return newOf(self, scope, "+");
-	// case TOKEN_QUESTION:
-	// 	return newOf(self, scope, "?");
-	// case TOKEN_COLON:
-	// 	return newOf(self, scope, ":");
-	// case TOKEN_SEMI:
-	// 	return newOf(self, scope, ";");
-	// case TOKEN_DASH:
-	// 	return newOf(self, scope, "-");
 	default:
 		break;
 	}

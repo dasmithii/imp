@@ -292,8 +292,7 @@ Object *Hashmap_clone(Runtime *runtime
 	                , Object *self
 	                , int argc
 	                , Object **argv){
-	Object *r = Runtime_rawObject(runtime);
-	Object_putShallow(r, "#", self);
+	Object *r = Runtime_simpleClone(runtime, self);
 	Map *internal = malloc(sizeof(Map));
 	if(!internal){
 		abort();

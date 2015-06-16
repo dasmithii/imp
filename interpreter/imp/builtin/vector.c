@@ -54,9 +54,7 @@ static Object *ImpVector_clone_(Runtime *runtime
 		Runtime_throwString(runtime, "Vector:~ does not accept arguments.");
 		return NULL;
 	}
-	Object *r = Runtime_rawObject(runtime);
-	Object_putShallow(r, "#", caller);
-
+	Object *r = Runtime_simpleClone(runtime, caller);
 	Vector *internal = malloc(sizeof(Vector));
 	if(!internal){
 		abort();

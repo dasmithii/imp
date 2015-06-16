@@ -54,7 +54,7 @@ static Object *ImpClosure_activate_internal(Runtime *runtime
 	}
 
 	ImpClosure_internal *internal = Object_getDataShallow(caller, "__data");
-	Object *scope = Runtime_clone(runtime, internal->context);
+	Object *scope = Runtime_simpleClone(runtime, internal->context);
 	Object_reference(scope);
 
 	Object *arguments = Runtime_cloneField(runtime, "Vector");
