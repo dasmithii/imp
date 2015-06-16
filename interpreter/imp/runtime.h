@@ -30,9 +30,13 @@ typedef struct {
 	char **argv;
 
 	// built-ins
-	Object baseNumber;
-	Object baseString;
-	Object baseVector;
+	Object *Object;
+	Object *Number;
+	Object *String;
+	Object *Vector;
+	Object *Closure;
+	Object *Importer;
+	Object *Route;
 } Runtime;
 
 
@@ -42,11 +46,11 @@ void Runtime_clean(Runtime *self);
 
 
 //// object creation
-Object *Runtime_rawObject(Runtime *self);
-Object *Runtime_newObject(Runtime *self); // clone of base object
+Object *Runtime_rawObject(Runtime *self); // TODO: replace with make(Empty)
 Object *Runtime_clone(Runtime *self, Object *base);
 Object *Runtime_simpleClone(Runtime *self, Object *base);
 Object *Runtime_cloneField(Runtime *self, char *name);
+#define Runtime_make(R, T) Runtime_clone(R, R->T)
 
 
 //// code execution

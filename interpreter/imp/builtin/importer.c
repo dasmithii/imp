@@ -273,12 +273,15 @@ static void importInternalModuleTo(Runtime *runtime
 			strcat(key, "__");
 			strcat(key, wopre + strlen(baseKey) + 1);
 			
+			Object *baseObj;
 
-			if(!Object_hasKeyShallow(context, baseKey)){
-				Object_putShallow(context, baseKey, Runtime_newObject(runtime));
-			}
+			if(Object_hasKeyShallow(context, baseKey)){
+				baseObj = Object_getShallow(context, baseKey);
+			} else{
+				baseObj = Runtime_make(runtime, Object);
+				Object_putShallow(context, baseKey, baseObj);
+			} 
 
-			Object *baseObj = Object_getShallow(context, baseKey);
 			assert(baseObj);
 
 			Object_registerCMethod(baseObj, key, sym);
@@ -347,7 +350,7 @@ static Object *importWithoutUsingCache(Runtime *runtime, char *modulePath){ // m
 		Runtime_throwString(runtime, "cannot import empty string.");
 	}
 
-	Object *r = Runtime_newObject(runtime);
+	Object *r = Runtime_make(runtime, Object);
 	Object_reference(r); // permanent reference (modules aren't ever collected)
 
 	if(isDirectory(modulePath)){

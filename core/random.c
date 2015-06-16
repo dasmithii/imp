@@ -27,7 +27,7 @@ Object *random_activate(Runtime *runtime
 	if(argc != 0){
 		Runtime_throwString(runtime, "random:Number does not accept arguments");
 	}
-	Object *r = Runtime_cloneField(runtime, "Number");
+	Object *r = Runtime_make(runtime, Number);
 	ImpNumber_setRaw(r, (double) rand());
 	return r;
 }
@@ -49,7 +49,7 @@ Object *random_between(Runtime *runtime
 	const double n0 = ImpNumber_getRaw(argv[0]);
 	const double n1 = ImpNumber_getRaw(argv[1]);
 
-	Object *r = Runtime_cloneField(runtime, "Number");
+	Object *r = Runtime_make(runtime, Number);
 	ImpNumber_setRaw(r, n0 + (n1-n0) * (double) rand() / (double) RAND_MAX);
 	return r;
 }
@@ -63,7 +63,7 @@ Object *random_unit(Runtime *runtime
 	if(argc != 0){
 		Runtime_throwString(runtime, "random:unit does not accept arguments");
 	}
-	Object *r = Runtime_cloneField(runtime, "Number");
+	Object *r = Runtime_make(runtime, Number);
 	ImpNumber_setRaw(r, (double) rand() / (double) RAND_MAX);
 	return r;
 }

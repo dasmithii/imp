@@ -21,7 +21,7 @@ Object *time_seconds(Runtime *runtime
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
 		Runtime_throwString(runtime, "time:seconds requires numeric argument");
 	}
-	Object *r = Runtime_cloneField(runtime, "Number");
+	Object *r = Runtime_make(runtime, Number);
 	ImpNumber_setRaw(r, MICROSECONDS_PER_SECOND * ImpNumber_getRaw(argv[0]));
 	return r;
 }
@@ -38,7 +38,7 @@ Object *time_milliseconds(Runtime *runtime
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
 		Runtime_throwString(runtime, "time:milliseconds requires numeric argument");
 	}
-	Object *r = Runtime_cloneField(runtime, "Number");
+	Object *r = Runtime_make(runtime, Number);
 	ImpNumber_setRaw(r, MICROSECONDS_PER_MILLISECOND * ImpNumber_getRaw(argv[0]));
 	return r;
 }
@@ -55,7 +55,7 @@ Object *time_minutes(Runtime *runtime
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
 		Runtime_throwString(runtime, "time:minutes requires numeric argument");
 	}
-	Object *r = Runtime_cloneField(runtime, "Number");
+	Object *r = Runtime_make(runtime, Number);
 	ImpNumber_setRaw(r, SECONDS_PER_MINUTE * MICROSECONDS_PER_SECOND * ImpNumber_getRaw(argv[0]));
 	return r;
 }
@@ -72,7 +72,7 @@ Object *time_hours(Runtime *runtime
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
 		Runtime_throwString(runtime, "time:hours requires numeric argument");
 	}
-	Object *r = Runtime_cloneField(runtime, "Number");
+	Object *r = Runtime_make(runtime, Number);
 	ImpNumber_setRaw(r, MINUTE_PER_HOUR * SECONDS_PER_MINUTE * MICROSECONDS_PER_SECOND * ImpNumber_getRaw(argv[0]));
 	return r;
 }

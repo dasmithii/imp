@@ -12,13 +12,12 @@ Object *os_onImport(Runtime *runtime
 	               , Object *module
 	               , int argc
 	               , Object **argv){
-	Object *obj = Runtime_cloneField(runtime, "Vector");
+	Object *obj = Runtime_make(runtime, Vector);
 	Object_reference(obj);
 
 	Vector *vec = ImpVector_getRaw(obj);
 	for(int i = 0; i < runtime->argc; i++){
-		printf("%s\n", runtime->argv[i]);
-		Object *arg = Runtime_cloneField(runtime, "String");
+		Object *arg = Runtime_make(runtime, String);
 		ImpString_setRaw(arg, runtime->argv[i]);
 		Vector_append(vec, &arg);
 	}

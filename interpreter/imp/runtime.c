@@ -16,6 +16,7 @@
 #include <imp/builtin/break.h>
 #include <imp/builtin/continue.h>
 #include <imp/builtin/base.h>
+#include <imp/builtin/miscellaneous.h>
 #include <imp/c.h>
 #include <imp/parser.h>
 #include <imp/runtime.h>
@@ -280,11 +281,6 @@ Object *Runtime_rawObject(Runtime *self){
 }
 
 
-Object *Runtime_newObject(Runtime *self){
-	return Runtime_cloneField(self, "#");
-}
-
-
 void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 	assert(self);
 
@@ -305,57 +301,47 @@ void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 	// IMPORTANT: be careful while messing with the order of 
 	// builtin initializations (!).
 
-	Object *base = Runtime_rawObject(self);
-	ImpBase_init(base);
+	self->Object = Runtime_rawObject(self);
+	ImpBase_init(self->Object);
 
-	self->root_scope = Runtime_simpleClone(self, base);
+	self->root_scope = Runtime_make(self, Object);
 	Object_putShallow(self->root_scope, "self", self->root_scope);
 
-	Object_putShallow(self->root_scope, "#", base);
+	#define IMP_INIT_IN_SLOT(OBJECT, NAME)                       \
+		self->OBJECT = Runtime_make(self, Object);               \
+		Object_reference(self->OBJECT);                          \
+		Object_putShallow(self->root_scope, NAME, self->OBJECT)  \
+		Imp##OBJECT##_init(self->OBJECT);
+	#define IMP_INIT(NAME) IMP_INIT_IN_SLOT(NAME, #NAME)
 
-	Object *s = Runtime_newObject(self);
-	ImpString_init(s);
-	Object_putShallow(self->root_scope, "String", s);
+	IMP_INIT(String);
+	IMP_INIT(Number);
+	IMP_INIT(Route);
+	IMP_INIT(Closure);
+	IMP_INIT(Vector);
+	IMP_INIT_IN_SLOT(Importer, "import");
 
-	Object *n = Runtime_newObject(self);
-	ImpNumber_init(n);
-	Object_putShallow(self->root_scope, "Number", n);
+	ImpMisc_init(self->root_scope);
 
-	Object *route = Runtime_newObject(self);
-	ImpRoute_init(route);
-	Object_putShallow(self->root_scope, "Route", route);
+	// Object *setter = Runtime_make(self, Object);
+	// ImpSet_init(setter);
+	// Object_putShallow(self->root_scope, "set", setter);
 
-	Object *setter = Runtime_newObject(self);
-	ImpSet_init(setter);
-	Object_putShallow(self->root_scope, "set", setter);
+	// Object *definer = Runtime_make(self, Object);
+	// ImpDef_init(definer);
+	// Object_putShallow(self->root_scope, "def", definer);
 
-	Object *definer = Runtime_newObject(self);
-	ImpDef_init(definer);
-	Object_putShallow(self->root_scope, "def", definer);
+	// Object *returner = Runtime_make(self, Object);
+	// ImpReturn_init(returner);
+	// Object_putShallow(self->root_scope, "return", returner);
 
-	Object *closure = Runtime_newObject(self);
-	ImpClosure_init(closure);
-	Object_putShallow(self->root_scope, "Closure", closure);
+	// Object *breaker = Runtime_make(self, Object);
+	// ImpBreak_init(breaker);
+	// Object_putShallow(self->root_scope, "break", breaker);
 
-	Object *vec = Runtime_newObject(self);
-	ImpVector_init(vec);
-	Object_putShallow(self->root_scope, "Vector", vec);
-
-	Object *returner = Runtime_newObject(self);
-	ImpReturn_init(returner);
-	Object_putShallow(self->root_scope, "return", returner);
-
-	Object *importer = Runtime_newObject(self);
-	ImpImporter_init(importer);
-	Object_putShallow(self->root_scope, "import", importer);
-
-	Object *breaker = Runtime_newObject(self);
-	ImpBreak_init(breaker);
-	Object_putShallow(self->root_scope, "break", breaker);
-
-	Object *continuer = Runtime_newObject(self);
-	ImpImporter_init(continuer);
-	Object_putShallow(self->root_scope, "continue", continuer);
+	// Object *continuer = Runtime_make(self, Object);
+	// ImpImporter_init(continuer);
+	// Object_putShallow(self->root_scope, "continue", continuer);
 
 	Runtime_unlockGC(self);
 }
@@ -407,7 +393,7 @@ static Object *Runtime_tokenToObject(Runtime *self, Object *scope, Token *token)
 	switch(token->type){
 	case TOKEN_ROUTE:
 		{
-			Object *route = Runtime_cloneField(self, "Route");
+			Object *route = Runtime_clone(self, self->Route);
 			assert(token->data.text);
 			ImpRoute_setRaw(route, token->data.text);
 			r = route;

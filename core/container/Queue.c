@@ -118,13 +118,9 @@ Object *Queue_isEmpty(Runtime *runtime
 	if(argc != 0){
 		Runtime_throwString(runtime, "Queue:Queue_isEmpty does not accept arguments");
 	}
-	Object *r = Runtime_cloneField(runtime, "Number");
 	Internal *internal = getRaw(self);
-	if(internal->head){
-		ImpNumber_setRaw(r, 0);
-	} else {
-		ImpNumber_setRaw(r, 1);
-	}
+	Object *r = Runtime_make(runtime, Number);
+	ImpNumber_setRaw(r, internal->head? 0:1);
 	return r;
 }
 

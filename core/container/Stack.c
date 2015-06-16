@@ -169,7 +169,7 @@ Object *Stack_size(Runtime *runtime
 	}
 
 	Internal *internal = getRaw(self);
-	Object *r = Runtime_cloneField(runtime, "Number");
+	Object *r = Runtime_make(runtime, Number);
 	ImpNumber_setRaw(r, (double) internal->size);
 	return r;
 }

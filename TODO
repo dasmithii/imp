@@ -2,10 +2,7 @@ BRANCH (cleanup):
 
  + Move runtime->root to importer field.
 
- + Instead of Runtime_cloneField, reference builtins statically
-   with Runtime_getBaseNumber, Runtime_getNumber, and et cetera.
-
- + Make root_scope fields true and false.
+ + Make Scope_init function
 
 
 

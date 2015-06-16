@@ -108,7 +108,7 @@ Object *io_File_readCharacter(Runtime *runtime
 	buf[0] = getc(fp);
 	buf[1] = 0;
 
-	Object *r = Runtime_cloneField(runtime, "String");
+	Object *r = Runtime_make(runtime, String);
 	ImpString_setRaw(r, buf);
 	return r;
 }
@@ -132,7 +132,7 @@ Object *io_File_readLine(Runtime *runtime
 		Runtime_throwString(runtime, "attempted to read from unopened file");
 	}
 
-	Object *r = Runtime_cloneField(runtime, "String");
+	Object *r = Runtime_make(runtime, String);
 	char *line = NULL;
 		size_t len = 0;
 		ssize_t read;
@@ -176,7 +176,7 @@ Object *io_File_read(Runtime *runtime
 	size_t size=fread(contents,1,fileSize,fp);
 	contents[size]=0; 
 
-	Object *r = Runtime_cloneField(runtime, "String");
+	Object *r = Runtime_make(runtime, String);
 	ImpString_setRaw(r, contents);
 	free(contents);
 
