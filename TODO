@@ -2,8 +2,6 @@ BRANCH (cleanup):
 
  + Move runtime->root to importer field.
 
- + Move registerCMethod functions to runtime.{h,c}
-
  + Ensure things run on debug build
 
  + Move importer cache to within importer or runtime.
