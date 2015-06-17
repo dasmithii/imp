@@ -1,11 +1,4 @@
-BRANCH (cleanup):
-
- + Move runtime->root to importer field.
-
- + Ensure things run on debug build
-
- + Move importer cache to within importer or runtime.
-
+Ensure debug mode works
 
 
 NOW:
@@ -31,6 +24,18 @@ NOW:
 
  + Cap slot name sizes
 
+ + Move runtime->root to importer field.
+
+ + Ensure things run on debug build
+
+ + Move importer cache to within importer or runtime.
+
+ + Make number type handle infinite precision integers, binary,
+   and hex, as well as the existing double. Magic.
+
+ + Deal with unix #! 
+
+ + Use '@' for arguments
 
 
 
@@ -51,7 +56,13 @@ MEDIUM:
  
  + Replace slot system with legit accessor.
 
+ + Prefix operators...
+
  + Implement macros
+
+ + Generators
+
+ + Object notation (maybe brackets and scrap macros?)
 
 
 

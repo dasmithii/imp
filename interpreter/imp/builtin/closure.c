@@ -58,7 +58,7 @@ static Object *activate_(Runtime *runtime
 	Object_reference(scope);
 
 	Object *arguments = Runtime_cloneField(runtime, "Vector");
-	Object_putShallow(scope, "arguments", arguments);
+	Object_putShallow(scope, "@", arguments);
 
 	if(argc > 0){
 		Object_putShallow(scope, "self", argv[0]);
