@@ -248,7 +248,11 @@ static void importInternalModuleTo(Runtime *runtime
 		}
 
 		if((*wopre >= 'a' && *wopre <= 'z') || *wopre == '_'){
-			Runtime_registerCMethod(runtime, context, wopre, sym);
+			if(strcmp(wopre, "activate") == 0){
+				Object_registerCActivator(context, sym);
+			} else {
+				Runtime_registerCMethod(runtime, context, wopre, sym);
+			}
 			if(endswith(wopre, "onImport")){
 				Runtime_callMethod(runtime, context, context, "onImport", 0, NULL);
 			}
@@ -276,7 +280,13 @@ static void importInternalModuleTo(Runtime *runtime
 
 			assert(baseObj);
 
-			Runtime_registerCMethod(runtime, baseObj, wopre + strlen(baseKey) + 1, sym);
+			char *afterBase = wopre + strlen(baseKey) + 1;
+			if(strcmp(afterBase, "activate") == 0){
+				Object_registerCActivator(baseObj, sym);
+			} else {
+				Runtime_registerCMethod(runtime, baseObj, afterBase, sym);
+			}
+
 			if(endswith(wopre, "onImport")){
 				Runtime_callMethod(runtime, context, baseObj, "onImport", 0, NULL);
 			}

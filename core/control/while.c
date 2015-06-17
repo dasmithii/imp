@@ -8,6 +8,10 @@
 #include <string.h>
 
 
+// note: this function, isZero, is duplicated for all
+// control structures (in each file) because I'm inept.
+// Make sure to replicate any changes to this function
+// in the other files as well.
 static bool isZero(Runtime *runtime
 	             , Object *ctx
 	             , Object *obj){
