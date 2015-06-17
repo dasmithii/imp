@@ -264,6 +264,7 @@ Object *Runtime_rawObject(Runtime *self){
 void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 	assert(self);
 
+	self->root = root;
 	self->argc = argc;
 	self->argv = argv;
 
@@ -299,7 +300,6 @@ void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 	IMP_INIT(Closure);
 	IMP_INIT(Vector);
 	IMP_INIT_IN_SLOT(Importer, "import");
-	Object_putShallow(self->Importer, "rootPath", root);
 
 	ImpMisc_init(self->root_scope, self);
 
