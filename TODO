@@ -1,6 +1,3 @@
-Ensure debug mode works
-
-
 NOW:
 
  + Make address type
@@ -24,14 +21,14 @@ NOW:
 
  + Cap slot name sizes
 
- + Move runtime->root to importer field.
-
  + Ensure things run on debug build
-
- + Move importer cache to within importer or runtime.
 
  + Make number type handle infinite precision integers, binary,
    and hex, as well as the existing double. Magic.
+
+ + Make argument expansion/pass
+
+ + Maybe make it so callMethod doesn't try underscore 
 
 
 

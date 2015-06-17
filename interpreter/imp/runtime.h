@@ -35,8 +35,10 @@ typedef struct {
 	Object *String;
 	Object *Vector;
 	Object *Closure;
-	Object *Importer;
 	Object *Route;
+
+	Object *Importer; // activate-able import object
+	Object *imports; // cache of dlls
 } Runtime;
 
 
@@ -50,6 +52,8 @@ Object *Runtime_rawObject(Runtime *self); // TODO: replace with make(Empty)
 Object *Runtime_clone(Runtime *self, Object *base);
 Object *Runtime_simpleClone(Runtime *self, Object *base);
 Object *Runtime_cloneField(Runtime *self, char *name);
+
+// T should be Object/Number/String/Vector/Closure/Route
 #define Runtime_make(R, T) Runtime_clone(R, R->T)
 
 

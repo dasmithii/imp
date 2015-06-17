@@ -386,20 +386,18 @@ static Object *importWithoutUsingCache(Runtime *runtime, char *modulePath){ // m
 }
 
 
-static Object *cache = NULL; // TODO: store this in runtime struct
-
 Object *Imp_import(Runtime *runtime, char *modulePath){
-	if(cache){
-		Object *cached = Object_getShallow(cache, modulePath);
+	if(runtime->imports){
+		Object *cached = Object_getShallow(runtime->imports, modulePath);
 		if(cached){
 			return cached;
 		}
 	} else {
-		cache = Runtime_rawObject(runtime);
-		Object_reference(cache);
+		runtime->imports = Runtime_rawObject(runtime);
+		Object_reference(runtime->imports);
 	}
 	Object *r = importWithoutUsingCache(runtime, modulePath);
-	Object_putShallow(cache, modulePath, r);
+	Object_putShallow(runtime->imports, modulePath, r);
 	return r;
 }
 
@@ -411,7 +409,6 @@ static Object *activate_(Runtime *runtime
 	                   , Object **argv){
 	assert(runtime);
 	assert(Object_isValid(context));
-	assert(ImpImporter_isValid(caller));
 
 	if(argc != 1 && argc != 2){
 		Runtime_throwString(runtime, "import requires one or two arguments.");
@@ -421,7 +418,6 @@ static Object *activate_(Runtime *runtime
 
 	char *modulePath = ImpString_getRaw(argv[0]);
 	Object *module = Imp_import(runtime, modulePath);
-	Object_putShallow(caller, "cache", cache);
 
 	if(argc == 1){ //
 		char importName[32];
@@ -462,5 +458,7 @@ static Object *activate_(Runtime *runtime
 void ImpImporter_init(Object *self, Runtime *runtime){
 	assert(self);
 	BuiltIn_setId(self, BUILTIN_IMPORTER);
+	runtime->imports = Runtime_make(runtime, Object);
+	Object_putShallow(runtime->root_scope, "imports", runtime->imports);
 	Object_registerCActivator(self, activate_);
 }
