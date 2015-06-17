@@ -15,9 +15,6 @@ char *ImpRoute_getRaw(Object *self){
 }
 
 
-
-
-
 bool ImpRoute_isValid(Object *obj){
 	return Object_isValid(obj)                      &&
 	       BuiltIn_protoId(obj) == BUILTIN_ROUTE    &&
@@ -39,11 +36,11 @@ void ImpRoute_print(Object *self){
 }
 
 
-static Object *ImpRoute_print_internal(Runtime *runtime
-	                                  , Object *context
-	                                  , Object *caller
-	                                  , int argc
-	                                  , Object **argv){
+static Object *print_(Runtime *runtime
+	                , Object *context
+	                , Object *caller
+	                , int argc
+	                , Object **argv){
 	assert(runtime);
 	assert(Object_isValid(context));
 	assert(ImpRoute_isValid(caller));
@@ -65,11 +62,11 @@ void ImpRoute_set(Object *self, Object *value){
 }
 
 
-static Object *ImpRoute_clone_internal(Runtime *runtime
-	                                 , Object *context
-	                                 , Object *caller
-	                                 , int argc
-	                                 , Object **argv){
+static Object *clone_(Runtime *runtime
+	                , Object *context
+	                , Object *caller
+	                , int argc
+	                , Object **argv){
 	assert(runtime);
 	assert(Object_isValid(caller));
 
@@ -84,11 +81,11 @@ static Object *ImpRoute_clone_internal(Runtime *runtime
 }
 
 
-static Object *ImpRoute_activate_internal(Runtime *runtime
-	                                    , Object *context
-	                                    , Object *caller
-	                                    , int argc
-	                                    , Object **argv){
+static Object *activate_(Runtime *runtime
+	                   , Object *context
+	                   , Object *caller
+	                   , int argc
+	                   , Object **argv){
 	assert(runtime);
 	assert(Object_isValid(context));
 	assert(ImpRoute_isValid(caller));
@@ -126,12 +123,13 @@ static Object *ImpRoute_activate_internal(Runtime *runtime
 }
 
 
-void ImpRoute_init(Object *self){
+void ImpRoute_init(Object *self, Runtime *runtime){
 	assert(self);
 	BuiltIn_setId(self, BUILTIN_ROUTE);
-	Object_registerCMethod(self, "__print", ImpRoute_print_internal);
-	Object_registerCMethod(self, "__~", ImpRoute_clone_internal);
-	Object_registerCMethod(self, "__activate", ImpRoute_activate_internal);
+	Runtime_registerCMethod(runtime, self, "~", clone_);
+	Runtime_registerPrivelegedCMethod(runtime, self, "print", print_);
+	Object_registerCActivator(self, activate_);
+	Object_putDataShallow(self, "__privilege", NULL);
 	ImpRoute_setRaw(self, "defaultRoute");
 }
 

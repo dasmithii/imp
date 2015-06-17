@@ -1,7 +1,7 @@
 #include "miscellaneous.h"
 #include "../c.h"
 #include "general.h"
-
+#include "route.h"
 
 
 
@@ -137,11 +137,11 @@ static Object *return_(Runtime *runtime
 }
 
 
-void ImpMisc_init(Object *self){
+void ImpMisc_init(Object *self, Runtime *runtime){
 	assert(self);
-	Object_registerCMethod(self, "__def", def_);
-	Object_registerCMethod(self, "__set", set_);
-	Object_registerCMethod(self, "__break", break_);
-	Object_registerCMethod(self, "__continue", continue_);
-	Object_registerCMethod(self, "__return", return_);
+	Runtime_registerPrivelegedCMethod(runtime, self, "def", def_);
+	Runtime_registerPrivelegedCMethod(runtime, self, "set", set_);
+	Runtime_registerCMethod(runtime, self, "break", break_);
+	Runtime_registerCMethod(runtime, self, "continue", continue_);
+	Runtime_registerCMethod(runtime, self, "return", return_);
 }

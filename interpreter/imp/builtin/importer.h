@@ -5,7 +5,7 @@
 #include "../object.h"
 
 
-void ImpImporter_init(Object *self);
+void ImpImporter_init(Object *self, Runtime *runtime);
 Object *Imp_import(Runtime *runtime, char *module);
 
 

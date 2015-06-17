@@ -15,12 +15,12 @@
 typedef struct {
 	ParseNode *code; // closure
 	Object *context; // cached objects in closure
-} ImpClosure_internal;
+} Internal;
 
 
-static ImpClosure_internal *ImpClosure_getRaw(Object *self){
+static Internal *ImpClosure_getRaw(Object *self){
 	assert(Object_isValid(self));
-	return (ImpClosure_internal*) Object_getDataDeep(self, "__data");
+	return (Internal*) Object_getDataDeep(self, "__data");
 }
 
 
@@ -42,18 +42,18 @@ void ImpClosure_print(Object *self){
 }
 
 
-static Object *ImpClosure_activate_internal(Runtime *runtime
-	                                      , Object *context
-	                                      , Object *caller
-	                                      , int argc
-	                                      , Object **argv){
+static Object *activate_(Runtime *runtime
+	                   , Object *context
+	                   , Object *caller
+	                   , int argc
+	                   , Object **argv){
 	assert(runtime);
 	assert(ImpClosure_isValid(caller));
 	for(int i = 0; i < argc; i++){
 		assert(Object_isValid(argv[i]));
 	}
 
-	ImpClosure_internal *internal = Object_getDataShallow(caller, "__data");
+	Internal *internal = Object_getDataDeep(caller, "__data");
 	Object *scope = Runtime_simpleClone(runtime, internal->context);
 	Object_reference(scope);
 
@@ -86,9 +86,13 @@ static void ParseNode_cacheReferences(ParseNode *node, Object *context, Object *
 
 	if(node->type == LEAF_NODE){
 		if(node->contents.token->type == TOKEN_ROUTE){
-			char buf[32];
+
+			// TODO: utilize ImpRoute_mapping here
+
+			char buf[64];
 			char *route = node->contents.token->data.text;
-			char *ptr = buf;
+			*buf = '_';
+			char *ptr = buf + 1;
 			while(*route && *route != ':'){
 				*ptr = *route;
 				ptr++;
@@ -99,6 +103,11 @@ static void ParseNode_cacheReferences(ParseNode *node, Object *context, Object *
 			Object *reference = Object_getDeep(context, buf);
 			if(reference){
 				Object_putShallow(cache, buf, reference);
+			}
+
+			reference = Object_getDeep(context, buf + 1);
+			if(reference){
+				Object_putShallow(cache, buf + 1, reference);
 			}
 		}
 	} else {
@@ -118,7 +127,7 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 	Object_reference(self);
 	Object_reference(context);
 
-	ImpClosure_internal *internal = malloc(sizeof(ImpClosure_internal));
+	Internal *internal = malloc(sizeof(Internal));
 	if(!internal){
 		abort();
 	}
@@ -143,15 +152,15 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 }
 
 
-static Object *ImpClosure_collect_internal(Runtime *runtime
-	                       , Object *context
-	                       , Object *caller
-	                       , int argc
-	                       , Object **argv){
+static Object *collect_(Runtime *runtime
+	                  , Object *context
+	                  , Object *caller
+	                  , int argc
+	                  , Object **argv){
 	assert(runtime);
 	assert(ImpClosure_isValid(caller));
 
-	ImpClosure_internal *raw = ImpClosure_getRaw(caller);
+	Internal *raw = ImpClosure_getRaw(caller);
 	assert(Object_isValid(raw->context));
 	ParseNode_deepClean(raw->code);
 	free(raw->code);
@@ -163,14 +172,14 @@ static Object *ImpClosure_collect_internal(Runtime *runtime
 }
 
 
-static Object *ImpClosure_mark_internal(Runtime *runtime
-	                       , Object *context
-	                       , Object *caller
-	                       , int argc
-	                       , Object **argv){
+static Object *mark_(Runtime *runtime
+	               , Object *context
+	               , Object *caller
+	               , int argc
+	               , Object **argv){
 	assert(runtime);
 
-	ImpClosure_internal *raw = ImpClosure_getRaw(caller);
+	Internal *raw = ImpClosure_getRaw(caller);
 	if(raw && raw->context){
 		Runtime_markRecursive(runtime, raw->context);
 	}
@@ -178,11 +187,11 @@ static Object *ImpClosure_mark_internal(Runtime *runtime
 }
 
 
-void ImpClosure_init(Object *self){
+void ImpClosure_init(Object *self, Runtime *runtime){
 	assert(Object_isValid(self));
 
 	BuiltIn_setId(self, BUILTIN_CLOSURE);
-	Object_registerCMethod(self, "__activate", ImpClosure_activate_internal);
-	Object_registerCMethod(self, "__collect", ImpClosure_collect_internal);
-	Object_registerCMethod(self, "__mark", ImpClosure_mark_internal);
+	Object_registerCActivator(self, activate_);
+	Runtime_registerCMethod(runtime, self, "collect", collect_);
+	Runtime_registerCMethod(runtime, self, "mark", mark_);
 }

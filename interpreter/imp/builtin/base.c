@@ -8,7 +8,7 @@
 #include "general.h"
 #include "../toolbox/vector.h"
 
-static Object *ImpBase_hasKeyShallow_(Runtime *runtime
+static Object *hasKeyShallow_(Runtime *runtime
 	                                        , Object *context
 	                                        , Object *caller
 	                                        , int argc
@@ -30,7 +30,7 @@ static Object *ImpBase_hasKeyShallow_(Runtime *runtime
 }
 
 
-static Object *ImpBase_hasKeyDeep_(Runtime *runtime
+static Object *hasKeyDeep_(Runtime *runtime
 	                                      , Object *context
 	                                      , Object *caller
 	                                      , int argc
@@ -51,7 +51,7 @@ static Object *ImpBase_hasKeyDeep_(Runtime *runtime
 	return r;
 }
 
-static Object *ImpBase_removeKeyShallow_(Runtime *runtime
+static Object *removeKeyShallow_(Runtime *runtime
 	                                        , Object *context
 	                                        , Object *caller
 	                                        , int argc
@@ -67,7 +67,7 @@ static Object *ImpBase_removeKeyShallow_(Runtime *runtime
 }
 
 
-static Object *ImpBase_getDeep_(Runtime *runtime
+static Object *getDeep_(Runtime *runtime
 	                                  , Object *context
 	                                  , Object *caller
 	                                  , int argc
@@ -87,7 +87,7 @@ static Object *ImpBase_getDeep_(Runtime *runtime
 
 
 
-static Object *ImpBase_getShallow_(Runtime *runtime
+static Object *getShallow_(Runtime *runtime
 	                                     , Object *context
 	                                     , Object *caller
 	                                     , int argc
@@ -107,7 +107,7 @@ static Object *ImpBase_getShallow_(Runtime *runtime
 
 
 
-static Object *ImpBase_putDeep_(Runtime *runtime
+static Object *putDeep_(Runtime *runtime
 	                                  , Object *context
 	                                  , Object *caller
 	                                  , int argc
@@ -124,7 +124,7 @@ static Object *ImpBase_putDeep_(Runtime *runtime
 
 
 
-static Object *ImpBase_putShallow_(Runtime *runtime
+static Object *putShallow_(Runtime *runtime
 	                                     , Object *context
 	                                     , Object *caller
 	                                     , int argc
@@ -140,7 +140,7 @@ static Object *ImpBase_putShallow_(Runtime *runtime
 }
 
 
-static Object *ImpBase_slotNames_(Runtime *runtime
+static Object *slotNames_(Runtime *runtime
 	                            , Object *context
 	                            , Object *caller
 	                            , int argc
@@ -161,7 +161,7 @@ static Object *ImpBase_slotNames_(Runtime *runtime
 }
 
 
-static Object *ImpBase_slotCount_(Runtime *runtime
+static Object *slotCount_(Runtime *runtime
 	                            , Object *context
 	                            , Object *caller
 	                            , int argc
@@ -175,7 +175,7 @@ static Object *ImpBase_slotCount_(Runtime *runtime
 }
 
 
-static Object *ImpBase_asString_(Runtime *runtime
+static Object *asString_(Runtime *runtime
 	                           , Object *context
 	                           , Object *caller
 	                           , int argc
@@ -190,7 +190,7 @@ static Object *ImpBase_asString_(Runtime *runtime
 	return r;
 }
 
-static Object *ImpBase_hasMethod_(Runtime *runtime
+static Object *hasMethod_(Runtime *runtime
 	                            , Object *context
 	                            , Object *caller
 	                            , int argc
@@ -211,7 +211,7 @@ static Object *ImpBase_hasMethod_(Runtime *runtime
 	return r;
 }
 
-static Object *ImpBase_hasSpecialMethod_(Runtime *runtime
+static Object *hasSpecialMethod_(Runtime *runtime
 	                                   , Object *context
 	                                   , Object *caller
 	                                   , int argc
@@ -233,7 +233,7 @@ static Object *ImpBase_hasSpecialMethod_(Runtime *runtime
 }
 
 
-static Object *ImpBase_callMethod_(Runtime *runtime
+static Object *callMethod_(Runtime *runtime
 	                                   , Object *context
 	                                   , Object *caller
 	                                   , int argc
@@ -257,11 +257,11 @@ static Object *ImpBase_callMethod_(Runtime *runtime
 }
 
 
-static Object *ImpBase_callSpecialMethod_(Runtime *runtime
-	                                   , Object *context
-	                                   , Object *caller
-	                                   , int argc
-	                                   , Object **argv){
+static Object *callSpecialMethod_(Runtime *runtime
+	                            , Object *context
+	                            , Object *caller
+	                            , int argc
+	                            , Object **argv){
 	if(argc == 0){
 		Runtime_throwString(runtime, "#:callSpecialMethod requires arguments");
 	}
@@ -308,11 +308,11 @@ static Object *compare(Runtime *runtime
 }
 
 
-static Object *ImpBase_above_(Runtime *runtime
-	                        , Object *context
-	                        , Object *self
-	                        , int argc
-	                        , Object **argv){
+static Object *above_(Runtime *runtime
+	                , Object *context
+	                , Object *self
+	                , int argc
+	                , Object **argv){
 	if(argc != 1){
 		Runtime_throwString(runtime, "#:> requires exactly 1 argument");
 	}
@@ -321,11 +321,11 @@ static Object *ImpBase_above_(Runtime *runtime
 	return c;
 } 
 
-static Object *ImpBase_aboveEq_(Runtime *runtime
-	                          , Object *context
-	                          , Object *self
-	                          , int argc
-	                          , Object **argv){
+static Object *aboveEq_(Runtime *runtime
+	                  , Object *context
+	                  , Object *self
+	                  , int argc
+	                  , Object **argv){
 	if(argc != 1){
 		Runtime_throwString(runtime, "#:>= requires exactly 1 argument");
 	}
@@ -334,7 +334,7 @@ static Object *ImpBase_aboveEq_(Runtime *runtime
 	return c;
 } 
 
-static Object *ImpBase_below_(Runtime *runtime
+static Object *below_(Runtime *runtime
 	                        , Object *context
 	                        , Object *self
 	                        , int argc
@@ -347,7 +347,7 @@ static Object *ImpBase_below_(Runtime *runtime
 	return c;
 } 
 
-static Object *ImpBase_belowEq_(Runtime *runtime
+static Object *belowEq_(Runtime *runtime
 	                          , Object *context
 	                          , Object *self
 	                          , int argc
@@ -360,7 +360,7 @@ static Object *ImpBase_belowEq_(Runtime *runtime
 	return c;
 } 
 
-static Object *ImpBase_not_(Runtime *runtime
+static Object *not_(Runtime *runtime
 	                      , Object *context
 	                      , Object *self
 	                      , int argc
@@ -378,7 +378,7 @@ static Object *ImpBase_not_(Runtime *runtime
 	return b;
 } 
 
-static Object *ImpBase_clone_(Runtime *runtime
+static Object *clone_(Runtime *runtime
 	                        , Object *context
 	                        , Object *self
 	                        , int argc
@@ -426,7 +426,7 @@ static Object *copyAndDo(Runtime *runtime
 }
 
 
-static Object *ImpBase_plus_(Runtime *runtime
+static Object *plus_(Runtime *runtime
 	                       , Object *context
 	                       , Object *self
 	                       , int argc
@@ -437,7 +437,7 @@ static Object *ImpBase_plus_(Runtime *runtime
 	return copyAndDo(runtime, context, self, argv[0], "+=");
 } 
 
-static Object *ImpBase_minus_(Runtime *runtime
+static Object *minus_(Runtime *runtime
 	                        , Object *context
 	                        , Object *self
 	                        , int argc
@@ -448,7 +448,7 @@ static Object *ImpBase_minus_(Runtime *runtime
 	return copyAndDo(runtime, context, self, argv[0], "-=");
 } 
 
-static Object *ImpBase_div_(Runtime *runtime
+static Object *div_(Runtime *runtime
 	                      , Object *context
 	                      , Object *self
 	                      , int argc
@@ -459,7 +459,7 @@ static Object *ImpBase_div_(Runtime *runtime
 	return copyAndDo(runtime, context, self, argv[0], "/=");
 } 
 
-static Object *ImpBase_times_(Runtime *runtime
+static Object *times_(Runtime *runtime
 	                      , Object *context
 	                      , Object *self
 	                      , int argc
@@ -470,7 +470,7 @@ static Object *ImpBase_times_(Runtime *runtime
 	return copyAndDo(runtime, context, self, argv[0], "*=");
 } 
 
-static Object *ImpBase_mod_(Runtime *runtime
+static Object *mod_(Runtime *runtime
 	                      , Object *context
 	                      , Object *self
 	                      , int argc
@@ -481,7 +481,7 @@ static Object *ImpBase_mod_(Runtime *runtime
 	return copyAndDo(runtime, context, self, argv[0], "%=");
 } 
 
-static Object *ImpBase_value_(Runtime *runtime
+static Object *value_(Runtime *runtime
 	                        , Object *context
 	                        , Object *self
 	                        , int argc
@@ -573,7 +573,7 @@ static bool objectsAreEqual(Runtime *runtime
 	return true;
 }
 
-static Object *ImpBase_equals_(Runtime *runtime
+static Object *equals_(Runtime *runtime
 	                         , Object *context
 	                         , Object *self
 	                         , int argc
@@ -598,7 +598,7 @@ static Object *ImpBase_equals_(Runtime *runtime
 	return r;
 } 
 
-static Object *ImpBase_is_(Runtime *runtime
+static Object *is_(Runtime *runtime
 	                     , Object *context
 	                     , Object *caller
 	                     , int argc
@@ -611,11 +611,11 @@ static Object *ImpBase_is_(Runtime *runtime
 	return r;
 } 
 
-static Object *ImpBase_asBoolean_(Runtime *runtime
-	                            , Object *context
-	                            , Object *caller
-	                            , int argc
-	                            , Object **argv){
+static Object *asBoolean_(Runtime *runtime
+	                    , Object *context
+	                    , Object *caller
+	                    , int argc
+	                    , Object **argv){
 	if(argc != 0){
 		Runtime_throwString(runtime, "#:? does not accept arguments");
 	}
@@ -643,11 +643,11 @@ static Object *ImpBase_asBoolean_(Runtime *runtime
 
 // Default hashCode implementation: returns a non-zero
 // deterministic value based on address in memory.
-static Object *ImpBase_hashCode_(Runtime *runtime
-	                           , Object *context
-	                           , Object *self
-	                           , int argc
-	                           , Object **argv){
+static Object *hashCode_(Runtime *runtime
+	                   , Object *context
+	                   , Object *self
+	                   , int argc
+	                   , Object **argv){
 	if(argc != 0){
 		Runtime_throwString(runtime, "#:hashCode does not accept arguments");
 	}
@@ -660,41 +660,40 @@ static Object *ImpBase_hashCode_(Runtime *runtime
 } 
 
 
-void ImpBase_init(Object *self){
+void ImpBase_init(Object *self, Runtime *runtime){
 	assert(self);
 	BuiltIn_setId(self, BUILTIN_OBJECT);
-	Object_registerCMethod(self, "__hasMethod", ImpBase_hasMethod_);
-	Object_registerCMethod(self, "__hasSpecialMethod", ImpBase_hasSpecialMethod_);
-	Object_registerCMethod(self, "__callMethod", ImpBase_callMethod_);
-	Object_registerCMethod(self, "__callSpecialMethod", ImpBase_callSpecialMethod_);
-	Object_registerCMethod(self, "__hasMethod", ImpBase_hasMethod_);
-	Object_registerCMethod(self, "__hasKeyShallow", ImpBase_hasKeyShallow_);
-	Object_registerCMethod(self, "__kasKeyDeep", ImpBase_hasKeyDeep_);
-	Object_registerCMethod(self, "__removeKeyShallow", ImpBase_removeKeyShallow_);
-	Object_registerCMethod(self, "__getDeep", ImpBase_getDeep_);
-	Object_registerCMethod(self, "__getShallow", ImpBase_getShallow_);
-	Object_registerCMethod(self, "__putDeep", ImpBase_putDeep_);
-	Object_registerCMethod(self, "__putShallow", ImpBase_putShallow_);
-	Object_registerCMethod(self, "__slotNames", ImpBase_slotNames_);
-	Object_registerCMethod(self, "__slotCount", ImpBase_slotCount_);
-	Object_registerCMethod(self, "__asString", ImpBase_asString_);
+	Runtime_registerCMethod(runtime, self, "hasMethod", hasMethod_);
+	Runtime_registerCMethod(runtime, self, "hasSpecialMethod", hasSpecialMethod_);
+	Runtime_registerCMethod(runtime, self, "callMethod", callMethod_);
+	Runtime_registerCMethod(runtime, self, "callSpecialMethod", callSpecialMethod_);
+	Runtime_registerCMethod(runtime, self, "hasKeyShallow", hasKeyShallow_);
+	Runtime_registerCMethod(runtime, self, "kasKeyDeep", hasKeyDeep_);
+	Runtime_registerCMethod(runtime, self, "removeKeyShallow", removeKeyShallow_);
+	Runtime_registerCMethod(runtime, self, "getDeep", getDeep_);
+	Runtime_registerCMethod(runtime, self, "getShallow", getShallow_);
+	Runtime_registerCMethod(runtime, self, "putDeep", putDeep_);
+	Runtime_registerCMethod(runtime, self, "putShallow", putShallow_);
+	Runtime_registerCMethod(runtime, self, "slotNames", slotNames_);
+	Runtime_registerCMethod(runtime, self, "slotCount", slotCount_);
+	Runtime_registerCMethod(runtime, self, "asString", asString_);
 
-	Object_registerCMethod(self, "__?", ImpBase_asBoolean_);
+	Runtime_registerCMethod(runtime, self, "?", asBoolean_);
 
-	Object_registerCMethod(self, "__>", ImpBase_above_);
-	Object_registerCMethod(self, "__>=", ImpBase_aboveEq_);
-	Object_registerCMethod(self, "__<", ImpBase_below_);
-	Object_registerCMethod(self, "__<=", ImpBase_belowEq_);
-	Object_registerCMethod(self, "__!", ImpBase_not_);
-	Object_registerCMethod(self, "__~", ImpBase_clone_);
-	Object_registerCMethod(self, "__+", ImpBase_plus_);
-	Object_registerCMethod(self, "__-", ImpBase_minus_);
-	Object_registerCMethod(self, "__*", ImpBase_times_);
-	Object_registerCMethod(self, "__/", ImpBase_div_);
-	Object_registerCMethod(self, "__%", ImpBase_mod_);
-	Object_registerCMethod(self, "__$", ImpBase_value_);
-	Object_registerCMethod(self, "__==", ImpBase_equals_);
-	Object_registerCMethod(self, "__is", ImpBase_is_);
+	Runtime_registerCMethod(runtime, self, ">", above_);
+	Runtime_registerCMethod(runtime, self, ">=", aboveEq_);
+	Runtime_registerCMethod(runtime, self, "<", below_);
+	Runtime_registerCMethod(runtime, self, "<=", belowEq_);
+	Runtime_registerCMethod(runtime, self, "!", not_);
+	Runtime_registerCMethod(runtime, self, "~", clone_);
+	Runtime_registerCMethod(runtime, self, "+", plus_);
+	Runtime_registerCMethod(runtime, self, "-", minus_);
+	Runtime_registerCMethod(runtime, self, "*", times_);
+	Runtime_registerCMethod(runtime, self, "/", div_);
+	Runtime_registerCMethod(runtime, self, "%", mod_);
+	Runtime_registerCMethod(runtime, self, "$", value_);
+	Runtime_registerCMethod(runtime, self, "==", equals_);
+	Runtime_registerCMethod(runtime, self, "is", is_);
 
-	Object_registerCMethod(self, "__hashCode", ImpBase_hashCode_);
+	Runtime_registerCMethod(runtime, self, "hashCode", hashCode_);
 }

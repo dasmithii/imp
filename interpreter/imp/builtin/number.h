@@ -5,7 +5,7 @@
 
 
 // management functions
-void ImpNumber_init(Object *self);
+void ImpNumber_init(Object *self, Runtime *runtime);
 
 // in place arithmatic
 void ImpNumber_add(Object *self, Object *other);

@@ -7,7 +7,7 @@
 
 bool ImpRoute_isValid(Object *self);
 
-void ImpRoute_init(Object *self);
+void ImpRoute_init(Object *self, Runtime *runtime);
 void ImpRoute_print(Object *self);
 char *ImpRoute_getRaw(Object *self);
 void ImpRoute_setRaw(Object *self, char *text);

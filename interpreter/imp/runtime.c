@@ -7,14 +7,9 @@
 #include <imp/builtin/route.h>
 #include <imp/builtin/number.h>
 #include <imp/builtin/string.h>
-#include <imp/builtin/def.h>
-#include <imp/builtin/set.h>
 #include <imp/builtin/closure.h>
 #include <imp/builtin/vector.h>
-#include <imp/builtin/return.h>
 #include <imp/builtin/importer.h>
-#include <imp/builtin/break.h>
-#include <imp/builtin/continue.h>
 #include <imp/builtin/base.h>
 #include <imp/builtin/miscellaneous.h>
 #include <imp/c.h>
@@ -40,9 +35,7 @@ Object *Runtime_activateOn(Runtime *runtime
 	                     , Object **argv
 	                     , Object *origin){
 	assert(runtime);
-	assert(context);
 	assert(Object_isValid(object));
-	Object *r = NULL;
 
 	Object_reference(context);
 	Object_reference(object);
@@ -51,42 +44,27 @@ Object *Runtime_activateOn(Runtime *runtime
 	}
 	Object_reference(origin);
 
-
+	Object *r = NULL;
 
 	Object *special = Object_getDeep(object, "_activate");
-	void *internal = Object_getDataDeep(object, "__activate");
+	Object *internal = NULL;
 	if(special){
-		// execute with dereferenced arguments
-		Object **argv2 = malloc(sizeof(Object*) * argc);
-		if(!argv2){
-			abort();
-		}
-		for(int i = 0; i < argc; i++){
-			argv2[i] = unrouteInContext(argv[i], context);
-			Object_reference(argv2[i]);
+		r = Runtime_activateOn(runtime, context, special, argc, argv, origin);
+	} else {
+		internal = Object_getDataDeep(object, "__activate");
+		if(!internal){
+			Runtime_throwString(runtime, "object not activatable");
+			goto fuckit;
 		}
 
-		r = Runtime_activateOn(runtime 
-			                 , context
-			                 , special
-			                 , argc
-			                 , argv2
-			                 , origin);
-
-		for(int i = 0; i < argc; i++){
-			Object_unreference(argv2[i]);
-		}
-
-		free(argv2);
-
-	} else if(internal){
 		CFunction cf = *((CFunction*) internal);
 
-		if(BuiltIn_isSpecial(object)){
+		if(Object_hasKeyDeep(object, "__privilege")){
 
 			// execute with arguments that haven't yet been 
 			// dereferenced
-			r = cf(runtime, context, object, argc, argv);
+			r = cf(runtime, context, origin, argc, argv);
+			
 		} else if(BuiltIn_id(object) == BUILTIN_CLOSURE){
 
 			// execute with dereferenced arguments prefixed
@@ -121,7 +99,7 @@ Object *Runtime_activateOn(Runtime *runtime
 				Object_reference(argv2[i]);
 			}
 
-			r = cf(runtime, context, object, argc, argv2);  // TODO: deal with this
+			r = cf(runtime, context, origin, argc, argv2);  // TODO: deal with this
 			
 			for(int i = 0; i < argc; i++){
 				Object_unreference(argv2[i]);
@@ -130,6 +108,8 @@ Object *Runtime_activateOn(Runtime *runtime
 		}
 	}
 
+
+	fuckit:
 
 	Object_unreference(context);
 	Object_unreference(object);
@@ -284,7 +264,6 @@ Object *Runtime_rawObject(Runtime *self){
 void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 	assert(self);
 
-	self->root = root;
 	self->argc = argc;
 	self->argv = argv;
 
@@ -302,7 +281,7 @@ void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 	// builtin initializations (!).
 
 	self->Object = Runtime_rawObject(self);
-	ImpBase_init(self->Object);
+	ImpBase_init(self->Object, self);
 
 	self->root_scope = Runtime_make(self, Object);
 	Object_putShallow(self->root_scope, "self", self->root_scope);
@@ -310,8 +289,8 @@ void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 	#define IMP_INIT_IN_SLOT(OBJECT, NAME)                       \
 		self->OBJECT = Runtime_make(self, Object);               \
 		Object_reference(self->OBJECT);                          \
-		Object_putShallow(self->root_scope, NAME, self->OBJECT)  \
-		Imp##OBJECT##_init(self->OBJECT);
+		Object_putShallow(self->root_scope, NAME, self->OBJECT); \
+		Imp##OBJECT##_init(self->OBJECT, self)
 	#define IMP_INIT(NAME) IMP_INIT_IN_SLOT(NAME, #NAME)
 
 	IMP_INIT(String);
@@ -320,28 +299,9 @@ void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 	IMP_INIT(Closure);
 	IMP_INIT(Vector);
 	IMP_INIT_IN_SLOT(Importer, "import");
+	Object_putShallow(self->Importer, "rootPath", root);
 
-	ImpMisc_init(self->root_scope);
-
-	// Object *setter = Runtime_make(self, Object);
-	// ImpSet_init(setter);
-	// Object_putShallow(self->root_scope, "set", setter);
-
-	// Object *definer = Runtime_make(self, Object);
-	// ImpDef_init(definer);
-	// Object_putShallow(self->root_scope, "def", definer);
-
-	// Object *returner = Runtime_make(self, Object);
-	// ImpReturn_init(returner);
-	// Object_putShallow(self->root_scope, "return", returner);
-
-	// Object *breaker = Runtime_make(self, Object);
-	// ImpBreak_init(breaker);
-	// Object_putShallow(self->root_scope, "break", breaker);
-
-	// Object *continuer = Runtime_make(self, Object);
-	// ImpImporter_init(continuer);
-	// Object_putShallow(self->root_scope, "continue", continuer);
+	ImpMisc_init(self->root_scope, self);
 
 	Runtime_unlockGC(self);
 }
@@ -711,39 +671,7 @@ Object *Runtime_callSpecialMethod(Runtime *runtime
 	if(method){
 		return Runtime_activateOn(runtime, context, method, argc, argv, object);
 	}
-
-
-	// try <object>:__<methodName>
-	sprintf(buf, "__%s", methodName);
-	void *p = Object_getDataDeep(object, buf);
-	if(p){
-		CFunction cf = *((CFunction*) p);
-		Object *r = NULL;
-		// execute with dereferenced arguments
-		Object **argv2 = malloc(sizeof(Object*) * argc);
-		if(!argv2){
-			abort();
-		}
-		Object_reference(context);
-		Object_reference(object);
-		for(int i = 0; i < argc; i++){
-			argv2[i] = unrouteInContext(argv[i], context);
-			Object_reference(argv2[i]);
-		}
-
-		r = cf(runtime, context, object, argc, argv2);
-
-		Object_unreference(context);
-		Object_unreference(object);
-		for(int i = 0; i < argc; i++){
-			Object_unreference(argv2[i]);
-		}
-
-		free(argv2);
-		return r;
-	}
-
-	Runtime_throwFormatted(runtime, "method '%s' does not exist", methodName);
+	Runtime_throwFormatted(runtime, "method '%s' does not exist", buf);
 	return NULL;
 }
 
@@ -759,6 +687,7 @@ Object *Runtime_callMethod(Runtime *runtime
 	if(method){
 		return Runtime_activateOn(runtime, context, method, argc, argv, object);
 	}
+	// try <object>:<methodName>
 	return Runtime_callSpecialMethod(runtime, context, object, methodName, argc, argv);
 }
 

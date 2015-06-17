@@ -6,7 +6,7 @@
 
 
 //// management
-void ImpBase_init(Object *self);
+void ImpBase_init(Object *self, Runtime *runtime);
 
 
 #endif

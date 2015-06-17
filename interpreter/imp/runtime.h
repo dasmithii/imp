@@ -25,7 +25,6 @@ typedef struct {
 	Stack tryStack; // stack of try calls
 
 	// configuration
-	char *root; // importer search path
 	int argc;
 	char **argv;
 

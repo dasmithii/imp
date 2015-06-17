@@ -33,11 +33,11 @@ void ImpString_print(Object *self){
 }
 
 
-static Object *ImpString_print_(Runtime *runtime
-	                                  , Object *context
-	                                  , Object *caller
-	                                  , int argc
-	                                  , Object **argv){
+static Object *print_(Runtime *runtime
+	                , Object *context
+	                , Object *caller
+	                , int argc
+	                , Object **argv){
 	assert(runtime);
 	assert(ImpString_isValid(caller));
 
@@ -51,11 +51,11 @@ static Object *ImpString_print_(Runtime *runtime
 }
 
 
-static Object *ImpString_clone_(Runtime *runtime
-	                                  , Object *context
-	                                  , Object *caller
-	                                  , int argc
-	                                  , Object **argv){
+static Object *clone_(Runtime *runtime
+	                , Object *context
+	                , Object *caller
+	                , int argc
+	                , Object **argv){
 	assert(runtime);
 	assert(ImpString_isValid(caller));
 
@@ -84,11 +84,11 @@ void ImpString_concatenateRaw(Object *self, char *s2){
 }
 
 
-Object *ImpString_concatenate_(Runtime *runtime
-	                         , Object *context
-	                         , Object *caller
-	                         , int argc
-	                         , Object **argv){
+Object *concatenate_(Runtime *runtime
+	               , Object *context
+	               , Object *caller
+	               , int argc
+	               , Object **argv){
 	assert(runtime);
 	assert(ImpString_isValid(caller));
 
@@ -118,11 +118,11 @@ Object *ImpString_concatenate_(Runtime *runtime
 }
 
 
-static Object *ImpString_asBoolean_(Runtime *runtime
-	                              , Object *context
-	                              , Object *caller
-	                              , int argc
-	                              , Object **argv){
+static Object *asBoolean_(Runtime *runtime
+	                    , Object *context
+	                    , Object *caller
+	                    , int argc
+	                    , Object **argv){
 	assert(runtime);
 	assert(ImpString_isValid(caller));
 
@@ -141,11 +141,11 @@ static Object *ImpString_asBoolean_(Runtime *runtime
 }
 
 
-static Object *ImpString_hashCode_(Runtime *runtime
-	                           , Object *context
-	                           , Object *self
-	                           , int argc
-	                           , Object **argv){
+static Object *hashCode_(Runtime *runtime
+	                   , Object *context
+	                   , Object *self
+	                   , int argc
+	                   , Object **argv){
 	if(argc != 0){
 		Runtime_throwString(runtime, "String:hashCode does not accept arguments");
 	}
@@ -170,11 +170,11 @@ static Object *ImpString_hashCode_(Runtime *runtime
 	return r;
 } 
 
-static Object *ImpString_compare_(Runtime *runtime
-	                            , Object *context
-	                            , Object *self
-	                            , int argc
-	                            , Object **argv){
+static Object *compare_(Runtime *runtime
+	                  , Object *context
+	                  , Object *self
+	                  , int argc
+	                  , Object **argv){
 	if(argc != 1){
 		Runtime_throwString(runtime, "String:<> requires one argument");
 	}
@@ -190,18 +190,18 @@ static Object *ImpString_compare_(Runtime *runtime
 } 
 
 
-void ImpString_init(Object *self){
+void ImpString_init(Object *self, Runtime *runtime){
 	assert(self);
 	BuiltIn_setId(self, BUILTIN_STRING);
 
-	Object_registerCMethod(self, "__print", ImpString_print_);
-	Object_registerCMethod(self, "__~", ImpString_clone_);
-	Object_registerCMethod(self, "__concatenate", ImpString_concatenate_);
-	Object_registerCMethod(self, "__?", ImpString_asBoolean_);
+	Runtime_registerCMethod(runtime, self, "print", print_);
+	Runtime_registerCMethod(runtime, self, "~", clone_);
+	Runtime_registerCMethod(runtime, self, "concatenate", concatenate_);
+	Runtime_registerCMethod(runtime, self, "?", asBoolean_);
 
-	Object_registerCMethod(self, "__<>", ImpString_compare_);
+	Runtime_registerCMethod(runtime, self, "<>", compare_);
 
-	Object_registerCMethod(self, "__hashCode", ImpString_hashCode_);
+	Runtime_registerCMethod(runtime, self, "hashCode", hashCode_);
 
 	ImpString_setRaw(self, "");
 }

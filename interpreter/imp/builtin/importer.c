@@ -248,12 +248,8 @@ static void importInternalModuleTo(Runtime *runtime
 		}
 
 		if((*wopre >= 'a' && *wopre <= 'z') || *wopre == '_'){
-			char key[64]; *key = 0;
-			strcat(key, "__");
-			strcat(key, wopre);
-
-			Object_registerCMethod(context, key, sym);
-			if(endswith(key, "onImport")){
+			Runtime_registerCMethod(runtime, context, wopre, sym);
+			if(endswith(wopre, "onImport")){
 				Runtime_callMethod(runtime, context, context, "onImport", 0, NULL);
 			}
 		} else if(*wopre >= 'A' && *wopre <= 'Z'){
@@ -269,10 +265,6 @@ static void importInternalModuleTo(Runtime *runtime
 				baseKey[i] = wopre[i];
 			}
 
-			char key[64]; *key = 0;
-			strcat(key, "__");
-			strcat(key, wopre + strlen(baseKey) + 1);
-			
 			Object *baseObj;
 
 			if(Object_hasKeyShallow(context, baseKey)){
@@ -284,8 +276,8 @@ static void importInternalModuleTo(Runtime *runtime
 
 			assert(baseObj);
 
-			Object_registerCMethod(baseObj, key, sym);
-			if(endswith(key, "onImport")){
+			Runtime_registerCMethod(runtime, baseObj, wopre + strlen(baseKey) + 1, sym);
+			if(endswith(wopre, "onImport")){
 				Runtime_callMethod(runtime, context, baseObj, "onImport", 0, NULL);
 			}
 		} else {
@@ -412,11 +404,11 @@ Object *Imp_import(Runtime *runtime, char *modulePath){
 }
 
 
-static Object *ImpImporter_activate_internal(Runtime *runtime
-	                                       , Object *context
-	                                       , Object *caller
-	                                       , int argc
-	                                       , Object **argv){
+static Object *activate_(Runtime *runtime
+	                   , Object *context
+	                   , Object *caller
+	                   , int argc
+	                   , Object **argv){
 	assert(runtime);
 	assert(Object_isValid(context));
 	assert(ImpImporter_isValid(caller));
@@ -467,8 +459,8 @@ static Object *ImpImporter_activate_internal(Runtime *runtime
 }
 
 
-void ImpImporter_init(Object *self){
+void ImpImporter_init(Object *self, Runtime *runtime){
 	assert(self);
 	BuiltIn_setId(self, BUILTIN_IMPORTER);
-	Object_registerCMethod(self, "__activate", ImpImporter_activate_internal);
+	Object_registerCActivator(self, activate_);
 }

@@ -10,16 +10,15 @@ typedef enum {
 	BUILTIN_STRING,
 	BUILTIN_NUMBER,
 	BUILTIN_CLOSURE,
-	BUILTIN_DEFINER,
-	BUILTIN_SETTER,
 	BUILTIN_VECTOR,
-	BUILTIN_RETURN,
 	BUILTIN_IMPORTER,
 	BUILTIN_OBJECT,
+
 	BUILTIN_NULL,
+	NOT_BUILTIN,
+
 	BUILTIN_BREAK,
-	BUILTIN_CONTINUE,
-	NOT_BUILTIN
+	BUILTIN_CONTINUE
 } BuiltinId;
 
 
@@ -27,8 +26,6 @@ void BuiltIn_setId(Object *self, BuiltinId id);
 BuiltinId BuiltIn_id(Object *self);
 BuiltinId BuiltIn_protoId(Object *self);
 bool BuiltIn_protoHadId(Object *self, BuiltinId biid);
-
-bool BuiltIn_isSpecial(Object *self);
 
 
 #endif

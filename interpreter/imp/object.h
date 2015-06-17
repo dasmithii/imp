@@ -66,10 +66,11 @@ Object *Object_prototype(Object *self);
 bool Object_isValid(Object *self);
 bool Slot_isValid(Slot *self);
 void Object_print(Object *self);
-bool Object_canBeActivated(Object *self);
 
+bool Object_canBeActivated(Object *self);
 bool Object_hasMethod(Object *self, char *name);
 bool Object_hasSpecialMethod(Object *self, char *name);
-bool Object_hasInternalMethod(Object *self, char *name);
+
+
 
 #endif

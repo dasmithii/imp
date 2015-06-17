@@ -5,7 +5,7 @@
 #include "../toolbox/vector.h"
 
 
-void ImpVector_init(Object *self);
+void ImpVector_init(Object *self, Runtime *runtime);
 Vector *ImpVector_getRaw(Object *self);
 
 

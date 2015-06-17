@@ -24,11 +24,11 @@ static double *ImpNumber_data(Object *self){
 }
 
 
-static Object *ImpNumber_add_(Runtime *runtime
-	                       , Object *context
-	                       , Object *caller
-	                       , int argc
-	                       , Object **argv){
+static Object *add_(Runtime *runtime
+	              , Object *context
+	              , Object *caller
+	              , int argc
+	              , Object **argv){
 	assert(runtime);
 	assert(ImpNumber_isValid(caller));
 
@@ -60,11 +60,11 @@ void ImpNumber_sub(Object *self, Object *other){
 }
 
 
-static Object *ImpNumber_sub_(Runtime *runtime
-	                       , Object *context
-	                       , Object *caller
-	                       , int argc
-	                       , Object **argv){
+static Object *sub_(Runtime *runtime
+	              , Object *context
+	              , Object *caller
+	              , int argc
+	              , Object **argv){
 	assert(runtime);
 	assert(Object_isValid(context));
 	assert(ImpNumber_isValid(caller));
@@ -92,11 +92,11 @@ void ImpNumber_mult(Object *self, Object *other){
 }
 
 
-static Object *ImpNumber_mult_(Runtime *runtime
-	                       , Object *context
-	                       , Object *caller
-	                       , int argc
-	                       , Object **argv){
+static Object *mult_(Runtime *runtime
+	               , Object *context
+	               , Object *caller
+	               , int argc
+	               , Object **argv){
 	assert(runtime);
 	assert(Object_isValid(context));
 	assert(ImpNumber_isValid(caller));
@@ -125,11 +125,11 @@ void ImpNumber_div(Object *self, Object *other){
 }
 
 
-static Object *ImpNumber_div_(Runtime *runtime
-	                       , Object *context
-	                       , Object *caller
-	                       , int argc
-	                       , Object **argv){
+static Object *div_(Runtime *runtime
+	              , Object *context
+	              , Object *caller
+	              , int argc
+	              , Object **argv){
 	assert(runtime);
 	assert(Object_isValid(context));
 	assert(ImpNumber_isValid(caller));
@@ -159,11 +159,11 @@ void ImpNumber_print(Object *self){
 }
 
 
-static Object *ImpNumber_print_(Runtime *runtime
-	                       , Object *context
-	                       , Object *caller
-	                       , int argc
-	                       , Object **argv){
+static Object *print_(Runtime *runtime
+	                , Object *context
+	                , Object *caller
+	                , int argc
+	                , Object **argv){
 	assert(ImpNumber_isValid(caller));
 
 	if(argc > 0){
@@ -175,11 +175,11 @@ static Object *ImpNumber_print_(Runtime *runtime
 }
 
 
-static Object *ImpNumber_set_(Runtime *runtime
-	                       , Object *context
-	                       , Object *caller
-	                       , int argc
-	                       , Object **argv){
+static Object *set_(Runtime *runtime
+	              , Object *context
+	              , Object *caller
+	              , int argc
+	              , Object **argv){
 	assert(runtime);
 	assert(Object_isValid(context));
 	assert(Object_isValid(caller));
@@ -222,11 +222,11 @@ double ImpNumber_getRaw(Object *self){
 }
 
 
-static Object *ImpNumber_clone_(Runtime *runtime
-	                       , Object *context
-	                       , Object *self
-	                       , int argc
-	                       , Object **argv){
+static Object *clone_(Runtime *runtime
+	                , Object *context
+	                , Object *self
+	                , int argc
+	                , Object **argv){
 	assert(runtime);
 	assert(self);
 	assert(argc == 0);
@@ -247,11 +247,11 @@ static Object *ImpNumber_clone_(Runtime *runtime
 
 
 
-static Object *ImpNumber_asString_(Runtime *runtime
-	                       , Object *context
-	                       , Object *caller
-	                       , int argc
-	                       , Object **argv){
+static Object *asString_(Runtime *runtime
+	                   , Object *context
+	                   , Object *caller
+	                   , int argc
+	                   , Object **argv){
 	assert(runtime);
 	assert(caller);
 	assert(argc == 0);
@@ -265,11 +265,11 @@ static Object *ImpNumber_asString_(Runtime *runtime
 
 
 
-static Object *ImpNumber_cmp_(Runtime *runtime
-	                       , Object *context
-	                       , Object *caller
-	                       , int argc
-	                       , Object **argv){
+static Object *cmp_(Runtime *runtime
+	              , Object *context
+	              , Object *caller
+	              , int argc
+	              , Object **argv){
 	if(argc != 1){
 		Runtime_throwString(runtime, "Number:<> requires exactly one argument");
 	}
@@ -292,11 +292,11 @@ static Object *ImpNumber_cmp_(Runtime *runtime
 }
 
 
-static Object *ImpNumber_mod_(Runtime *runtime
-	                       , Object *context
-	                       , Object *caller
-	                       , int argc
-	                       , Object **argv){
+static Object *mod_(Runtime *runtime
+	              , Object *context
+	              , Object *caller
+	              , int argc
+	              , Object **argv){
 	if(argc != 1){
 		Runtime_throwString(runtime, "Number:%= requires exactly one argument");
 	}
@@ -309,11 +309,11 @@ static Object *ImpNumber_mod_(Runtime *runtime
 	return NULL;
 }
 
-static Object *ImpNumber_inc_(Runtime *runtime
-	                       , Object *context
-	                       , Object *caller
-	                       , int argc
-	                       , Object **argv){
+static Object *inc_(Runtime *runtime
+	              , Object *context
+	              , Object *caller
+	              , int argc
+	              , Object **argv){
 	if(argc != 0){
 		Runtime_throwString(runtime, "Number:++ does not accept");
 	}
@@ -322,11 +322,11 @@ static Object *ImpNumber_inc_(Runtime *runtime
 	return caller;
 }
 
-static Object *ImpNumber_dec_(Runtime *runtime
-	                       , Object *context
-	                       , Object *caller
-	                       , int argc
-	                       , Object **argv){
+static Object *dec_(Runtime *runtime
+	              , Object *context
+	              , Object *caller
+	              , int argc
+	              , Object **argv){
 	if(argc != 0){
 		Runtime_throwString(runtime, "Number:-- does not accept");
 	}
@@ -335,11 +335,11 @@ static Object *ImpNumber_dec_(Runtime *runtime
 	return caller;
 }
 
-static Object *ImpNumber_copy_(Runtime *runtime
-	                         , Object *context
-	                         , Object *self
-	                         , int argc
-	                         , Object **argv){
+static Object *copy_(Runtime *runtime
+	               , Object *context
+	               , Object *self
+	               , int argc
+	               , Object **argv){
 	if(argc != 0){
 		Runtime_throwString(runtime, "Number:$ does not accept arguments");
 	}
@@ -352,11 +352,11 @@ static Object *ImpNumber_copy_(Runtime *runtime
 }
 
 
-static Object *ImpNumber_asBoolean_(Runtime *runtime
-	                              , Object *context
-	                              , Object *self
-	                              , int argc
-	                              , Object **argv){
+static Object *asBoolean_(Runtime *runtime
+	                    , Object *context
+	                    , Object *self
+	                    , int argc
+	                    , Object **argv){
 	if(argc != 0){
 		Runtime_throwString(runtime, "Number:? does not accept arguments");
 	}
@@ -367,11 +367,11 @@ static Object *ImpNumber_asBoolean_(Runtime *runtime
 }
 
 
-static Object *ImpNumber_hashCode_(Runtime *runtime
-	                           , Object *context
-	                           , Object *self
-	                           , int argc
-	                           , Object **argv){
+static Object *hashCode_(Runtime *runtime
+	                   , Object *context
+	                   , Object *self
+	                   , int argc
+	                   , Object **argv){
 	if(argc != 0){
 		Runtime_throwString(runtime, "#:hashCode does not accept arguments");
 	}
@@ -384,30 +384,30 @@ static Object *ImpNumber_hashCode_(Runtime *runtime
 } 
 
 
-void ImpNumber_init(Object *self){
+void ImpNumber_init(Object *self, Runtime *runtime){
 	assert(self);
 	BuiltIn_setId(self, BUILTIN_NUMBER);
 
-	Object_registerCMethod(self, "__+=", ImpNumber_add_);
-	Object_registerCMethod(self, "__-=", ImpNumber_sub_);
-	Object_registerCMethod(self, "__*=", ImpNumber_mult_);
-	Object_registerCMethod(self, "__/=", ImpNumber_div_);
-	Object_registerCMethod(self, "__%=", ImpNumber_mod_);
-	Object_registerCMethod(self, "__<>", ImpNumber_cmp_);
+	Runtime_registerCMethod(runtime, self, "+=", add_);
+	Runtime_registerCMethod(runtime, self, "-=", sub_);
+	Runtime_registerCMethod(runtime, self, "*=", mult_);
+	Runtime_registerCMethod(runtime, self, "/=", div_);
+	Runtime_registerCMethod(runtime, self, "%=", mod_);
+	Runtime_registerCMethod(runtime, self, "<>", cmp_);
 
-	Object_registerCMethod(self, "__++", ImpNumber_inc_);
-	Object_registerCMethod(self, "__--", ImpNumber_dec_);
+	Runtime_registerCMethod(runtime, self, "++", inc_);
+	Runtime_registerCMethod(runtime, self, "--", dec_);
 
-	Object_registerCMethod(self, "__$", ImpNumber_copy_);
-	Object_registerCMethod(self, "__?", ImpNumber_asBoolean_);
+	Runtime_registerCMethod(runtime, self, "$", copy_);
+	Runtime_registerCMethod(runtime, self, "?", asBoolean_);
 
-	Object_registerCMethod(self, "__print", ImpNumber_print_);
-	Object_registerCMethod(self, "__set", ImpNumber_set_);
+	Runtime_registerCMethod(runtime, self, "print", print_);
+	Runtime_registerCMethod(runtime, self, "set", set_);
 
-	Object_registerCMethod(self, "__~", ImpNumber_clone_);
-	Object_registerCMethod(self, "__asString", ImpNumber_asString_);
+	Runtime_registerCMethod(runtime, self, "~", clone_);
+	Runtime_registerCMethod(runtime, self, "asString", asString_);
 
-	Object_registerCMethod(self, "__hashCode", ImpNumber_hashCode_);
+	Runtime_registerCMethod(runtime, self, "hashCode", hashCode_);
 
 	ImpNumber_setRaw(self, 0);
 }

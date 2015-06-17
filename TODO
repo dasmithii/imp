@@ -2,7 +2,11 @@ BRANCH (cleanup):
 
  + Move runtime->root to importer field.
 
- + Make Scope_init function
+ + Move registerCMethod functions to runtime.{h,c}
+
+ + Ensure things run on debug build
+
+ + Move importer cache to within importer or runtime.
 
 
 
@@ -26,6 +30,8 @@ NOW:
    nested loops.
 
  + Protect against circular prototype linkage.
+
+ + Cap slot name sizes
 
 
 
