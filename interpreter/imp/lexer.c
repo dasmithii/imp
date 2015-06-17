@@ -60,6 +60,16 @@ int Tokenization_init(Tokenization *tokenization, char *code){
 	tokenization->error = NULL;
 	Vector_init(&tokenization->tokens, sizeof(Token));
 
+
+	// skip shebang
+	if(code[0] == '#' && code[1] == '!'){
+		while(*code && *code != '\n'){
+			++code;
+		}
+		++code;
+	}
+
+
 	// prefix with '('
 	Token tmp = {.type = TOKEN_SOFT_OPEN};
 	Vector_append(&tokenization->tokens, &tmp);

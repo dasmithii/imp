@@ -33,9 +33,6 @@ NOW:
  + Make number type handle infinite precision integers, binary,
    and hex, as well as the existing double. Magic.
 
- + Deal with unix #! 
-
- + Use '@' for arguments
 
 
 
