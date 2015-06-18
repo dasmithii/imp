@@ -506,9 +506,9 @@ Object *Runtime_executeInContext(Runtime *runtime
 	case CLOSURE_NODE:
 		{
 			r = Runtime_cloneField(runtime, "Closure");
-			Runtime_lockGC(runtime);
+			Object_reference(r);
 			ImpClosure_compile(runtime, r, &node, scope);
-			Runtime_unlockGC(runtime);
+			Object_unreference(r);
 		}
 		break;
 	}
