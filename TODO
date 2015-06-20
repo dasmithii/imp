@@ -1,4 +1,18 @@
+MOMENT:
+  
+  make set work in ifs and whiles at least
+
+   1. Store unmarked pointer to original context
+   2. Overwrite set to do that
+
+
 NOW:
+
+ Modules:
+   + CLI
+   + Runtime
+
+
 
  + Make address type
 
@@ -23,13 +37,14 @@ NOW:
 
  + Ensure things run on debug build
 
- + Make number type handle infinite precision integers, binary,
+ + Make number type handle infinite precision integers?, binary,
    and hex, as well as the existing double. Magic.
 
  + Make argument expansion/pass
 
  + Maybe make it so callMethod doesn't try underscore 
 
+ + Use standardized hash algo for importe
 
 
 
@@ -58,6 +73,12 @@ MEDIUM:
 
  + Object notation (maybe brackets and scrap macros?)
 
+ + Make composition functions for objects 
+     - &=: and in place (intersection)
+     - |=: or in place (union)
+     - 
+
+ + Make clonable Runtime module for executing sub programs
 
 
 

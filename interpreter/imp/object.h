@@ -1,3 +1,42 @@
+// Imp is a uni-typed/duck-typed language. Everything is
+// an object, and objects are nothing more than
+// collections of nested objects (and internal data, in
+// some cases).
+//
+// Objects are collections of slots, essentially, slots
+// being key-value pairs. 
+//
+// There are three types of slots:
+//   1. regular    (e.g. objectName:slotName)
+//   2. special    (e.g. objectName:_slotName)
+//   3. internal   (e.g. objectName:__slotName)
+//
+// Note that slot names imply their types with prefixed 
+// underscores.
+//
+// 1. Regular slots are programmer-defined variables and
+//    are best understood in contrast with special slots.
+// 
+// 2. Special slots may be activated by the interpreter
+//    for various reasons. _mark, for example, would be 
+//    activated during the mark phase of mark & sweep
+//    garbage collection. Another example is _collect,
+//    a destructor of sorts. Others include _each and 
+//    _onImport.
+//
+//    Regular slots, except for #, are never accessed by
+//    the interpreter.
+//
+// 3. Internal slots are not mapped to imp object
+//    pointers, but instead, raw pointers. They have no
+//    standard structure. Avoid messing with them
+//    whenever possible.
+// 
+//    The garbage collector, by default, will free
+//    internal pointers. Keep this in mind if you are 
+//    wrapping C functions or libraries. Also, always
+//    use utilities from builtin/general.h and c.h; 
+//    never interact with internal slots directly.
 #ifndef IMP_OBJECT_H_
 #define IMP_OBJECT_H_
 

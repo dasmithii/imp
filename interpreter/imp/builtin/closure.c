@@ -62,6 +62,8 @@ static Object *activate_(Runtime *runtime
 
 	if(argc > 0){
 		Object_putShallow(scope, "self", argv[0]);
+	} else {
+		Runtime_throwString(runtime, "closure not provided with self argument");
 	}
 
 	Vector *raw = ImpVector_getRaw(arguments);

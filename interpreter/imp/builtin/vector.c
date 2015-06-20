@@ -328,6 +328,39 @@ static Object *size_(Runtime *runtime
 }
 
 
+
+static Object *each_(Runtime *runtime
+	               , Object *context
+	               , Object *caller
+	               , int argc
+	               , Object **argv){
+	assert(runtime);
+	assert(ImpVector_isValid(caller));
+
+	if(argc != 1){
+		Runtime_throwString(runtime, "Vector:each requires exactly one argument");
+	}
+
+	if(!Object_canBeActivated(argv[0])){
+		Runtime_throwString(runtime, "Vector:each requires an activate-able argument");
+	}
+
+	Vector *internal = ImpVector_getRaw(caller);
+	for(int i = 0; i < internal->size; i++){
+		Object *item = *((Object**) Vector_hook(internal, i));
+		Object *out = Runtime_activate(runtime
+			                          , context
+			                          , argv[0]
+			                          , 1
+			                          , &item);
+		if(out){
+			return out;
+		}
+	}
+	return NULL;
+}
+
+
 void ImpVector_init(Object *self, Runtime *runtime){
 	assert(self);
 
@@ -347,6 +380,8 @@ void ImpVector_init(Object *self, Runtime *runtime){
 	Runtime_registerCMethod(runtime, self, "$", copy_);
 	Runtime_registerCMethod(runtime, self, "get", get_);
 	Runtime_registerCMethod(runtime, self, "size", size_);
+
+	Runtime_registerCMethod(runtime, self, "each", each_);
 
 	Runtime_registerCMethod(runtime, self, "asString", asString_);
 }

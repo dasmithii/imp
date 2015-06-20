@@ -425,12 +425,17 @@ bool Object_canBeActivated(Object *self){
 }
 
 bool Object_hasSpecialMethod(Object *self, char *name){
-	char buf[64];
-	sprintf(buf, "_%s", name);
-	return Object_hasKeyDeep(self, buf);
+	char _prefixed[64];
+	sprintf(_prefixed, "_%s", name);
+	return Object_hasMethod(self, _prefixed);
 }
 
 bool Object_hasMethod(Object *self, char *name){
-	return Object_hasKeyDeep(self, name)         || 
-	       Object_hasSpecialMethod(self, name);
+	Object *deep = Object_getDeep(self, name);
+	if(deep){
+		return Object_canBeActivated(deep);
+	} else if(*name != '_'){
+		return Object_hasSpecialMethod(self, name);
+	}
+	return false;
 }

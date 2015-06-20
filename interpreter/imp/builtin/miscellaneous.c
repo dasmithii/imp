@@ -2,6 +2,8 @@
 #include "../c.h"
 #include "general.h"
 #include "route.h"
+#include "string.h"
+#include <string.h>
 
 
 
@@ -17,6 +19,14 @@ static Object *def_(Runtime *runtime
 
 	Object *route = argv[0];
 	Object *value = unrouteInContext(argv[1], context);
+	if(!value){
+		if(BuiltIn_id(argv[1]) == BUILTIN_ROUTE){
+			Runtime_throwFormatted(runtime, "variable does not exist '%s'", ImpRoute_getRaw(argv[1]));
+		} else {
+			Runtime_throwFormatted(runtime, "cannot assign '%s' to NULL", ImpRoute_getRaw(argv[0]));
+		}
+		return NULL;
+	}
 	Object_reference(value);
 
 	if(argc != 2){
@@ -25,6 +35,7 @@ static Object *def_(Runtime *runtime
 		Runtime_throwString(runtime, "def requires a route as first argument.");
 	}
 
+	// TODO: use ImpRoute_submapping here
 
 	Object *par = context;
 	int rargc = ImpRoute_argc(route);
@@ -41,8 +52,8 @@ static Object *def_(Runtime *runtime
 	}
 	char fbuf[64];
 	ImpRoute_argv(route, rargc - 1, fbuf);
-	if(Object_hasKeyShallow(par, fbuf)){
-		Runtime_throwString(runtime, "def would overwrite value");
+	if(strcmp(fbuf, "#") != 0 && Object_hasKeyShallow(par, fbuf)){
+		Runtime_throwFormatted(runtime, "def would overwrite value '%s'", fbuf);
 	}
 	Object_putShallow(par, fbuf, value);
 
@@ -69,10 +80,18 @@ static Object *set_(Runtime *runtime
 
 	Object *route = argv[0];
 	Object *value = unrouteInContext(argv[1], context);
+	if(!value){
+		if(BuiltIn_id(argv[1]) == BUILTIN_ROUTE){
+			Runtime_throwFormatted(runtime, "variable does not exist '%s'", ImpRoute_getRaw(argv[1]));
+		} else {
+			Runtime_throwFormatted(runtime, "cannot assign '%s' to NULL", ImpRoute_getRaw(argv[0]));
+		}
+		return NULL;
+	}
 
 	Object *parent = ImpRoute_submapping(route, context);
 	if(!parent){
-		Runtime_throwString(runtime, "set failed; try def.");
+		Runtime_throwFormatted(runtime, "set failed on '%s'; try def.", ImpRoute_getRaw(route));
 	}
 
 	char field[32];
@@ -116,22 +135,20 @@ static Object *continue_(Runtime *runtime
 
 
 static Object *return_(Runtime *runtime
-	                             , Object *context
-	                             , Object *caller
-	                             , int argc
-	                             , Object **argv){
+	                 , Object *context
+	                 , Object *caller
+	                 , int argc
+	                 , Object **argv){
 	assert(runtime);
 	assert(Object_isValid(context));
 
-	if(argc != 1){
+	if(argc > 1){
 		Runtime_throwString(runtime, "return accepts only one parameter.");
+	} else if(argc == 1){
+		Runtime_setReturnValue(runtime, argv[0]);
+		return argv[0];
 	} else {
-		Object *value = argv[0];
-		if(BuiltIn_id(value) == BUILTIN_ROUTE){
-			value = ImpRoute_mapping(value, context);
-		}
-		Runtime_setReturnValue(runtime, value);
-		return value;
+		Runtime_setReturnValue(runtime, NULL);
 	}
 	return NULL;
 }
@@ -144,4 +161,8 @@ void ImpMisc_init(Object *self, Runtime *runtime){
 	Runtime_registerCMethod(runtime, self, "break", break_);
 	Runtime_registerCMethod(runtime, self, "continue", continue_);
 	Runtime_registerCMethod(runtime, self, "return", return_);
+
+	Runtime_executeSourceInContext(runtime
+		                         , "(def nil:asString 'nil')"
+		                         , runtime->Object);
 }

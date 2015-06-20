@@ -5,6 +5,37 @@
 #include <imp/builtin/string.h>
 
 
+Object *Runtime_clone(Runtime *runtime
+	                , Object *context
+	                , Object *base
+	                , int argc
+	                , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "Runtime:clone does not accept arguments");
+	}
+	Object *r = Runtime_simpleClone(runtime, base);
+	Object_putDataShallow(r, "__data", runtime);
+	return r;
+}
+
+
+Object *Runtime_collect(Runtime *runtime
+	                  , Object *context
+	                  , Object *base
+	                  , int argc
+	                  , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "Runtime:collect does not accept arguments");
+	}
+	// get rid of runtime pointer so its not freed by gc
+	Runtime *ptr = Object_getDataShallow(r, "__data");
+	Runtime_
+	Object_putDataShallow(r, "__data", NULL);
+	Object_remShallow(r, "__data");
+	return NULL;
+}
+
+
 Object *runtime_rawObject(Runtime *runtime
 	              , Object *call_context
 	              , Object *module

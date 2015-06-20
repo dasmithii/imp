@@ -1,0 +1,59 @@
+(import 'core/io')
+(import 'core/control' self)
+
+
+(def Node:~ {
+	(def r:# self)
+	(def r:next nil)
+	(def r:previous nil)
+	(def r:value nil)
+	(return r)
+})
+
+
+
+(def ~ {
+	(def r:# self)
+	(def r:head nil)
+	(def r:tail nil)
+	(def r:size 0)
+	(return r)
+})
+
+
+(def append {
+	(def newNode (Node:~))
+	(set newNode:value (@:get 0))
+	(if self:size {
+		(set self:tail:next newNode)
+		(set self:tail newNode)
+	}{
+		(set self:tail newNode)
+		(set self:head newNode)
+	})
+
+	(self:size:++)
+})
+
+
+(def getNode {
+	(def target (@:get 0))
+	// todo: check index:size
+
+	(def i 0)
+	(def node self:head)
+
+	(while {i:< target} {
+		(set node node:next)
+		(i:++)
+		(io:stdout:writeLine target '...' i '...' node)
+	})
+
+	(return node)
+})
+
+
+(def get {
+	(def node (self:getNode (@:get 0)))
+	(return node:value)
+})

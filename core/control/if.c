@@ -8,7 +8,10 @@
 #include <string.h>
 
 
-
+// note: this function, isZero, is duplicated for all
+// control structures (in each file) because I'm inept.
+// Make sure to replicate any changes to this function
+// in the other files as well.
 static bool isZero(Runtime *runtime
 	             , Object *ctx
 	             , Object *obj){
@@ -62,7 +65,7 @@ Object *if_activate(Runtime *runtime
 			cond = Runtime_activate(runtime, context, cond, 0, NULL);
 		}
 		if(!isZero(runtime, context, cond)){
-			Object *r = Runtime_activate(runtime, context, argv[i+1], 0, NULL);
+			Object *r = Runtime_activateOn(runtime, context, argv[i+1], 0, NULL, Object_getDeep(context, "self"));
 			if(r){
 				Runtime_setReturnValue(runtime, r);
 			}
@@ -71,7 +74,7 @@ Object *if_activate(Runtime *runtime
 	}
 	
 	if(argc % 2 == 1){
-		Object *r = Runtime_activate(runtime, context, argv[argc-1], 0, NULL);
+		Object *r = Runtime_activateOn(runtime, context, argv[argc-1], 0, NULL, Object_getDeep(context, "self"));
 		if(r){
 			Runtime_setReturnValue(runtime, r);
 		}

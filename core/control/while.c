@@ -60,7 +60,7 @@ Object *while_activate(Runtime *runtime
 	Object *step = argv[1];
 
 	if(argc != 2){
-		Runtime_throwString(runtime, "while accepts exactly 2 arguments.");
+		Runtime_throwString(runtime, "while requires exactly 2 arguments");
 	} 
 	if(!Object_canBeActivated(step)){
 		Runtime_throwString(runtime, "while step must be activatable");
@@ -77,7 +77,7 @@ Object *while_activate(Runtime *runtime
 		}
 
 		// execute block
-		Object *stepR = Runtime_activate(runtime, context, step, 0, NULL);
+		Object *stepR = Runtime_activateOn(runtime, context, step, 0, NULL, Object_getDeep(context, "self"));
 		if(stepR){
 			if(BuiltIn_id(stepR) == BUILTIN_BREAK){
 				break;

@@ -213,6 +213,12 @@ Object *io_File_write(Runtime *runtime
 				Runtime_throwString(runtime, "asString method did not return string");
 			}
 			fprintf(fp, "%s", ImpString_getRaw(s));
+		} else if(Object_hasKeyDeep(argv[i], "asString")){
+			Object *as = Object_getDeep(argv[i], "asString");
+			if(BuiltIn_id(as) != BUILTIN_STRING){
+				Runtime_throwString(runtime, "asString field was not string");
+			}
+			fprintf(fp, "%s", ImpString_getRaw(as));
 		} else {
 			Runtime_throwString(runtime, "File:write given unwritable parameter(s)");
 		}

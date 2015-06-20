@@ -290,7 +290,7 @@ void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 	#define IMP_INIT_IN_SLOT(OBJECT, NAME)                       \
 		self->OBJECT = Runtime_make(self, Object);               \
 		Object_reference(self->OBJECT);                          \
-		Object_putShallow(self->root_scope, NAME, self->OBJECT); \
+		Object_putShallow(self->Object, NAME, self->OBJECT); \
 		Imp##OBJECT##_init(self->OBJECT, self)
 	#define IMP_INIT(NAME) IMP_INIT_IN_SLOT(NAME, #NAME)
 
@@ -301,7 +301,7 @@ void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 	IMP_INIT(Vector);
 	IMP_INIT_IN_SLOT(Importer, "import");
 
-	ImpMisc_init(self->root_scope, self);
+	ImpMisc_init(self->Object, self);
 
 	Runtime_unlockGC(self);
 }
@@ -532,6 +532,7 @@ Object *Runtime_executeSourceInContext(Runtime *self
 	if(rc){
 		Runtime_throwString(self, tree.error);
 	} else {
+		Object_putShallow(context, "self", context);
 		r = Runtime_executeInContext(self, context, tree.root);
 	}
 

@@ -72,14 +72,14 @@ static Node *Bucket_hookNode(Bucket *bucket, Object *key, Runtime *runtime){
 }
 
 
-static void Bucket_insert(Bucket *bucket
+static int Bucket_insert(Bucket *bucket
 	                    , Object *key
 	                    , Object *value
 	                    , Runtime *runtime){
 	Node *existing = Bucket_hookNode(bucket, key, runtime);
 	if(existing){
 		existing->value = value;
-		return;
+		return 0;
 	}
 
 	Node *newNode = malloc(sizeof(newNode));
@@ -90,10 +90,11 @@ static void Bucket_insert(Bucket *bucket
 	newNode->value = value;
 	newNode->next = bucket->head;
 	bucket->head = newNode;
+	return 1;
 }
 
 
-static void Bucket_remove(Bucket *bucket, Object *key, Runtime *runtime){
+static int Bucket_remove(Bucket *bucket, Object *key, Runtime *runtime){
 	Node *existing = Bucket_hookNode(bucket, key, runtime);
 	if(existing){
 		if(existing == bucket->head){
@@ -106,7 +107,9 @@ static void Bucket_remove(Bucket *bucket, Object *key, Runtime *runtime){
 			pre->next = existing->next;
 		}
 		free(existing);
+		return 1;
 	}
+	return 0;
 }
 
 
@@ -188,15 +191,18 @@ Object *Hashmap_put(Runtime *runtime
 
 	Map *const map = getRaw(self);
 
-	const double load = (double) map->elemC / (double) map->buckC;
+	const double load = ((double) map->elemC) / ((double) map->buckC);
 	if(load >= MAX_LOAD){
 		Map_setBuckC(map, 2 * map->buckC, runtime);
 	}
 
-	Bucket_insert(Map_bucketFor(map, argv[0], runtime)
-		        , argv[0]
-		        , argv[1]
-		        , runtime);
+	int shouldInc = Bucket_insert(Map_bucketFor(map, argv[0], runtime)
+		                        , argv[0]
+		                        , argv[1]
+		                        , runtime);
+	if(shouldInc){
+		map->elemC++;
+	}
 	return NULL;
 }
 
@@ -233,15 +239,16 @@ Object *Hashmap_remove(Runtime *runtime
 
 	const double load = (double) map->elemC / (double) map->buckC;
 	if(load <= MIN_LOAD && map->buckC > MIN_BUCKET_COUNT){
-		size_t targetSize = MIN_LOAD * map->elemC;
+		size_t targetSize = (size_t) (MIN_LOAD * (double) map->elemC);
 		if(targetSize < MIN_BUCKET_COUNT){
 			targetSize = MIN_BUCKET_COUNT;
 		}
 		Map_setBuckC(map, targetSize, runtime);
 	}
-	Bucket_remove(Map_bucketFor(map, argv[0], runtime)
-		        , argv[0]
-		        , runtime);
+	int shouldDec = Bucket_remove(Map_bucketFor(map, argv[0], runtime)
+		                        , argv[0]
+		                        , runtime);
+	map->elemC--;
 	return NULL;
 }
 
@@ -282,7 +289,7 @@ Object *Hashmap_collect(Runtime *runtime
 	if(map->bucks){
 		free(map->bucks);
 	}
-	free(map);
+	// map is freed by gc
 	return NULL;
 }
 

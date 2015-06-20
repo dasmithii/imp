@@ -24,7 +24,7 @@ Object *os_onImport(Runtime *runtime
 		ImpString_setRaw(arg, runtime->argv[i]);
 		Vector_append(vec, &arg);
 	}
-	Object_putShallow(module, "arguments", obj);
+	Object_putShallow(module, "@", obj);
 	Object_unreference(obj);
 	return NULL;
 }
