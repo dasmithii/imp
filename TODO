@@ -1,3 +1,7 @@
+Inste
+
+
+
 MOMENT:
   
   IDEAL CLOSURE BEHAVIOR
@@ -11,25 +15,60 @@ ORDER OF OPS
 1. Store mapping of routes to objects in scope during
    closure compilation.
 
+    + utilize object w/ underscores or something in 
+      place of colons
+
+
 2. For everything but set, dereference vars with this
    mapping first (after checking local scope), and
    when matches aren't found, use inherited context.
+
+    + Will need to implement getAttribute 
+
 
 3. For set, skip object cache and just check local 
    scope and compile scope. If set overrides a cached
    object, remove that object (and nested) from cache.
 
+    + Need setAttribute
 
-(def obj:n 4)
-(def f {
-  (set)
-  (print someVar)
+
+
+
+OR
+
+
+
+
+Have set, def, and unroute functions check for a _mappings internal
+
+def:
+    just act normally.
+
+set:
+    if route is in mappings, set in parent context, update mappings,
+    and .... on parent set, check that parent hasn't been collected  ^^^^
+
+unroute:
+    check mappings after locals
+
+closure:
+    1. form and inject mappings
+    2. inject parent scope (as non-referenced internal)
+
+
+
+(def makeCounter {
+  (def i 0)
+  (if @:size {
+    (i:= (@:get 0))
+  })
+  (return {
+    (def r (i:$))
+    (i:++)
+    (return r)
+  })
 })
-
-
-
-
-
 
 
 
@@ -72,6 +111,8 @@ NOW:
  + Maybe make it so callMethod doesn't try underscore 
 
  + Use standardized hash algo for importe
+
+ + Make set more method like 
 
 
 

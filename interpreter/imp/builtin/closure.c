@@ -10,9 +10,6 @@
 #include "vector.h"
 
 
-
-
-
 // Internally, closures store an AST, a pointer to the
 // context in which they were compiled, and a cache of
 // objects which they referenced during compile time.
@@ -61,23 +58,40 @@ static Object *activate_(Runtime *runtime
 	}
 
 	Internal *internal = Object_getDataDeep(caller, "__data");
-	Object *scope = Runtime_simpleClone(runtime, internal->context); // TODO: if 
+
+
+	Object *scope = Runtime_make(runtime, Object);
 	Object_reference(scope);
 
+	// inject function arguments
 	Object *arguments = Runtime_cloneField(runtime, "Vector");
 	Object_putShallow(scope, "@", arguments);
-
 	Vector *raw = ImpVector_getRaw(arguments);
 	for(int i = 1; i < argc; i++){
 		Vector_append(raw, &argv[i]);
 	}
 
+	// inject self argument
 	if(argc > 0){
 		Object_putShallow(scope, "self", argv[0]);
 	} else {
 		Runtime_throwString(runtime, "closure not provided with self argument");
 	}
+
+
+	// inject parent context hidden field
+	Object **pcp = malloc(sizeof(Object*));
+	*pcp = internal->context;
+	Object_putDataShallow(scope, "__parentContext", (void*) pcp);
  
+ 	// inject copy of cached mappings
+ 	Object *cacheCp = Runtime_callMethod(runtime
+ 		                               , NULL
+ 		                               , internal->cache
+ 		                               , "$", 0, NULL);
+ 	Object_putShallow(scope, "_mappings", cacheCp);
+
+
 	Object *r = Runtime_executeInContext(runtime
 		                               , scope
 		                               , *internal->code);
@@ -95,28 +109,10 @@ static void ParseNode_cacheReferences(ParseNode *node, Object *context, Object *
 
 	if(node->type == LEAF_NODE){
 		if(node->contents.token->type == TOKEN_ROUTE){
-
-			// TODO: utilize ImpRoute_mapping here
-
-			char buf[64];
 			char *route = node->contents.token->data.text;
-			*buf = '_';
-			char *ptr = buf + 1;
-			while(*route && *route != ':'){
-				*ptr = *route;
-				ptr++;
-				route++;
-			}
-			*ptr = 0;
-
-			Object *reference = Object_getDeep(context, buf);
+			Object *reference = ImpRoute_mapping_(route, context);
 			if(reference){
-				Object_putShallow(cache, buf, reference);
-			}
-
-			reference = Object_getDeep(context, buf + 1);
-			if(reference){
-				Object_putShallow(cache, buf + 1, reference);
+				Object_putShallow(cache, route, reference);
 			}
 		}
 	} else {
@@ -141,7 +137,7 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 		abort();
 	}
 	internal->context = context;
-	internal->cache = Runtime_make(runtime, Object); // TODO: avoid using runtime-allocated object here
+	internal->cache = Runtime_make(runtime, Object); 
 	Object_reference(internal->cache);
 	internal->code = malloc(sizeof(ParseNode));
 	if(!internal->code){
