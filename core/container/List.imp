@@ -11,7 +11,6 @@
 })
 
 
-
 (def ~ {
 	(def r:# self)
 	(def r:head nil)
@@ -24,6 +23,7 @@
 (def append {
 	(def newNode (Node:~))
 	(set newNode:value (@:get 0))
+	(set newNode:previous self:head)
 	(if self:size {
 		(set self:tail:next newNode)
 		(set self:tail newNode)
@@ -46,7 +46,6 @@
 	(while {i:< target} {
 		(set node node:next)
 		(i:++)
-		(io:stdout:writeLine target '...' i '...' node)
 	})
 
 	(return node)

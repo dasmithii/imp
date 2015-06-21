@@ -1,9 +1,36 @@
 MOMENT:
   
-  make set work in ifs and whiles at least
+  IDEAL CLOSURE BEHAVIOR
 
-   1. Store unmarked pointer to original context
-   2. Overwrite set to do that
+ORDER OF OPS
+    1. Local scope
+    2. Object Cache
+    3. Compile scope
+
+
+1. Store mapping of routes to objects in scope during
+   closure compilation.
+
+2. For everything but set, dereference vars with this
+   mapping first (after checking local scope), and
+   when matches aren't found, use inherited context.
+
+3. For set, skip object cache and just check local 
+   scope and compile scope. If set overrides a cached
+   object, remove that object (and nested) from cache.
+
+
+(def obj:n 4)
+(def f {
+  (set)
+  (print someVar)
+})
+
+
+
+
+
+
 
 
 NOW:

@@ -532,7 +532,9 @@ Object *Runtime_executeSourceInContext(Runtime *self
 	if(rc){
 		Runtime_throwString(self, tree.error);
 	} else {
-		Object_putShallow(context, "self", context);
+		if(!Object_hasKeyDeep(context, "self")){
+			Object_putShallow(context, "self", context);
+		}
 		r = Runtime_executeInContext(self, context, tree.root);
 	}
 

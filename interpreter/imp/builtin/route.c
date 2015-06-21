@@ -205,6 +205,7 @@ Object *ImpRoute_submapping_(char *self, Object *context){
 
 
 Object *ImpRoute_mapping_(char *self, Object *context){
+	// todo use submapping here to shorten
 	Object *r = context;
 	int argc = ImpRoute_argc_(self);
 	for(int i = 0; i < argc; i++){

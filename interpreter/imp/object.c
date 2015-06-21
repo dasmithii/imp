@@ -252,7 +252,7 @@ void Object_putShallow(Object *self, char *key, Object *value){
 	assert(Object_isValid(self));
 	assert(Object_isValid(value));
 	assert(!keyForInternal(key));
-
+	assert(key[0] != '#' || key[1] != 0 || self != value);
 	Object_insertShallow(self, key, value);
 }
 

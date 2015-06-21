@@ -8,6 +8,11 @@
 #include <string.h>
 
 
+///////////////////////////////////////////////////
+//
+// BEGIN COMMON CODE
+//
+
 // note: this function, isZero, is duplicated for all
 // control structures (in each file) because I'm inept.
 // Make sure to replicate any changes to this function
@@ -40,6 +45,11 @@ static bool isZero(Runtime *runtime
 	return false;
 }
 
+//
+// END COMMON
+//
+///////////////////////////////////////////////////
+
 
 // If accepts one or more condition-executable pairs as
 // arguments, plus an optional final argument, the 
@@ -57,6 +67,14 @@ Object *if_activate(Runtime *runtime
 
 	if(argc < 2){
 		Runtime_throwString(runtime, "if given insufficient arguments");
+	}
+
+	// check that all provided blocks are valid
+	for(int i = 1; i < argc; i += 2){
+		if(BuiltIn_id(argv[i]) != BUILTIN_CLOSURE){
+			Runtime_throwString(runtime, "if requires closure arguments");
+			return NULL;
+		}
 	}
 
 	for(int i = 0; i < argc - 1; i += 2){

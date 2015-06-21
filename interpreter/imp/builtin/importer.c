@@ -457,7 +457,9 @@ static Object *activate_(Runtime *runtime
 			if(Slot_isPrimitive(slot)){
 				continue;
 			}
-			Object_putShallow(dest, slot->key, Slot_object(slot));
+			if(strcmp(slot->key, "#") != 0){
+				Object_putShallow(dest, slot->key, Slot_object(slot));
+			}
 		}
 
 		return dest;

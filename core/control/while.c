@@ -42,6 +42,8 @@ static bool isZero(Runtime *runtime
 
 
 
+
+
 // If accepts one or more condition-executable pairs as
 // arguments, plus an optional final argument, the 
 // 'else' block. Conditions are scanned until one is
@@ -62,9 +64,11 @@ Object *while_activate(Runtime *runtime
 	if(argc != 2){
 		Runtime_throwString(runtime, "while requires exactly 2 arguments");
 	} 
-	if(!Object_canBeActivated(step)){
-		Runtime_throwString(runtime, "while step must be activatable");
+
+	if(BuiltIn_id(step) != BUILTIN_CLOSURE){
+		Runtime_throwString(runtime, "while step must be a closure");
 	}
+
 
 	for(;;){
 		// check condition

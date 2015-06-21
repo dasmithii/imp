@@ -12,9 +12,16 @@
 
 
 
+
+// Internally, closures store an AST, a pointer to the
+// context in which they were compiled, and a cache of
+// objects which they referenced during compile time.
+//
+// Closure object contexts
 typedef struct {
 	ParseNode *code; // closure
-	Object *context; // cached objects in closure
+	Object *cache;   // referenced objects in closure
+	Object *context;
 } Internal;
 
 
@@ -30,7 +37,7 @@ bool ImpClosure_isValid(Object *obj){
 	}
 
 	if(Object_hasKeyShallow(obj, "#")){
-		return Object_isValid(ImpClosure_getRaw(obj)->context);
+		return Object_isValid(ImpClosure_getRaw(obj)->cache);
 	}
 	return true;
 }
@@ -54,21 +61,21 @@ static Object *activate_(Runtime *runtime
 	}
 
 	Internal *internal = Object_getDataDeep(caller, "__data");
-	Object *scope = Runtime_simpleClone(runtime, internal->context);
+	Object *scope = Runtime_simpleClone(runtime, internal->context); // TODO: if 
 	Object_reference(scope);
 
 	Object *arguments = Runtime_cloneField(runtime, "Vector");
 	Object_putShallow(scope, "@", arguments);
 
+	Vector *raw = ImpVector_getRaw(arguments);
+	for(int i = 1; i < argc; i++){
+		Vector_append(raw, &argv[i]);
+	}
+
 	if(argc > 0){
 		Object_putShallow(scope, "self", argv[0]);
 	} else {
 		Runtime_throwString(runtime, "closure not provided with self argument");
-	}
-
-	Vector *raw = ImpVector_getRaw(arguments);
-	for(int i = 1; i < argc; i++){
-		Vector_append(raw, &argv[i]);
 	}
  
 	Object *r = Runtime_executeInContext(runtime
@@ -133,8 +140,9 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 	if(!internal){
 		abort();
 	}
-	internal->context = Runtime_make(runtime, Object); // TODO: avoid using runtime-allocated object here
-	Object_reference(internal->context);
+	internal->context = context;
+	internal->cache = Runtime_make(runtime, Object); // TODO: avoid using runtime-allocated object here
+	Object_reference(internal->cache);
 	internal->code = malloc(sizeof(ParseNode));
 	if(!internal->code){
 		abort();
@@ -145,10 +153,10 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 	internal->code->type = BLOCK_NODE;
 
 	Object_putDataShallow(self, "__data", internal);
-	ParseNode_cacheReferences(code, context, internal->context);
-	assert(Object_isValid(internal->context));
+	ParseNode_cacheReferences(code, context, internal->cache);
+	assert(Object_isValid(internal->cache));
 
-	Object_unreference(internal->context);
+	Object_unreference(internal->cache);
 	Object_unreference(self);
 	Object_unreference(context);
 }
@@ -163,11 +171,11 @@ static Object *collect_(Runtime *runtime
 	assert(ImpClosure_isValid(caller));
 
 	Internal *raw = ImpClosure_getRaw(caller);
-	assert(Object_isValid(raw->context));
+	assert(Object_isValid(raw->cache));
 	ParseNode_deepClean(raw->code);
 	free(raw->code);
 	raw->code = NULL;
-	raw->context = NULL;
+	raw->cache = NULL;
 	Object_remShallow(caller, "__data");
 
 	return NULL;
@@ -182,8 +190,8 @@ static Object *mark_(Runtime *runtime
 	assert(runtime);
 
 	Internal *raw = ImpClosure_getRaw(caller);
-	if(raw && raw->context){
-		Runtime_markRecursive(runtime, raw->context);
+	if(raw && raw->cache){
+		Runtime_markRecursive(runtime, raw->cache);
 	}
 	return NULL;
 }

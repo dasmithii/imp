@@ -89,15 +89,33 @@ static Object *set_(Runtime *runtime
 		return NULL;
 	}
 
+	// if context defines a special setRoute method, use it
+	if(Object_hasSpecialMethod(context, "setRoute")){
+		Object *argv2[2];
+		argv2[0] = Runtime_make(runtime, String);
+		ImpString_setRaw(argv2[0], ImpRoute_getRaw(route));
+		argv2[1] = value;
+		Runtime_callMethod(runtime
+			             , NULL
+			             , context
+			             , "setRoute"
+			             , 2
+			             , argv2);
+		return NULL;
+	}
+
+	// otherwise, use default
+
+
 	Object *parent = ImpRoute_submapping(route, context);
-	if(!parent){
+	char field[32];
+	ImpRoute_argv(route, ImpRoute_argc(route) - 1, field);
+	
+	if(!parent || !Object_hasKeyDeep(parent, field)){
 		Runtime_throwFormatted(runtime, "set failed on '%s'; try def.", ImpRoute_getRaw(route));
 	}
 
-	char field[32];
-	ImpRoute_argv(route, ImpRoute_argc(route) - 1, field);
-
-	Object_putShallow(parent, field, value);
+	Object_putDeep(parent, field, value);
 
 	return NULL;
 }
