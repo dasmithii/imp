@@ -17,7 +17,6 @@
 // Closure object contexts
 typedef struct {
 	ParseNode *code; // closure
-	Object *cache;   // referenced objects in closure
 	Object *context;
 } Internal;
 
@@ -34,7 +33,7 @@ bool ImpClosure_isValid(Object *obj){
 	}
 
 	if(Object_hasKeyShallow(obj, "#")){
-		return Object_isValid(ImpClosure_getRaw(obj)->cache);
+		return Object_isValid(ImpClosure_getRaw(obj)->context);
 	}
 	return true;
 }
@@ -60,7 +59,7 @@ static Object *activate_(Runtime *runtime
 	Internal *internal = Object_getDataDeep(caller, "__data");
 
 
-	Object *scope = Runtime_make(runtime, Object);
+	Object *scope = Runtime_simpleClone(runtime, internal->context);
 	Object_reference(scope);
 
 	// inject function arguments
@@ -78,20 +77,6 @@ static Object *activate_(Runtime *runtime
 		Runtime_throwString(runtime, "closure not provided with self argument");
 	}
 
-
-	// inject parent context hidden field
-	Object **pcp = malloc(sizeof(Object*));
-	*pcp = internal->context;
-	Object_putDataShallow(scope, "__parentContext", (void*) pcp);
- 
- 	// inject copy of cached mappings
- 	Object *cacheCp = Runtime_callMethod(runtime
- 		                               , NULL
- 		                               , internal->cache
- 		                               , "$", 0, NULL);
- 	Object_putShallow(scope, "_mappings", cacheCp);
-
-
 	Object *r = Runtime_executeInContext(runtime
 		                               , scope
 		                               , *internal->code);
@@ -99,27 +84,6 @@ static Object *activate_(Runtime *runtime
 	Object_unreference(scope);
 
 	return r;
-}
-
-
-static void ParseNode_cacheReferences(ParseNode *node, Object *context, Object *cache){
-	assert(node);
-	assert(Object_isValid(context));
-	assert(Object_isValid(cache));
-
-	if(node->type == LEAF_NODE){
-		if(node->contents.token->type == TOKEN_ROUTE){
-			char *route = node->contents.token->data.text;
-			Object *reference = ImpRoute_mapping_(route, context);
-			if(reference){
-				Object_putShallow(cache, route, reference);
-			}
-		}
-	} else {
-		for(int i = 0; i < node->contents.non_leaf.argc; i++){
-			ParseNode_cacheReferences(node->contents.non_leaf.argv + i, context, cache);
-		}
-	}
 }
 
 
@@ -137,22 +101,15 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 		abort();
 	}
 	internal->context = context;
-	internal->cache = Runtime_make(runtime, Object); 
-	Object_reference(internal->cache);
 	internal->code = malloc(sizeof(ParseNode));
 	if(!internal->code){
 		abort();
 	}
-
 	*(internal->code) = ParseNode_deepCopy(code);
-
 	internal->code->type = BLOCK_NODE;
 
 	Object_putDataShallow(self, "__data", internal);
-	ParseNode_cacheReferences(code, context, internal->cache);
-	assert(Object_isValid(internal->cache));
 
-	Object_unreference(internal->cache);
 	Object_unreference(self);
 	Object_unreference(context);
 }
@@ -167,13 +124,9 @@ static Object *collect_(Runtime *runtime
 	assert(ImpClosure_isValid(caller));
 
 	Internal *raw = ImpClosure_getRaw(caller);
-	assert(Object_isValid(raw->cache));
 	ParseNode_deepClean(raw->code);
 	free(raw->code);
 	raw->code = NULL;
-	raw->cache = NULL;
-	Object_remShallow(caller, "__data");
-
 	return NULL;
 }
 
@@ -186,8 +139,8 @@ static Object *mark_(Runtime *runtime
 	assert(runtime);
 
 	Internal *raw = ImpClosure_getRaw(caller);
-	if(raw && raw->cache){
-		Runtime_markRecursive(runtime, raw->cache);
+	if(raw && raw->context){
+		Runtime_markRecursive(runtime, raw->context);
 	}
 	return NULL;
 }

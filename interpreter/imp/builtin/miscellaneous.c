@@ -89,10 +89,6 @@ static Object *set_(Runtime *runtime
 		return NULL;
 	}
 
-
-	// NOTE: TODO?: switch ONE and TWO
-
-	// TWO
 	Object *submapping = ImpRoute_submapping(route, context);
 	char field[32];
 	ImpRoute_argv(route, ImpRoute_argc(route) - 1, field);
@@ -102,43 +98,7 @@ static Object *set_(Runtime *runtime
 		return NULL;
 	}
 
-
-
-
-	// ONE
-	char *route_ = ImpRoute_getRaw(route);
-	if(strcmp(route_, "#") != 0){
-		Object *_mappings = Object_getDeep(context, "_mappings");
-		if(_mappings && Object_hasKeyShallow(_mappings, route_)){
-			Object *parent = *((Object**) Object_getDataDeep(context, "__parentContext"));
-			if(parent){
-				// TODO: check that parent still exists
-				// set value in parent
-				Object *argv2[2];
-				argv2[0] = route;
-				argv2[1] = value;
-				Runtime_callSpecialMethod(runtime
-					                    , parent
-					                    , parent
-					                    , "set"
-					                    , 2
-					                    , argv2);
-
-				// update nested submappings
-				for(int i = 0; i < _mappings->slotCount; i++){
-					Slot *slot = _mappings->slots + i;
-					char *pos = strstr(slot->key, route_);
-					if(pos == slot->key){    
-						Object_putShallow(_mappings, slot->key, ImpRoute_mapping_(slot->key, parent));  //TODO
-						i--;
-					}
-				}
-				return NULL;
-			}
-		}
-	}
-
-	Runtime_throwFormatted(runtime, "set failed on '%s'; try def.", route_);
+	Runtime_throwFormatted(runtime, "set failed on '%s'; try def.", ImpRoute_getRaw(route));
 	return NULL;
 }
 

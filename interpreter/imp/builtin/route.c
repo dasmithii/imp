@@ -194,11 +194,11 @@ Object *ImpRoute_submapping_(char *self, Object *context){
 		ImpRoute_argv_(self, i, cho);
 		r = Object_getDeep(r, cho);
 		if(!r){
-			return cacheMapping(self, context);
+			return NULL;
 		}
 	}
 	if(r == context){
-		return cacheMapping(self, context);
+		return NULL;
 	}
 	return r;
 }
@@ -213,7 +213,7 @@ Object *ImpRoute_mapping_(char *self, Object *context){
 		ImpRoute_argv_(self, i, cho);
 		r = Object_getDeep(r, cho);
 		if(!r){
-			return cacheMapping(self, context);
+			return NULL;
 		}
 	}
 	return r;
