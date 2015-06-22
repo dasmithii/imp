@@ -1,0 +1,11 @@
+(import 'core/control/while')
+
+(def _activate {
+	(def n (@:get 0))
+	(set n (n:$))
+	(def f (@:get 1))
+	(while n {
+		(f)
+		(n:--)
+	})
+})
