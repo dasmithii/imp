@@ -1,5 +1,7 @@
 NOW:
 
+ + Make primes example stop at square route.
+
  + string methods
 
  + CLI module
