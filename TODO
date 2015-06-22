@@ -1,5 +1,7 @@
 NOW:
 
+ + Make control structures builtin?
+
  + Make address type
 
  + Make legit ':' operator.
