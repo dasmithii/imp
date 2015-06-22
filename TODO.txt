@@ -36,6 +36,8 @@ NOW:
 
  + Make set more method like 
 
+ + Make io functions that default to stdout and stdin
+
 
 
 MAJOR:
