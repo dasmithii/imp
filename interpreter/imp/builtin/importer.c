@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <ctype.h>
 #include <dlfcn.h>
 #include <dirent.h>

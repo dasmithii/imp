@@ -1,17 +1,16 @@
+#include <assert.h>
+#include <stdbool.h>
+#include <string.h>
+
 #include <imp/runtime.h>
 #include <imp/object.h>
 #include <imp/builtin/general.h>
 #include <imp/builtin/importer.h>
 #include <imp/builtin/number.h>
 #include <imp/builtin/string.h>
-#include <stdbool.h>
-#include <string.h>
 
 
-///////////////////////////////////////////////////
-//
-// BEGIN COMMON CODE
-//
+
 
 // note: this function, isZero, is duplicated for all
 // control structures (in each file) because I'm inept.
@@ -44,11 +43,6 @@ static bool isZero(Runtime *runtime
 	Runtime_throwString(runtime, "object not boolean");
 	return false;
 }
-
-//
-// END COMMON
-//
-///////////////////////////////////////////////////
 
 
 // If accepts one or more condition-executable pairs as

@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "general.h"
 #include "number.h"
 #include "string.h"
