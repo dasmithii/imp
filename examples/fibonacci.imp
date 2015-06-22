@@ -7,7 +7,7 @@
 (def i 100)
 
 (while i {
-	(io:stdout:writeLine a)
+	(io:writeLine a)
 	(def c (a:$))
 	(c:+= b)
 	(a:set b)

@@ -1,5 +1,10 @@
 NOW:
 
+ + string methods
+
+ + CLI module
+ + tester module
+
  + Make builtin array and move vector to core.
 
  + Make control structures builtin?
@@ -36,8 +41,7 @@ NOW:
 
  + Make set more method like 
 
- + Make io functions that default to stdout and stdin
-
+ 
 
 
 MAJOR:

@@ -5,6 +5,6 @@
 (def i 100)
 
 (while i {
-	(io:stdout:writeLine i)
+	(io:writeLine i)
 	(i:--)	
 })

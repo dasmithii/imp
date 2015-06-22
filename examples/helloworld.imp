@@ -1,4 +1,4 @@
 #!/usr/bin/env imp
 (import 'core/io')
 
-(io:stdout:writeLine 'Hello, world!')
+(io:writeLine 'Hello, world!')

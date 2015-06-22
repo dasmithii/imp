@@ -9,16 +9,16 @@
 	(def m3 (i:% 3))
 	(def m5 (i:% 5))
 	(if (m3:== 0) {
-		(io:stdout:write 'Fizz ')
+		(io:write 'Fizz ')
 		(shouldPrintNumber:set 0)
 	})
 	(if (m5:== 0) {
-		(io:stdout:write 'Buzz')
+		(io:write 'Buzz')
 		(shouldPrintNumber:set 0)
 	})
 	(if shouldPrintNumber {
-		(io:stdout:write i)
+		(io:write i)
 	})
 	(i:++)
-	(io:stdout:writeLine)
+	(io:writeLine)
 })

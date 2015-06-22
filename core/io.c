@@ -245,6 +245,55 @@ Object *io_File_writeLine(Runtime *runtime
 }
 
 
+Object *io_readCharacter(Runtime *runtime
+	              , Object *context
+	              , Object *io
+	              , int argc
+                  , Object **argv){
+	return io_File_read(runtime
+		              , context
+		              , Object_getShallow(io, "stdin")
+		              , argc
+		              , argv);
+}
+
+Object *io_readLine(Runtime *runtime
+	              , Object *context
+	              , Object *io
+	              , int argc
+                  , Object **argv){
+	return io_File_readLine(runtime
+		                  , context
+		                  , Object_getShallow(io, "stdin")
+		                  , argc
+		                  , argv);
+}
+
+Object *io_write(Runtime *runtime
+	              , Object *context
+	              , Object *io
+	              , int argc
+                  , Object **argv){
+	return io_File_write(runtime
+		               , context
+		               , Object_getShallow(io, "stdout")
+		               , argc
+		               , argv);
+}
+
+Object *io_writeLine(Runtime *runtime
+	               , Object *context
+	               , Object *io
+	               , int argc
+                   , Object **argv){
+	return io_File_writeLine(runtime
+		                   , context
+		                   , Object_getShallow(io, "stdout")
+		                   , argc
+		                   , argv);
+}
+
+
 Object *io_onImport(Runtime *runtime
 	              , Object *context
 	              , Object *io

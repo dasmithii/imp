@@ -3,8 +3,8 @@
 (import 'core/io')
 
 (def max 100)
-(io:stdout:writeLine 'Printing prime numbers below' max '...')
-(io:stdout:writeLine 2)
+(io:writeLine 'Printing prime numbers below' max '...')
+(io:writeLine 2)
 
 (def primes (Vector:~))
 
@@ -26,7 +26,7 @@
 (while {i:< 100} {
 	(if (check i) {
 		(primes:append (i:$))
-		(io:stdout:writeLine i)
+		(io:writeLine i)
 	})
 	(i:+= 2)
 })

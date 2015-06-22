@@ -7,7 +7,7 @@
 (l:append 'adam')
 (l:append 'jake')
 
-(io:stdout:writeLine (l:get 0))
-(io:stdout:writeLine (l:get 1))
-(io:stdout:writeLine (l:get 2))
-(io:stdout:writeLine (l:get 3))
+(io:writeLine (l:get 0))
+(io:writeLine (l:get 1))
+(io:writeLine (l:get 2))
+(io:writeLine (l:get 3))
