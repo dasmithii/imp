@@ -153,6 +153,22 @@ static Object *return_(Runtime *runtime
 	return NULL;
 }
 
+static Object *throw_(Runtime *runtime
+	                , Object *context
+	                , Object *caller
+	                , int argc
+	                , Object **argv){
+	assert(runtime);
+	assert(Object_isValid(context));
+
+	if(argc != 1){
+		Runtime_throwString(runtime, "throw accepts exactly one parameter.");
+	}
+	Runtime_throw(runtime, argv[0]);
+	return NULL;
+}
+
+
 
 void ImpMisc_init(Object *self, Runtime *runtime){
 	assert(self);
@@ -161,6 +177,7 @@ void ImpMisc_init(Object *self, Runtime *runtime){
 	Runtime_registerCMethod(runtime, self, "break", break_);
 	Runtime_registerCMethod(runtime, self, "continue", continue_);
 	Runtime_registerCMethod(runtime, self, "return", return_);
+	Runtime_registerCMethod(runtime, self, "throw", throw_);
 
 	Runtime_executeSourceInContext(runtime
 		                         , "(def nil:asString 'nil')"

@@ -16,7 +16,7 @@ CORE_PATH = ./core
 # Space-separated pkg-config libraries used by this project
 LIBS =
 # General compiler flags
-COMPILE_FLAGS = -std=c99 -Wall -Wextra -g
+COMPILE_FLAGS = -std=c99 -Wno-unused-parameter -Wall -Wextra -g -Wno-unused-parameter
 # Additional release-specific flags
 RCOMPILE_FLAGS = -D NDEBUG
 # Additional debug-specific flags

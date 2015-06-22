@@ -35,7 +35,6 @@
 	(self:size:++)
 })
 
-
 (def getNode {
 	(def target (@:get 0))
 	// todo: check index:size
