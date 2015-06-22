@@ -1,16 +1,15 @@
 #!/usr/bin/env imp
-(import 'core/control' self)
+
+(import 'core/control/repeat')
 (import 'core/io')
 
-(def a 0)
-(def b 1)
-(def i 100)
+(def n0 0)        // - lower iterator
+(def n1 1)        // - higher iterator
+(def temp 0)      // - swapper variable
 
-(while i {
-	(io:writeLine a)
-	(def c (a:$))
-	(c:+= b)
-	(a:set b)
-	(b:set c)	
-	(i:--)
+(repeat 10 {
+	(io:writeLine n0)
+	(temp:= n1)
+	(n1:+= n0)
+	(n0:= temp)
 })

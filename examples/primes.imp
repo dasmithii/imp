@@ -1,4 +1,5 @@
 #!/usr/bin/env imp
+
 (import 'core/control' self)
 (import 'core/io')
 

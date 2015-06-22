@@ -18,16 +18,12 @@ Anecdote (name explanation)
 
     Rising from rubble while still intact, the imp begins
     a new life. Dust clears, injuries heal, and he grows
-    more self-aware He understands, over time, how
+    self-aware. He understands, over time, how
     "close enough" only applies to horseshoes and 
     hand-grenades. Because walls are equivalent to neither
-    horseshoes nor hand-grenades, his collision meant
-    little in the larger scheme of things.
+    horseshoes nor hand-grenades, his collision, as he
+    learns, means little in the larger scheme of things.
 
-    The imp had skirted death, just barely. And now he was
-    free. He had escaped with many lifetimes worth of
+    The imp skirted death, just barely, and now he is
+    free, having escaped with many lifetimes worth of
     experiential capital.
-
-
-
-    Also, IMP is a self-describing acronym: "I Make Programs" 

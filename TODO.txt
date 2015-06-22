@@ -1,5 +1,7 @@
 NOW:
 
+ + Check arguments on core .imp files
+
  + Make primes example stop at square route.
 
  + string methods

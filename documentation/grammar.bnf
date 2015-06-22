@@ -1,9 +1,0 @@
-block = { [whitespace], (call | closure | macro), [whitespace] } ;
-
-whitespace = "\n" | " " | "\t" ;
-
-closure = "{", block, "}" ;
-
-macro = "[", block, "]" ;
-
-call = 

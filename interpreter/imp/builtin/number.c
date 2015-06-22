@@ -402,7 +402,7 @@ void ImpNumber_init(Object *self, Runtime *runtime){
 	Runtime_registerCMethod(runtime, self, "?", asBoolean_);
 
 	Runtime_registerCMethod(runtime, self, "print", print_);
-	Runtime_registerCMethod(runtime, self, "set", set_);
+	Runtime_registerCMethod(runtime, self, "=", set_);
 
 	Runtime_registerCMethod(runtime, self, "~", clone_);
 	Runtime_registerCMethod(runtime, self, "asString", asString_);
