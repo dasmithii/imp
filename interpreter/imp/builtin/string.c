@@ -24,6 +24,8 @@ void ImpString_setRaw(Object *self, char *text){
 	assert(ImpString_isValid(self));
 	assert(text);
 	Object_putDataDeep(self, "__data", strdup(text));
+	Object *size = Object_getDeep(self, "size");
+	ImpNumber_setRaw(size, (double) strlen(text));
 }
 
 
@@ -65,8 +67,16 @@ static Object *clone_(Runtime *runtime
 	}
 
 	Object *r = Runtime_simpleClone(runtime, caller);
-	Object_putDataShallow(r, "__data", strdup(ImpString_getRaw(caller))); // TODO: check pointer from strdup
-
+	Object_reference(r);
+	char *callerRaw = ImpString_getRaw(caller);
+	if(!callerRaw){
+		callerRaw = "";
+	}
+	Object_putDataShallow(r, "__data", strdup(callerRaw)); // TODO: check pointer from strdup
+	Object *size = Runtime_make(runtime, Number);
+	ImpNumber_setRaw(size, 0);
+	Object_putShallow(r, "size", size);
+	Object_unreference(r);
 	return r;	
 }
 
@@ -202,6 +212,4 @@ void ImpString_init(Object *self, Runtime *runtime){
 	Runtime_registerCMethod(runtime, self, "<>", compare_);
 
 	Runtime_registerCMethod(runtime, self, "hashCode", hashCode_);
-
-	ImpString_setRaw(self, "");
 }
