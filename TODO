@@ -1,84 +1,4 @@
-Inste
-
-
-
-MOMENT:
-  
-  IDEAL CLOSURE BEHAVIOR
-
-ORDER OF OPS
-    1. Local scope
-    2. Object Cache
-    3. Compile scope
-
-
-1. Store mapping of routes to objects in scope during
-   closure compilation.
-
-    + utilize object w/ underscores or something in 
-      place of colons
-
-
-2. For everything but set, dereference vars with this
-   mapping first (after checking local scope), and
-   when matches aren't found, use inherited context.
-
-    + Will need to implement getAttribute 
-
-
-3. For set, skip object cache and just check local 
-   scope and compile scope. If set overrides a cached
-   object, remove that object (and nested) from cache.
-
-    + Need setAttribute
-
-
-
-
-OR
-
-
-
-
-Have set, def, and unroute functions check for a _mappings internal
-
-def:
-    just act normally.
-
-set:
-    if route is in mappings, set in parent context, update mappings,
-    and .... on parent set, check that parent hasn't been collected  ^^^^
-
-unroute:
-    check mappings after locals
-
-closure:
-    1. form and inject mappings
-    2. inject parent scope (as non-referenced internal)
-
-
-
-(def makeCounter {
-  (def i 0)
-  (if @:size {
-    (i:= (@:get 0))
-  })
-  (return {
-    (def r (i:$))
-    (i:++)
-    (return r)
-  })
-})
-
-
-
 NOW:
-
- Modules:
-   + CLI
-   + Runtime
-
-
 
  + Make address type
 
@@ -101,8 +21,6 @@ NOW:
 
  + Cap slot name sizes
 
- + Ensure things run on debug build
-
  + Make number type handle infinite precision integers?, binary,
    and hex, as well as the existing double. Magic.
 
@@ -110,7 +28,7 @@ NOW:
 
  + Maybe make it so callMethod doesn't try underscore 
 
- + Use standardized hash algo for importe
+ + Use standardized hash algo for importer
 
  + Make set more method like 
 
