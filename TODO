@@ -1,5 +1,7 @@
 NOW:
 
+ + Make builtin array and move vector to core.
+
  + Make control structures builtin?
 
  + Make address type
