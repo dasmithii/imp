@@ -185,44 +185,14 @@ static bool endswith(char *whole, char *part){
 // the headers it includes. Soon, multi-file modules will
 // be supported. But for now, this is the way.
 static void importInternalModuleTo(Runtime *runtime
-	                , char *path
-	                , Object *context){
+	                             , char *path
+	                             , Object *context){
+	Object_reference(context);
+
+	// read source file
 	char *code = readFile(path);
 	if(!code){
 		Runtime_throwFormatted(runtime, "failed to read file: %s", path);
-	}
-
-	char importName[128];
-	getNameOfImport(importName, path);
-
-	char prefix[128]; *prefix = 0;
-	strcat(prefix, "Object *");
-	strcat(prefix, importName);
-	strcat(prefix, "_");
-
-	const int prefixLen = strlen(prefix);
-
-	Vector symbols;
-	Vector_init(&symbols, 48);	
-
-	char *ptr = code;
-	while(ptr && *ptr){
-		ptr = strstr(ptr, prefix);
-		if(!ptr){
-			break;
-		}
-		ptr += prefixLen;
-
-		char symbol[48];
-		char *it = symbol;
-
-		while(ptr && (isalnum(*ptr) || *ptr == '_')){
-			*it = *ptr;
-			++it;
-			++ptr;
-		}
-		*it = 0;
-		Vector_append(&symbols, symbol);
 	}
 
 	// load dynamic library
@@ -231,10 +201,35 @@ static void importInternalModuleTo(Runtime *runtime
 		Runtime_throwString(runtime, "failed to dlopen");
 	}
 
-	Object_reference(context);
+	// where module will be imported to within <context>
+	char importName[128];
+	getNameOfImport(importName, path);
 
-	for(int i = 0; i < symbols.size; i++){
-		char *wopre = Vector_hook(&symbols, i); // without prefix
+	// prefix denoting exported functions
+	char prefix[128]; *prefix = 0;
+	sprintf(prefix, "Object *%s_", importName);
+	const int prefixLen = strlen(prefix);
+
+	// scan through code, loading each symbol prefixed with
+	// the above
+	char *ptr = code;
+	while(ptr && *ptr){
+		ptr = strstr(ptr, prefix);
+		if(!ptr){
+			break;
+		}
+		ptr += prefixLen;
+
+		char wopre[48];
+		char *it = wopre;
+
+		while(ptr && (isalnum(*ptr) || *ptr == '_')){
+			*it = *ptr;
+			++it;
+			++ptr;
+		}
+		*it = 0;
+		
  
 		char full_[64]; *full_ = 0;
 		char *full = full_;  // full symbol
@@ -296,11 +291,9 @@ static void importInternalModuleTo(Runtime *runtime
 		}
 	}
 
-	Object_unreference(context);
 
 	// dlclose(so); TODO:? make it so module_ctx destructor calls dlclose
-
-	Vector_clean(&symbols);
+	Object_unreference(context);
 	free(code);
 } 
       

@@ -13,6 +13,7 @@ NOW:
 
  + Finish array module and screw toolbox
 
+ + Make importer cache symbols
 
  + Setup runtime to use init methods in place of clones (like python)
 
