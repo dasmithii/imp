@@ -4,7 +4,6 @@ Uses of toolbox
   + Stack   |  Runtime->tryStack      |  core/container/Stack
   + Vector  |  builtin/base           |  core/container/Array
   + Vector  |  builtin/closure        |  core/container/Array
-  + Vector  |  builtin/importer       |  raw? or rewrite in imp
 
 
 NOW:
