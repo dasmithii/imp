@@ -1,5 +1,12 @@
 NOW:
 
+ + Finish array module and screw toolbox
+
+
+ + Setup runtime to use init methods in place of clones (like python)
+
+ + Make Number:asString accept format
+
  + Check arguments on core .imp files
 
  + Make primes example stop at square route.

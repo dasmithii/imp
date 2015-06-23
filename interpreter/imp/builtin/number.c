@@ -222,6 +222,9 @@ double ImpNumber_getRaw(Object *self){
 	return *((double*) Object_getDataDeep(self, "__data"));
 }
 
+int ImpNumber_getRawRounded(Object *self){
+	return (int) (ImpNumber_getRaw(self) + .5);
+}
 
 static Object *clone_(Runtime *runtime
 	                , Object *context
