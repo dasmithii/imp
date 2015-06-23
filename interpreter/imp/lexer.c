@@ -58,8 +58,6 @@ int Tokenization_init(Tokenization *tokenization, char *code){
 	assert(tokenization);
 	assert(code);
 	tokenization->error = NULL;
-	Vector_init(&tokenization->tokens, sizeof(Token));
-
 
 	// skip shebang
 	if(code[0] == '#' && code[1] == '!'){
@@ -69,10 +67,27 @@ int Tokenization_init(Tokenization *tokenization, char *code){
 		++code;
 	}
 
+	// 
+	size_t tokenCount = 0;
+	size_t tokenCapacity = 128;
+	Token *tokenArray = malloc(tokenCapacity * sizeof(Token));
+	if(!tokenArray){
+		abort();
+	}
+	#define IMP_REGISTER_TOKEN(t)          \
+		if(tokenCount == tokenCapacity){   \
+			tokenCapacity *= 2;            \
+			tokenArray = realloc(tokenArray, tokenCapacity * sizeof(Token)); \
+			if(!tokenArray){               \
+				abort();                   \
+			}                              \
+		}                                  \
+		tokenArray[tokenCount] = t;        \
+		tokenCount++
 
 	// prefix with '('
 	Token tmp = {.type = TOKEN_SOFT_OPEN};
-	Vector_append(&tokenization->tokens, &tmp);
+	IMP_REGISTER_TOKEN(tmp);
 
 	Token token;
 	bool afterSpace;
@@ -167,18 +182,15 @@ int Tokenization_init(Tokenization *tokenization, char *code){
 		}
 		++code; // **                        **  ^^^
 		afterSpace = false;
-		Vector_append(&tokenization->tokens, &token);
+		IMP_REGISTER_TOKEN(token);
 	}
 
 	tmp.type = TOKEN_SOFT_CLOSE;
-	Vector_append(&tokenization->tokens, &tmp);
+	IMP_REGISTER_TOKEN(tmp);
+	#undef IMP_REGISTER_TOKEN
+	tokenization->size = tokenCount;
+	tokenization->buffer = tokenArray;
 	return 0; // TODO: handle errors
-}
-
-
-static void cleanToken(void *token){
-	assert(token);
-	Token_clean((Token*) token);
 }
 
 	
@@ -188,8 +200,10 @@ void Tokenization_clean(Tokenization *tokenization){
 		free(tokenization->error);
 		tokenization->error = NULL;
 	}
-	Vector_each(&tokenization->tokens, cleanToken);
-	Vector_clean(&tokenization->tokens);
+	for(int i = 0; i < tokenization->size; i++){
+		Token_clean(tokenization->buffer + i);
+	}
+	free(tokenization->buffer);
 }
 
 
@@ -208,20 +222,12 @@ static void printToken(void *token){
 }
 
 
-void Tokenization_print(Tokenization *tokenization){
-	assert(tokenization);
-	assert(!tokenization->error);
-	Vector_each(&tokenization->tokens, printToken);
-}
-
-
-Token *Tokenization_begin(Tokenization *self){
+void Tokenization_print(Tokenization *self){
 	assert(self);
-	return (Token*) self->tokens.buffer.data;
+	assert(!self->error);
+	for(int i = 0; i < self->size; i++){
+		Token_printVerbose(self->buffer + i);
+		printf(" ");
+	}
 }
 
-
-Token *Tokenization_end(Tokenization *self){
-	assert(self);
-	return ((Token*) self->tokens.buffer.data) + self->tokens.size;
-}

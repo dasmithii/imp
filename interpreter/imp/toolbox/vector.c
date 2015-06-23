@@ -34,15 +34,15 @@ int Vector_append(Vector *const vec, const void *const ptr)
 	assume_ptrs(vec, ptr);
 
 	// check capacity
-	if(vec->size >= vec->buffer.num_elems){
+	if(vec->size == vec->buffer.num_elems){
 		int rc = Vector_expand(vec);
 		if(rc)
 			return -1;
 	}
 
 	// insert element
+	Vector_set(vec, vec->size, ptr);
 	vec->size++;
-	Vector_set(vec, vec->size - 1, ptr);
 	return 0;
 }
 
@@ -93,7 +93,7 @@ int Vector_insert(Vector *const vec, const unsigned i, const void *const ptr)
 	assume_max(i, vec->size + 1);
 
 	// ensure capacity
-	if(vec->size >= vec->buffer.num_elems){
+	if(vec->size == vec->buffer.num_elems){
 		int rc = Vector_expand(vec);
 		if(rc)
 			return -1;
@@ -228,11 +228,12 @@ int Vector_reserve(Vector * const vec, const size_t n)
 // --------------------------------------------------------------- //
 void Vector_set(Vector *const vec, const unsigned i, const void *const elem)
 {
-	assume_ptr(vec);
-	assume_ptr(elem);
 	assume_max(i, vec->size);
 	void *dest = Vector_hook(vec, i);
-	memcpy(dest, elem, vec->buffer.elem_size);
+	if(elem)
+		memcpy(dest, elem, vec->buffer.elem_size);
+	else
+		memset(dest, 0, vec->buffer.elem_size);
 }
 
 // --------------------------------------------------------------- //

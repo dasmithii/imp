@@ -1,14 +1,14 @@
 #ifndef IMP_LEXER_H_
 #define IMP_LEXER_H_
 
-#include <imp/toolbox/vector.h>
 #include <imp/token.h>
 
 
 
 
 typedef struct {
-	Vector tokens;
+	Token *buffer;
+	size_t size;
 	char *error;
 } Tokenization;
 
@@ -24,8 +24,6 @@ void Tokenization_clean(Tokenization *tokenization);
 
 // miscellaneous
 void Tokenization_print(Tokenization *tokenization);
-Token *Tokenization_begin(Tokenization *self);
-Token *Tokenization_end(Tokenization *self);
 bool isValidRouteChar(char c);
 bool isValidRouteBegin(char c);
 bool isValidRouteText(char *text);

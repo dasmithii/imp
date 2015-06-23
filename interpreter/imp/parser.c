@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include <imp/parser.h>
-#include <imp/toolbox/vector.h>
 
 
 // for injected returns in short-hand closures
@@ -88,8 +87,23 @@ static int ParseNode_init(ParseTree *parent
 
 
 	// find and parse sub-nodes
-	Vector subs;
-	Vector_init(&subs, sizeof(ParseNode));
+	size_t subCount = 0;
+	size_t subCapacity = 4;
+	ParseNode *subArray = malloc(subCapacity * sizeof(ParseNode));
+	if(!subArray){
+		abort();
+	}
+	#define IMP_REGISTER_SUB(node)       \
+		if(subCount == subCapacity){     \
+			subCapacity *= 2;            \
+			subArray = realloc(subArray, subCapacity * sizeof(ParseNode)); \
+			if(!subArray){               \
+				abort();                 \
+			}                            \
+		}                                \
+		subArray[subCount] = node;       \
+		subCount++
+
 
 	int depth = 0;
 	Token *it = begin;
@@ -103,7 +117,7 @@ static int ParseNode_init(ParseTree *parent
 				if(ParseNode_init(parent, &node, prev, it)){
 					return 1;
 				}
-				Vector_append(&subs, &node);
+				IMP_REGISTER_SUB(node);
 			}
 			prev = it;
 			if(Token_isUnary(prev)){
@@ -136,13 +150,13 @@ static int ParseNode_init(ParseTree *parent
 	if(ParseNode_init(parent, &final, prev, it)){
 		return 1;
 	}
-	Vector_append(&subs, &final);
+	IMP_REGISTER_SUB(final);
 
 
 	if(beginType == TOKEN_CURLY_OPEN  ||
 	   beginType == TOKEN_HARD_OPEN){
-		for(int i = 0; i < subs.size; i++){
-			ParseNode *sub = Vector_hook(&subs, i);
+		for(int i = 0; i < subCount; i++){
+			ParseNode *sub = subArray + i;
 			if(sub->type != CALL_NODE){
 				// translate from {<code>} to {(return (<code>))}
 
@@ -164,16 +178,16 @@ static int ParseNode_init(ParseTree *parent
 				rnav[0].contents.token = &RETURN_TOKEN;
 
 				rnav[1].type = CALL_NODE;
-				rnav[1].contents.non_leaf.argc = subs.size;
-				rnav[1].contents.non_leaf.argv = (void*)subs.buffer.data;
+				rnav[1].contents.non_leaf.argc = subCount;
+				rnav[1].contents.non_leaf.argv = subArray;
 	
 				return 0;
 			}
 		}
 	}
 
-	node->contents.non_leaf.argc = subs.size;
-	node->contents.non_leaf.argv = (void*)subs.buffer.data;
+	node->contents.non_leaf.argc = subCount;
+	node->contents.non_leaf.argv = subArray;
 	return 0;
 }
 
@@ -190,8 +204,8 @@ int ParseTree_init(ParseTree *tree, char *code){
 	}
 	if(ParseNode_init(tree
      , &tree->root
-     , Tokenization_begin(&tree->tokenization)
-     , Tokenization_end(&tree->tokenization))){
+     , tree->tokenization.buffer
+     , tree->tokenization.buffer + tree->tokenization.size)){
 		return 1;
 	}
 	tree->root.type = BLOCK_NODE;
