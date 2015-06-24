@@ -2,9 +2,9 @@
 #define IMP_RUNTIME_H_
 
 #include <imp/toolbox/vector.h>
-#include <imp/toolbox/stack.h>
 #include <imp/object.h>
 #include <imp/parser.h>
+#include "ObjectPool.h"
 
 #include <setjmp.h>
 
@@ -14,15 +14,11 @@
 typedef struct {
 	char *error;
 	Object *root_scope;
-	Vector collectables;  // TODO: use queue or something lockless instead of vector
+
+	ImpObjectPool objectPool;
 
 	Object *lastReturnValue; // TODO: track return values for each coroutine
 	bool    returnWasCalled; 
-
-	int gc_locks;
-	bool gc_on;
-
-	Stack tryStack; // stack of try calls
 
 	// configuration
 	char *root; // importer search path (like goroot)
@@ -88,10 +84,9 @@ void Runtime_throwFormatted(Runtime *runtime, const char *format, ...);
 
 
 //// garbage collection
-void Runtime_lockGC(Runtime *self);
-void Runtime_unlockGC(Runtime *self);
 bool Runtime_isManaged(Runtime *self, Object *object);
 void Runtime_markRecursive(Runtime *runtime, Object *object);
+void Runtime_collectObject(Runtime *runtime, Object *object);
 int Runtime_objectCount(Runtime *self);
 
 

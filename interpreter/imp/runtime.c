@@ -170,89 +170,22 @@ void Runtime_markRecursive(Runtime *runtime, Object *object){
 }
 
 
-static void Runtime_runGC(Runtime *self){
-	assert(self);
-	assert(self->gc_locks == 0);
-	assert(self->gc_on == false);
-	self->gc_on = true;
-
-	// Unmark all allocations.
-	Vector_each(&self->collectables, unmark); // TODO: check error
-
-	// mark volatile objects and dependencies
-	for(int i = 0; i < self->collectables.size; i++){
-		Object *object = *((Object**) Vector_hook(&self->collectables, i));
-		if(Object_referenceCount(object) > 0){
-			Runtime_markRecursive(self, object);
-		}
+void Runtime_collectObject(Runtime *self, Object *object){
+	if(Object_hasSpecialMethod(object, "collect")){
+		Runtime_callSpecialMethod(self
+			                    , NULL
+			                    , object
+			                    , "collect"
+			                    , 0
+			                    , NULL);
 	}
-
-	// Mark all accessible allocations.
-	Runtime_markRecursive(self, self->root_scope);
-	if(self->lastReturnValue){
-		Runtime_markRecursive(self, self->lastReturnValue);
-	}
-
-	// Move all accessible allocations to a new vector. Call 
-	// onCollect methods now, before freeing any objects.
-	Vector leftovers;
-	Vector_init(&leftovers, sizeof(Object*));
-	for(int i = 0; i < self->collectables.size; i++){
-		Object *item = *((Object**) Vector_hook(&self->collectables, i));
-		assert(Object_isValid(item));
-
-		if(item->gc_mark){
-			Vector_append(&leftovers, &item);
-		} else {
-			if(Object_hasSpecialMethod(item, "collect")){
-				Runtime_callSpecialMethod(self
-					                    , NULL
-					                    , item
-					                    , "collect"
-					                    , 0
-					                    , NULL);
-			}
-		}
-	}
-
-	// Delete old vector of pointers. Replace it.
-	Vector_clean(&self->collectables);
-	self->collectables = leftovers;
-
-	// free old objects
-	for(int i = 0; i < self->collectables.size; i++){
-		Object *item = *((Object**) Vector_hook(&self->collectables, i));
-		if(!item->gc_mark){
-			Object_free(item);
-		}
-	}
-
-	self->gc_on = false;
+	Object_clean(object);
 }
 
 
 Object *Runtime_rawObject(Runtime *self){
 	assert(self);
-
-	int oc = Runtime_objectCount(self);
-
-	if(self->gc_on == false       &&
-	   self->gc_locks == 0        &&
-	   oc >= 20 && oc % 20 == 0){
-		Runtime_runGC(self);
-	}
-
-
-	// allocate record, and return new object
-	Object *r = malloc(sizeof(Object));
-	if(!r){
-		abort();
-	}
-	Object_init(r);
-	assert(Object_isValid(r));
-	Vector_append(&self->collectables, &r);
-
-	return r;
+	return ImpObjectPool_allocate(self->objectPool);
 }
 
 
@@ -263,13 +196,10 @@ void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 	self->argc = argc;
 	self->argv = argv;
 
-
-	self->gc_locks = 0;
-	self->gc_on = false;
-	Runtime_lockGC(self);
-
 	self->error = NULL;
-	Vector_init(&self->collectables, sizeof(Object*));
+	self->objectPool = ImpObjectPool_forRuntime(self);
+	ImpObjectPool_lockGC(self->objectPool);
+
 
 	// IMPORTANT: be careful while messing with the order of 
 	// builtin initializations (!).
@@ -296,7 +226,7 @@ void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 
 	ImpMisc_init(self->Object, self);
 
-	Runtime_unlockGC(self);
+	ImpObjectPool_unlockGC(self->objectPool);
 }
 
 
@@ -313,7 +243,6 @@ Object *Runtime_simpleClone(Runtime *runtime, Object *base){
 Object *Runtime_clone(Runtime *runtime, Object *base){
 	assert(runtime);
 	assert(Object_isValid(base));
-	assert(Runtime_isManaged(runtime, base));
 
 	if(Object_hasSpecialMethod(base, "~")){
 		return Runtime_callSpecialMethod(runtime
@@ -521,12 +450,6 @@ Object *Runtime_executeSource(Runtime *self, char *code){
 }
 
 
-int Runtime_objectCount(Runtime *self){
-	assert(self);
-	return self->collectables.size;
-}
-
-
 void Runtime_throw(Runtime *runtime, Object *exception){
 	assert(runtime);
 	assert(exception);
@@ -598,32 +521,6 @@ void Runtime_print(Runtime *runtime, Object *context, Object *object){
 	Object_unreference(object);
 }
 
-
-void Runtime_lockGC(Runtime *self){
-	assert(self);
-	assert(self->gc_on == false);
-	self->gc_locks++;
-}
-
-
-void Runtime_unlockGC(Runtime *self){
-	assert(self);
-	self->gc_locks--;
-	assert(self->gc_locks >= 0);
-}
-
-
-bool Runtime_isManaged(Runtime *self, Object *object){
-	assert(self);
-	assert(object);
-	for(int i = 0; i < self->collectables.size; i++){
-		Object *item = *((Object**) Vector_hook(&self->collectables, i));
-		if(item == object){
-			return true;
-		}
-	}
-	return false;
-}
 
 Object *Runtime_callSpecialMethod(Runtime *runtime
 	                     , Object *context
