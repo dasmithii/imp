@@ -137,13 +137,6 @@ Object *Runtime_activate(Runtime *runtime
 }
 
 
-static void unmark(void *addr){
-	assert(addr);
-	Object *obj = *((Object**) addr);
-	Object_unmark(obj);
-}
-
-
 void Runtime_markRecursive(Runtime *runtime, Object *object){
 	assert(runtime);
 	assert(Object_isValid(object));
@@ -205,9 +198,11 @@ void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 	// builtin initializations (!).
 
 	self->Object = Runtime_rawObject(self);
+	Object_reference(self->Object);
 	ImpBase_init(self->Object, self);
 
 	self->root_scope = Runtime_make(self, Object);
+	Object_reference(self->root_scope);
 	Object_putShallow(self->root_scope, "self", self->root_scope);
 
 	#define IMP_INIT_IN_SLOT(OBJECT, NAME)                       \

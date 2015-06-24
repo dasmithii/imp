@@ -204,6 +204,7 @@ void Tokenization_clean(Tokenization *tokenization){
 		Token_clean(tokenization->buffer + i);
 	}
 	free(tokenization->buffer);
+	tokenization->buffer = NULL;
 }
 
 

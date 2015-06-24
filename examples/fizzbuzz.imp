@@ -10,7 +10,7 @@
 	(def m3 (i:% 3))
 	(def m5 (i:% 5))
 	(if (m3:== 0) {
-		(io:write 'Fizz ')
+		(io:write 'Fizz')
 		(shouldPrintNumber:= 0)
 	})
 	(if (m5:== 0) {
