@@ -378,8 +378,8 @@ static void ImpObjectPool_markAndSweep(ImpObjectPool self){
 Object *ImpObjectPool_allocate(ImpObjectPool self){
 	if(self->gcRunning == false         &&
 	   self->gcLocks == 0               &&
-	   self->objectCount >= 50          &&
-	   self->objectCount %  20  == 0){
+	   self->objectCount >= 500         &&
+	   self->objectCount %  250  == 0){
 		ImpObjectPool_markAndSweep(self);
 	}
 
