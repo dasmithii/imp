@@ -139,6 +139,8 @@ Object Activation
 
 
 Installation
+
+    Note: Windows is not supported.
     
     1. Clone this repository.
     2. Enter root directory.
