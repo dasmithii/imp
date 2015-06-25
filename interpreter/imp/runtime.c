@@ -9,7 +9,6 @@
 #include <imp/builtin/number.h>
 #include <imp/builtin/string.h>
 #include <imp/builtin/closure.h>
-#include <imp/builtin/vector.h>
 #include <imp/builtin/importer.h>
 #include <imp/builtin/base.h>
 #include <imp/builtin/miscellaneous.h>
@@ -216,8 +215,10 @@ void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 	IMP_INIT(Number);
 	IMP_INIT(Route);
 	IMP_INIT(Closure);
-	IMP_INIT(Vector);
 	IMP_INIT_IN_SLOT(Importer, "import");
+
+	self->Array = Imp_import(self, "core/container/Array");
+	Object_reference(self->Array);
 
 	ImpMisc_init(self->Object, self);
 
@@ -239,13 +240,13 @@ Object *Runtime_clone(Runtime *runtime, Object *base){
 	assert(runtime);
 	assert(Object_isValid(base));
 
-	if(Object_hasSpecialMethod(base, "~")){
-		return Runtime_callSpecialMethod(runtime
-			                        , NULL
-			                        , base
-			                        , "~"
-			                        , 0
-			                        , NULL);
+	if(Object_hasMethod(base, "~")){
+		return Runtime_callMethod(runtime
+			                    , NULL
+			                    , base
+			                    , "~"
+			                    , 0
+			                    , NULL);
 	} else {
 		return Runtime_simpleClone(runtime, base);
 	}
@@ -546,7 +547,7 @@ Object *Runtime_callMethod(Runtime *runtime
 	if(method){
 		return Runtime_activateOn(runtime, context, method, argc, argv, object);
 	}
-	// try <object>:<methodName>
-	return Runtime_callSpecialMethod(runtime, context, object, methodName, argc, argv);
+	Runtime_throwFormatted(runtime, "method '%s' does not exist", methodName);
+	return NULL;
 }
 

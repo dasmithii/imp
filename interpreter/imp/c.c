@@ -22,16 +22,13 @@ void Runtime_registerCMethod_(Runtime *runtime
                             , bool privileged){
 	assert(runtime);
 	assert(Object_isValid(object));
-	assert(methodName && *methodName && *methodName != '_');
 
-	char methodSlotKey[64];
-	sprintf(methodSlotKey, "_%s", methodName);
-	if(Object_hasKeyShallow(object, methodSlotKey)){
-		Runtime_throwFormatted(runtime, "registerCMethod failed: slot '%s' already exists (would overwrite)", methodSlotKey);
+	if(Object_hasKeyShallow(object, methodName)){
+		Runtime_throwFormatted(runtime, "registerCMethod failed: slot '%s' already exists (would overwrite)", methodName);
 	}
 
 	Object *methodObject = Runtime_make(runtime, Object);
-	Object_putShallow(object, methodSlotKey, methodObject);
+	Object_putShallow(object, methodName, methodObject);
 	if(privileged){
 		Object_putDataShallow(methodObject, "__privilege", NULL);
 	}

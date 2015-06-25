@@ -229,7 +229,7 @@ static void importInternalModuleTo(Runtime *runtime
 			++ptr;
 		}
 		*it = 0;
-		
+
  
 		char full_[64]; *full_ = 0;
 		char *full = full_;  // full symbol
@@ -247,7 +247,14 @@ static void importInternalModuleTo(Runtime *runtime
 			if(strcmp(wopre, "activate") == 0){
 				Object_registerCActivator(context, sym);
 			} else {
-				Runtime_registerCMethod(runtime, context, wopre, sym);
+				// special cases
+				if(strcmp(wopre, "clone") == 0){
+					Runtime_registerCMethod(runtime, context, "~", sym);
+				} else if(strcmp(wopre, "copy") == 0){
+					Runtime_registerCMethod(runtime, context, "$", sym);
+				} else {
+					Runtime_registerCMethod(runtime, context, wopre, sym);
+				}
 			}
 			if(endswith(wopre, "onImport")){
 				Runtime_callMethod(runtime, context, context, "onImport", 0, NULL);

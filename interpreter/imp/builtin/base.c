@@ -5,9 +5,7 @@
 #include "base.h"
 #include "number.h"
 #include "string.h"
-#include "vector.h"
 #include "general.h"
-#include "../toolbox/vector.h"
 
 static Object *hasKeyShallow_(Runtime *runtime
 	                                        , Object *context
@@ -142,21 +140,45 @@ static Object *putShallow_(Runtime *runtime
 
 
 static Object *slotNames_(Runtime *runtime
-	                            , Object *context
-	                            , Object *caller
-	                            , int argc
-	                            , Object **argv){
+	                    , Object *context
+	                    , Object *caller
+	                    , int argc
+	                    , Object **argv){
 	if(argc != 0){
 		Runtime_throwString(runtime, "#:slotNames does not accept arguments");
 	}
-	Object *r = Runtime_cloneField(runtime, "Vector");
+
+	Object *size = Runtime_make(runtime, Number);
+	ImpNumber_setRaw(size, caller->slotCount);
+
+	Object *r = Runtime_callMethod(runtime
+		                         , context
+		                         , runtime->Array
+		                         , "withSize"
+		                         , 1
+		                         , &size);
+
 	Object_reference(r);
-	Vector *v = ImpVector_getRaw(r);
+
+	Object *index = Runtime_make(runtime, Number);
+	ImpNumber_setRaw(index, 0);
+	Object_reference(index);
+
 	for(int i = 0; i < caller->slotCount; i++){
-		Object *item = Runtime_cloneField(runtime, "String");
-		ImpString_setRaw(item, caller->slots[i].key);
-		Vector_append(v, &item);
+		Object *args[2];
+		args[0] = index;
+		args[1] = Runtime_make(runtime, String);
+		ImpString_setRaw(args[1], caller->slots[i].key);
+		Runtime_callMethod(runtime
+			             , context
+			             , r
+			             , "set"
+			             , 2
+			             , args);
+		ImpNumber_setRaw(index, 1 + ImpNumber_getRaw(index));
 	}
+
+	Object_reference(index);
 	Object_unreference(r);
 	return r;
 }
@@ -386,15 +408,6 @@ static Object *clone_(Runtime *runtime
 	                        , Object **argv){
 	if(argc != 0){
 		Runtime_throwString(runtime, "#:~ accepts no arguments");
-	}
-
-	if(Object_hasSpecialMethod(self, "clone")){
-		return Runtime_callSpecialMethod(runtime
-			                           , context
-			                           , self
-			                           , "clone"
-			                           , 0
-			                           , NULL);
 	}
 
 	return Runtime_simpleClone(runtime, self);

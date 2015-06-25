@@ -212,5 +212,5 @@ void ImpString_init(Object *self, Runtime *runtime){
 
 	Runtime_registerCMethod(runtime, self, "<>", compare_);
 
-	Runtime_registerCMethod(runtime, self, "hashCode", hashCode_);
+	Runtime_registerCMethod(runtime, self, "_hashCode", hashCode_);
 }

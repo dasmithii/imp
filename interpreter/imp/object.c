@@ -303,7 +303,6 @@ void Object_mark(Object *self){
 
 
 void Object_unmark(Object *self){
-	assert(Object_isValid(self));
 	self->gc_mark = false;
 }
 

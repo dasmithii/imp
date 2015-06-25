@@ -1,7 +1,6 @@
 #ifndef IMP_RUNTIME_H_
 #define IMP_RUNTIME_H_
 
-#include <imp/toolbox/vector.h>
 #include <imp/object.h>
 #include <imp/parser.h>
 #include "ObjectPool.h"
@@ -29,7 +28,7 @@ typedef struct {
 	Object *Object;
 	Object *Number;
 	Object *String;
-	Object *Vector;
+	Object *Array;
 	Object *Closure;
 	Object *Route;
 

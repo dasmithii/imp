@@ -2,6 +2,7 @@
 #include <imp/object.h>
 #include <imp/builtin/general.h>
 #include <imp/builtin/number.h>
+#include <string.h>
 
 
 
@@ -11,7 +12,7 @@ static Object **getBuffer(Object *array){
 }
 
 static int getSize(Object *array){
-	return ImpNumber_getRawRounded(Object_getDataDeep(array, "size"));
+	return ImpNumber_getRawRounded(Object_getDeep(array, "size"));
 }
 
 
@@ -21,24 +22,17 @@ Object *Array_clone(Runtime *runtime
 	              , Object *base
 	              , int argc
 	              , Object **argv){
-	Object *r = Runtime_make(runtime, Object);
+	if(argc != 0){
+		Runtime_throwString(runtime, "Array:~ does not accept arguments");
+	}
+
+	Object *r = Runtime_simpleClone(runtime, base);
 	Object_reference(r);
 
 	Object *size = Runtime_make(runtime, Number);
-	ImpNumber_setRaw(size, (double) argc);
+	ImpNumber_setRaw(size, 0);
 	Object_putShallow(r, "size", size);
-
-	Object **data = NULL;
-	if(argc){
-		data = calloc(argc, sizeof(Object*));
-		if(!data){
-			Runtime_throwFormatted(runtime, "failed to allocate array of size %d", argc);
-		}
-		for(int i = 0; i < argc; i++){
-			data[i] = argv[i];
-		}
-	}
-	Object_putDataShallow(r, "__data", data);
+	Object_putDataShallow(r, "__data", NULL);
 
 	Object_unreference(r);
 	return r;
@@ -59,7 +53,7 @@ Object *Array_get(Runtime *runtime
 	}
 
 	int size = getSize(self);
-	int i = ImpNumber_getAsInt(argv[0]);
+	int i = ImpNumber_getRawRounded(argv[0]);
 
 	if(i < 0 || i >= size){
 		Runtime_throwFormatted(runtime, "Array:get index out of bounds %d/%d", i, size);
@@ -83,7 +77,7 @@ Object *Array_set(Runtime *runtime
 	}
 
 	int size = getSize(self);
-	int i = ImpNumber_getAsInt(argv[0]);
+	int i = ImpNumber_getRawRounded(argv[0]);
 
 	if(i < 0 || i >= size){
 		Runtime_throwFormatted(runtime, "Array:set index out of bounds %d/%d", i, size);
@@ -108,7 +102,7 @@ Object *Array_resize(Runtime *runtime
 	}
 
 	int oldSize = getSize(self);
-	int newSize = ImpNumber_getAsInt(argv[0]);
+	int newSize = ImpNumber_getRawRounded(argv[0]);
 
 	if(newSize < 0){
 		Runtime_throwString(runtime, "Array:resize requires non-negative argument");
@@ -135,7 +129,7 @@ Object *Array_resize(Runtime *runtime
 }
 
 
-Object *Array_mark(Runtime *runtime
+Object *Array__mark(Runtime *runtime
 	             , Object *context
 	             , Object *self
 	             , int argc
@@ -151,6 +145,73 @@ Object *Array_mark(Runtime *runtime
 			Runtime_markRecursive(runtime, buffer[i]);
 		}
 	}
+	return NULL;
+}
+
+
+
+Object *Array_withSize(Runtime *runtime
+	             , Object *context
+	             , Object *Array
+	             , int argc
+	             , Object **argv){
+	if(argc != 1){
+		Runtime_throwString(runtime, "Array:withSize requires exactly one argument");
+	}
+
+	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
+		Runtime_throwString(runtime, "Array:withSize requires numeric argument");
+	}
+	const int size = ImpNumber_getRawRounded(argv[0]);
+
+	if(size < 0){
+		Runtime_throwString(runtime, "Array:withSize requires non-negative argument");
+	}
+
+	Object *r = Runtime_simpleClone(runtime, Array);
+	Object_reference(r);
+
+	{
+		Object *sizeObject = Runtime_make(runtime, Number);
+		ImpNumber_setRaw(sizeObject, (double) size);
+		Object_putShallow(r, "size", sizeObject);
+	}
+
+	Object **data = NULL;
+	if(size){
+		data = calloc(size, sizeof(Object*));
+		if(!data){
+			Runtime_throwString(runtime, "Array:withSize ... malloc failed");
+		}
+	}
+	Object_putDataShallow(r, "__data", data);
+
+	Object_unreference(r);
+	return r;
+}
+
+
+Object *Array_withContents(Runtime *runtime
+	                     , Object *context
+	                     , Object *Array
+	                     , int argc
+	                     , Object **argv){
+	Object *r = Runtime_simpleClone(runtime, Array);
+	Object_reference(r);
+
+	Object *size = Runtime_make(runtime, Number);
+	ImpNumber_setRaw(size, (double) argc);
+	Object_putShallow(r, "size", size);
+
+	Object **data = calloc(argc, sizeof(Object*));
+	if(!data){
+		Runtime_throwString(runtime, "Array:withSize ... malloc failed");
+	}
+	memcpy(data, argv, argc * sizeof(Object*));
+	Object_putDataShallow(r, "__data", data);
+
+	Object_unreference(r);
+	return r;
 }
 
 

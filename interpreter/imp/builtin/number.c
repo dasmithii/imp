@@ -411,7 +411,7 @@ void ImpNumber_init(Object *self, Runtime *runtime){
 	Runtime_registerCMethod(runtime, self, "~", clone_);
 	Runtime_registerCMethod(runtime, self, "asString", asString_);
 
-	Runtime_registerCMethod(runtime, self, "hashCode", hashCode_);
+	Runtime_registerCMethod(runtime, self, "_hashCode", hashCode_);
 
 	ImpNumber_setRaw(self, 0);
 }

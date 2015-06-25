@@ -3,12 +3,9 @@
 #include <string.h>
 #include <assert.h>
 
-#include "../toolbox/vector.h"
-
 #include "closure.h"
 #include "general.h"
 #include "route.h"
-#include "vector.h"
 
 
 // Internally, closures store an AST, a pointer to the
@@ -53,23 +50,20 @@ static Object *activate_(Runtime *runtime
 	                   , Object **argv){
 	assert(runtime);
 	assert(ImpClosure_isValid(caller));
-	for(int i = 0; i < argc; i++){
-		assert(Object_isValid(argv[i]));
-	}
 
 	Internal *internal = Object_getDataDeep(caller, "__data");
-
 
 	Object *scope = Runtime_simpleClone(runtime, internal->context);
 	Object_reference(scope);
 
 	// inject function arguments
-	Object *arguments = Runtime_cloneField(runtime, "Vector");
-	Object_putShallow(scope, "@", arguments);
-	Vector *raw = ImpVector_getRaw(arguments);
-	for(int i = 1; i < argc; i++){
-		Vector_append(raw, &argv[i]);
-	}
+	Object_putShallow(scope, "@", Runtime_callMethod(runtime
+		                                 , context
+		                                 , runtime->Array
+		                                 , "withContents"
+		                                 , argc - 1
+		                                 , argv + 1));
+
 
 	// inject self argument
 	if(argc > 0){
@@ -152,6 +146,6 @@ void ImpClosure_init(Object *self, Runtime *runtime){
 
 	BuiltIn_setId(self, BUILTIN_CLOSURE);
 	Object_registerCActivator(self, activate_);
-	Runtime_registerCMethod(runtime, self, "collect", collect_);
-	Runtime_registerCMethod(runtime, self, "mark", mark_);
+	Runtime_registerCMethod(runtime, self, "_collect", collect_);
+	Runtime_registerCMethod(runtime, self, "_mark", mark_);
 }

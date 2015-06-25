@@ -5,12 +5,11 @@ Work on rebuilding blocks in
 Crate_collectUnmarkedObjects
 
 
++ Use varargs on Runtime_callMethod
 
 
 Uses of toolbox 
 
-  + Vector  |  Runtime->collectibles  |  core/container/Vector
-  + Stack   |  Runtime->tryStack      |  core/container/Stack
   + Vector  |  builtin/base           |  core/container/Array
   + Vector  |  builtin/closure        |  core/container/Array
 
