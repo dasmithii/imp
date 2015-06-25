@@ -2,8 +2,7 @@ Overview
 
     Imp is a little scripting language I'm building for fun. It 
     is dynamic, duck-typed, and optimized for prototypal 
-    programming. Its syntax is characterized by prefix notation
-    and heavy use of grouping operators.
+    programming.
 
       >  (import 'core/io')
       >  (io:writeLine 'Hello, world!')
@@ -139,6 +138,18 @@ Object Activation
 
 
 
+Installation
+    
+    1. Clone this repository.
+    2. Enter root directory.
+    3. `make release`
+    4. `make install`
+
+    `imp` will now be available in your command line.
+
+
+
+
 Disclaimer
 
     Note that Imp remains in early-stage development. The
@@ -174,6 +185,4 @@ Manifesto
     take a faithful leap. Only in the hands of gravity will you
     realize your true potential - flight (or not). I encourage
     you to take your leap if you haven't already.
-
-
 

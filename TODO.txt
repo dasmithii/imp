@@ -1,24 +1,8 @@
-FORGETTING LAST FreeList add
-
-
-Work on rebuilding blocks in 
-Crate_collectUnmarkedObjects
-
-
-+ Use varargs on Runtime_callMethod
-
-
-Uses of toolbox 
-
-  + Vector  |  builtin/base           |  core/container/Array
-  + Vector  |  builtin/closure        |  core/container/Array
-
-
 NOW:
 
- + Make imports un-import at end of file.
+ + Use varargs on Runtime_callMethod
 
- + Finish array module and screw toolbox
+ + Make imports un-import at end of file.
 
  + Make importer cache symbols
 
@@ -34,8 +18,6 @@ NOW:
 
  + CLI module
  + tester module
-
- + Make builtin array and move vector to core.
 
  + Make control structures builtin?
 
