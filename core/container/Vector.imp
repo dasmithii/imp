@@ -1,0 +1,28 @@
+(import 'core/control' self)
+(import 'core/container/Array')
+
+(def minimumCapacity 4)
+
+(def ~ {
+	(def r:# self)
+	(def r:size 0)
+	(def r:buffer (Array:withSize minimumCapacity))
+	(return r)
+}
+
+
+(def get {
+	(if (@:size:!= 1) {
+		(throw 'Vector:get requires exactly 1 argument')
+	})
+	(def i (@:get 0))
+	(if (|| (i:>= self:size) (i:< 0)) {
+		(throw 'index out of bounds')
+	})
+	(return (self:buffer:get i))
+})
+
+
+(def set {
+	
+})

@@ -313,6 +313,25 @@ static Object *mod_(Runtime *runtime
 	return NULL;
 }
 
+
+static Object *powEq_(Runtime *runtime
+	                , Object *context
+	                , Object *caller
+	                , int argc
+	                , Object **argv){
+	if(argc != 1){
+		Runtime_throwString(runtime, "Number:**= requires exactly one argument");
+	}
+
+	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
+		Runtime_throwString(runtime, "Number:**= requires another number as its argument");
+	}
+
+	ImpNumber_setRaw(caller, pow(ImpNumber_getRaw(caller), ImpNumber_getRaw(argv[0])));
+	return NULL;
+}
+
+
 static Object *inc_(Runtime *runtime
 	              , Object *context
 	              , Object *caller
@@ -365,8 +384,26 @@ static Object *asBoolean_(Runtime *runtime
 		Runtime_throwString(runtime, "Number:? does not accept arguments");
 	}
 
-	Object *r = Runtime_cloneField(runtime, "Number");
+	Object *r = Runtime_make(runtime, Number);
 	ImpNumber_setRaw(r, ImpNumber_getRaw(self)? 1:0);
+	return r;
+}
+
+
+static Object *squareRoot_(Runtime *runtime
+	                     , Object *context
+	                     , Object *self
+	                     , int argc
+	                     , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "Number:squareRoot does not accept arguments");
+	}
+	double raw = ImpNumber_getRaw(self);
+	if(raw < 0){
+		Runtime_throwString(runtime, "cannot take square root of negative number");
+	}
+	Object *r = Runtime_make(runtime, Number);
+	ImpNumber_setRaw(r, sqrt(raw));
 	return r;
 }
 
@@ -397,7 +434,10 @@ void ImpNumber_init(Object *self, Runtime *runtime){
 	Runtime_registerCMethod(runtime, self, "*=", mult_);
 	Runtime_registerCMethod(runtime, self, "/=", div_);
 	Runtime_registerCMethod(runtime, self, "%=", mod_);
+	Runtime_registerCMethod(runtime, self, "^=", powEq_);
 	Runtime_registerCMethod(runtime, self, "<>", cmp_);
+
+	Runtime_registerCMethod(runtime, self, "squareRoot", squareRoot_);
 
 	Runtime_registerCMethod(runtime, self, "++", inc_);
 	Runtime_registerCMethod(runtime, self, "--", dec_);

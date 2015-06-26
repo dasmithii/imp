@@ -485,15 +485,28 @@ static Object *times_(Runtime *runtime
 } 
 
 static Object *mod_(Runtime *runtime
-	                      , Object *context
-	                      , Object *self
-	                      , int argc
-	                      , Object **argv){
+	              , Object *context
+	              , Object *self
+	              , int argc
+	              , Object **argv){
 	if(argc != 1){
 		Runtime_throwString(runtime, "#:% requires exactly 1 arguments");
 	}
 	return copyAndDo(runtime, context, self, argv[0], "%=");
 } 
+
+
+static Object *exp_(Runtime *runtime
+	              , Object *context
+	              , Object *self
+	              , int argc
+	              , Object **argv){
+	if(argc != 1){
+		Runtime_throwString(runtime, "#:^ requires exactly 1 arguments");
+	}
+	return copyAndDo(runtime, context, self, argv[0], "^=");
+} 
+
 
 static Object *value_(Runtime *runtime
 	                        , Object *context
@@ -705,6 +718,7 @@ void ImpBase_init(Object *self, Runtime *runtime){
 	Runtime_registerCMethod(runtime, self, "*", times_);
 	Runtime_registerCMethod(runtime, self, "/", div_);
 	Runtime_registerCMethod(runtime, self, "%", mod_);
+	Runtime_registerCMethod(runtime, self, "^", exp_);
 	Runtime_registerCMethod(runtime, self, "$", value_);
 	Runtime_registerCMethod(runtime, self, "==", equals_);
 	Runtime_registerCMethod(runtime, self, "is", is_);
