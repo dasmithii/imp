@@ -1,5 +1,7 @@
 NOW:
 
+ + Make lexer store token texts contiguously
+
  + Use varargs on Runtime_callMethod
 
  + Make imports un-import at end of file.

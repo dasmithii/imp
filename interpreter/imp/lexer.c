@@ -9,6 +9,138 @@
 #include <imp/token.h>
 
 
+
+
+typedef struct {
+	char *code;
+	char *position;
+	size_t line;
+	size_t column;
+
+	size_t tokenCount;
+	size_t tokenCapacity;
+	Token *tokenBuffer;
+
+	char *error;
+} Lexer;
+
+
+static inline Lexer Lexer_of(char *code){
+	assert(code);
+
+	Lexer r = {
+		.code = code,
+		.position = code,
+		.line = 0,
+		.column = 0,
+		.tokenCount = 0,
+		.tokenCapacity = 5
+	};
+
+	r.tokenBuffer = malloc(r.tokenCapacity * sizeof(Token));
+	if(r.tokenBuffer){
+		r.error = NULL;
+	} else{
+		r.error = "failed malloc on lexer initialization";
+	}
+	return r;
+}
+
+
+static inline void Lexer_register(Lexer *self, Token token){
+	// expand token buffer if necessary
+	if(self->tokenCount == self->tokenCapacity){
+		self->tokenCapacity *= 2;
+		self->tokenBuffer = realloc(self->tokenBuffer
+			                       , self->tokenCapacity * sizeof(Token));
+		if(!self->tokenBuffer){
+			self->error = "failed to register token; failed malloc";
+			return;
+		}
+	}
+	// add token to buffer
+	self->tokenBuffer[self->tokenCount] = token;
+	self->tokenCount++;
+}
+
+
+static inline void Lexer_right(Lexer *self, int n){
+	self->position += n;
+	self->column += n;
+}
+
+
+static inline bool Lexer_whitespace(Lexer *self){
+	if(*self->position == ' ' || *self->position == '\t'){
+		Lexer_right(self, 1);
+		return true;
+	}
+	return false;
+}
+
+
+static inline bool Lexer_newLine(Lexer *self){
+	if(*self->position == '\n'){
+		self->column = 0;
+		self->line++;
+		self->position++;
+		return true;
+	}
+	return false;
+}
+
+
+static inline bool Lexer_comment(Lexer *self){
+	if(self->position[0] == '/' && 
+	   self->position[1] == '/'){
+		Lexer_right(self, 2);
+		while(*self->position && self->position[0] != '\n'){
+			Lexer_right(self, 1);
+		}
+		return true;
+	}
+	return false;
+}
+
+
+static inline bool Lexer_grouping(Lexer *self){
+	#define PAIRING(c, t)                       \
+		case c: {                               \
+			Token token = {.type = TOKEN_##t};  \
+			Lexer_register(self, token);        \
+			Lexer_right(self, 1);               \
+			return true;                        \
+		}
+
+	switch(*self->position){
+	PAIRING('(', SOFT_OPEN)
+	PAIRING(')', SOFT_CLOSE)
+	PAIRING('[', HARD_OPEN)
+	PAIRING(']', HARD_CLOSE)
+	PAIRING('{', CURLY_OPEN)
+	PAIRING('}', CURLY_CLOSE)
+	default:
+		return false;
+	}
+}
+
+
+static inline bool Lexer_number(Lexer *self){
+	char *c = self->position;
+	if(*c == '-') {
+		++c;
+	}
+	if(isdigit(c[0]) || (c[0] == '.' && isdigit(c[1]))){
+		Token t = {.type = TOKEN_NUMBER};
+		char *begin = self->position;
+		t.data.number = strtod(begin, &self->position);
+		Lexer_register(self, t);
+		return true;
+	}
+	return false;
+}
+
+
 bool isValidRouteChar(char c){
 	return isValidRouteBegin(c) || isdigit(c);
 }
@@ -37,6 +169,7 @@ bool isValidRouteBegin(char c){
 	       c == ':';
 }
 
+
 bool isValidRouteText(char *text){
 	if(!text || *text == 0){
 		return false;
@@ -54,172 +187,120 @@ bool isValidRouteText(char *text){
 }
 
 
-int Tokenization_init(Tokenization *tokenization, char *code){
-	assert(tokenization);
-	assert(code);
-	tokenization->error = NULL;
-
-	// skip shebang
-	if(code[0] == '#' && code[1] == '!'){
-		while(*code && *code != '\n'){
-			++code;
+static inline bool Lexer_route(Lexer *self){
+	if(isValidRouteBegin(self->position[0])){
+		Token token = {.type = TOKEN_ROUTE};
+		char *begin = self->position;
+		while(isValidRouteChar(self->position[0])){
+			Lexer_right(self, 1);
 		}
-		++code;
+		token.data.text = malloc(1 + self->position - begin);
+		if(!token.data.text){
+			self->error = "failed malloc";
+			return true;
+		}
+		token.data.text[self->position - begin] = 0;
+		memcpy(token.data.text, begin, (self->position - begin));
+		Lexer_register(self, token);
+		return true;
 	}
-
-	// 
-	size_t tokenCount = 0;
-	size_t tokenCapacity = 128;
-	Token *tokenArray = malloc(tokenCapacity * sizeof(Token));
-	if(!tokenArray){
-		abort();
-	}
-	#define IMP_REGISTER_TOKEN(t)          \
-		if(tokenCount == tokenCapacity){   \
-			tokenCapacity *= 2;            \
-			tokenArray = realloc(tokenArray, tokenCapacity * sizeof(Token)); \
-			if(!tokenArray){               \
-				abort();                   \
-			}                              \
-		}                                  \
-		tokenArray[tokenCount] = t;        \
-		tokenCount++
-
-	// prefix with '('
-	Token tmp = {.type = TOKEN_SOFT_OPEN};
-	IMP_REGISTER_TOKEN(tmp);
-
-	Token token;
-	bool afterSpace;
-	int line = 0;
-	char *end = code + strlen(code);
-	while(*code){
-		if(isspace(*code)){
-			++code;
-			afterSpace = true;
-			if(*code == '\n'){
-				line++;
-			}
-			continue;
-		}
-
-		// extract comment
-		if(code[0] == '/' && end - code >= 0 && code[1] == '/'){
-			while(*code && *code != '\n'){
-				++code;
-			}
-			continue;
-		}
-
-
-		switch(*code){
-		case '(':
-			token.type = TOKEN_SOFT_OPEN;
-			break;
-		case ')':
-			token.type = TOKEN_SOFT_CLOSE;
-			break;
-		case '[':
-			token.type = TOKEN_HARD_OPEN;
-			break;
-		case ']':
-			token.type = TOKEN_HARD_CLOSE;
-			break;
-		case '{':
-			token.type = TOKEN_CURLY_OPEN;
-			break;
-		case '}':
-			token.type = TOKEN_CURLY_CLOSE;
-			break;
-		default:
-			{
-				char *end = code + 1;
-				if(*code == '\''){
-					token.type = TOKEN_STRING;
-					++code;
-					++end;
-					while(*end != '\''){
-						if(*end == 0){
-							tokenization->error = strdup("unterminated string.");
-							return 1;
-						}
-						++end;
-					}
-					token.data.text = malloc((end - code) + 1);
-					if(!token.data.text){
-						abort();
-					}
-					token.data.text[end - code] = 0;
-					memcpy(token.data.text, code, (end-code));
-					++end;
-				} else if(isValidRouteBegin(*code)){
-					token.type = TOKEN_ROUTE;
-					end = code + 1;
-					while(isValidRouteChar(*end)){
-						++end;
-					}
-					token.data.text = malloc((end - code) + 1);
-					if(!token.data.text){
-						abort();
-					}
-					token.data.text[end - code] = 0;
-					memcpy(token.data.text, code, (end-code));
-				} else if(isdigit(*code) || *code == '.'){
-					token.type = TOKEN_NUMBER;
-					end = code + 1;
-					while(isdigit(*end) || *end == '.'){
-						++end;
-					}
-					token.data.number = strtod(code, &end); // ISSUE
-				} else {
-					tokenization->error = malloc(164);
-					sprintf(tokenization->error, "Unrecognized token '%c' on line %d.", *code, line);
-					return 1;
-				}
-				code = end - 1; // to counteract ** below
-				break;
-			}
-		}
-		++code; // **                        **  ^^^
-		afterSpace = false;
-		IMP_REGISTER_TOKEN(token);
-	}
-
-	tmp.type = TOKEN_SOFT_CLOSE;
-	IMP_REGISTER_TOKEN(tmp);
-	#undef IMP_REGISTER_TOKEN
-	tokenization->size = tokenCount;
-	tokenization->buffer = tokenArray;
-	return 0; // TODO: handle errors
+	return false;
 }
 
-	
-void Tokenization_clean(Tokenization *tokenization){
-	assert(tokenization);
-	if(tokenization->error){
-		free(tokenization->error);
-		tokenization->error = NULL;
+
+static inline bool Lexer_string(Lexer *self){
+	char d = self->position[0]; // delimitter
+	if(d == '"' || d == '\'' || d == '`'){
+		Lexer_right(self, 1);
+
+		Token token = {.type = TOKEN_STRING};
+		char *begin = self->position;
+
+		while(self->position[0] != d){
+			if(self->position[0] == 0){
+				self->error = "unterminated string";
+				return true;
+			}
+			Lexer_right(self, 1);
+		}
+
+		token.data.text = malloc(1 + self->position - begin);
+		if(!token.data.text){
+			self->error = "failed malloc";
+			return true;
+		}
+		token.data.text[self->position - begin] = 0;
+		memcpy(token.data.text, begin, (self->position - begin));
+		Lexer_register(self, token);
+
+		Lexer_right(self, 1);
+		return true;
 	}
-	for(int i = 0; i < tokenization->size; i++){
-		Token_clean(tokenization->buffer + i);
+	return false;
+}
+
+
+static inline void Lexer_step(Lexer *self){
+
+	#define CHECK(op)  if(Lexer_##op(self)) return
+	CHECK(whitespace);
+	CHECK(newLine);
+	CHECK(comment);
+	CHECK(grouping);
+	CHECK(number);
+	CHECK(route);
+	CHECK(string);
+
+	self->error = "invalid token";
+}
+
+
+static inline void Lexer_run(Lexer *self){
+	Token t = {.type = TOKEN_SOFT_OPEN};
+	Lexer_register(self, t);
+
+	while(*self->position){
+		Lexer_step(self);
+		if(self->error){
+			return;
+		}
 	}
-	free(tokenization->buffer);
-	tokenization->buffer = NULL;
+
+	t.type = TOKEN_SOFT_CLOSE;
+	Lexer_register(self, t);
 }
 
 
 Tokenization lex(char *code){
 	assert(code);
-	Tokenization r;
-	Tokenization_init(&r, code);
+	Lexer lexer = Lexer_of(code);
+	if(!lexer.error){
+		Lexer_run(&lexer);
+	}
+
+	Tokenization r = {
+		.buffer = lexer.tokenBuffer,
+		.size = lexer.tokenCount,
+		.error = NULL
+	};
+	if(lexer.error){
+		r.error = malloc(strlen(r.error) + 32);
+		sprintf(r.error, "line %zu, column %zu: %s", lexer.line, lexer.column, lexer.error);
+	}
+
 	return r;
 }
 
 
-static void printToken(void *token){
-	assert(token);
-	Token_printVerbose((Token*) token);
-	printf(" ");
+void Tokenization_clean(Tokenization *self){
+	assert(self);
+	if(self->error){
+		free(self->error);
+	}
+	for(int i = 0; i < self->size; i++){
+		Token_clean(self->buffer + i);
+	}
+	free(self->buffer);
 }
 
 
@@ -230,5 +311,6 @@ void Tokenization_print(Tokenization *self){
 		Token_printVerbose(self->buffer + i);
 		printf(" ");
 	}
+	printf("\n");
 }
 

@@ -1,5 +1,3 @@
-#!/usr/bin/env imp
-
 (import 'core/io')
 
 (io:writeLine 'Hello, world!')

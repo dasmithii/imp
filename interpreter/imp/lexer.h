@@ -15,11 +15,7 @@ typedef struct {
 
 // interface
 Tokenization lex(char *code);
-
-
-// management
-int Tokenization_init(Tokenization *tokenization, char *code);
-void Tokenization_clean(Tokenization *tokenization);
+void Tokenization_clean(Tokenization *self);
 
 
 // miscellaneous
@@ -27,6 +23,8 @@ void Tokenization_print(Tokenization *tokenization);
 bool isValidRouteChar(char c);
 bool isValidRouteBegin(char c);
 bool isValidRouteText(char *text);
+
+
 
 
 #endif

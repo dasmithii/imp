@@ -197,11 +197,12 @@ int ParseTree_init(ParseTree *tree, char *code){
 	assert(code);
 	tree->error = NULL;
 
-	int ec = Tokenization_init(&tree->tokenization, code);
-	if(ec){
+	tree->tokenization = lex(code);
+	if(tree->tokenization.error){
 		tree->error = strdup(tree->tokenization.error);
-		return ec;
+		return 1;
 	}
+
 	if(ParseNode_init(tree
      , &tree->root
      , tree->tokenization.buffer
