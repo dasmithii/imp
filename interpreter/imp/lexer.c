@@ -1,3 +1,14 @@
+// The lexer API consists of the 'lex' function, which
+// returns a Tokenization, and Tokenization_clean,
+// which frees Tokenization internals.
+//
+// Implementation wise, we use the Lexer struct to 
+// simplify things. It maintains state while decomposed
+// lexing functions (prefixed with 'Lexer_try') check
+// for tokens of each type. Each of these decomposed
+// functions return a boolean based on whether or not
+// they recognized a token. They also return true in 
+// the case of an error.
 #include <assert.h>
 #include <ctype.h>
 #include <stdbool.h>
