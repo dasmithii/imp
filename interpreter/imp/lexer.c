@@ -64,22 +64,22 @@ static inline void Lexer_register(Lexer *self, Token token){
 }
 
 
-static inline void Lexer_right(Lexer *self, int n){
+static inline void Lexer_shiftRightBy(Lexer *self, int n){
 	self->position += n;
 	self->column += n;
 }
 
 
-static inline bool Lexer_whitespace(Lexer *self){
+static inline bool Lexer_tryWhitespace(Lexer *self){
 	if(*self->position == ' ' || *self->position == '\t'){
-		Lexer_right(self, 1);
+		Lexer_shiftRightBy(self, 1);
 		return true;
 	}
 	return false;
 }
 
 
-static inline bool Lexer_newLine(Lexer *self){
+static inline bool Lexer_tryNewLine(Lexer *self){
 	if(*self->position == '\n'){
 		self->column = 0;
 		self->line++;
@@ -90,12 +90,12 @@ static inline bool Lexer_newLine(Lexer *self){
 }
 
 
-static inline bool Lexer_comment(Lexer *self){
+static inline bool Lexer_tryComment(Lexer *self){
 	if(self->position[0] == '/' && 
 	   self->position[1] == '/'){
-		Lexer_right(self, 2);
+		Lexer_shiftRightBy(self, 2);
 		while(*self->position && self->position[0] != '\n'){
-			Lexer_right(self, 1);
+			Lexer_shiftRightBy(self, 1);
 		}
 		return true;
 	}
@@ -103,12 +103,12 @@ static inline bool Lexer_comment(Lexer *self){
 }
 
 
-static inline bool Lexer_grouping(Lexer *self){
+static inline bool Lexer_tryGrouping(Lexer *self){
 	#define PAIRING(c, t)                       \
 		case c: {                               \
 			Token token = {.type = TOKEN_##t};  \
 			Lexer_register(self, token);        \
-			Lexer_right(self, 1);               \
+			Lexer_shiftRightBy(self, 1);               \
 			return true;                        \
 		}
 
@@ -125,7 +125,7 @@ static inline bool Lexer_grouping(Lexer *self){
 }
 
 
-static inline bool Lexer_number(Lexer *self){
+static inline bool Lexer_tryNumber(Lexer *self){
 	char *c = self->position;
 	if(*c == '-') {
 		++c;
@@ -187,12 +187,12 @@ bool isValidRouteText(char *text){
 }
 
 
-static inline bool Lexer_route(Lexer *self){
+static inline bool Lexer_tryRoute(Lexer *self){
 	if(isValidRouteBegin(self->position[0])){
 		Token token = {.type = TOKEN_ROUTE};
 		char *begin = self->position;
 		while(isValidRouteChar(self->position[0])){
-			Lexer_right(self, 1);
+			Lexer_shiftRightBy(self, 1);
 		}
 		token.data.text = malloc(1 + self->position - begin);
 		if(!token.data.text){
@@ -208,10 +208,10 @@ static inline bool Lexer_route(Lexer *self){
 }
 
 
-static inline bool Lexer_string(Lexer *self){
+static inline bool Lexer_tryString(Lexer *self){
 	char d = self->position[0]; // delimitter
 	if(d == '"' || d == '\'' || d == '`'){
-		Lexer_right(self, 1);
+		Lexer_shiftRightBy(self, 1);
 
 		Token token = {.type = TOKEN_STRING};
 		char *begin = self->position;
@@ -221,7 +221,7 @@ static inline bool Lexer_string(Lexer *self){
 				self->error = "unterminated string";
 				return true;
 			}
-			Lexer_right(self, 1);
+			Lexer_shiftRightBy(self, 1);
 		}
 
 		token.data.text = malloc(1 + self->position - begin);
@@ -233,7 +233,7 @@ static inline bool Lexer_string(Lexer *self){
 		memcpy(token.data.text, begin, (self->position - begin));
 		Lexer_register(self, token);
 
-		Lexer_right(self, 1);
+		Lexer_shiftRightBy(self, 1);
 		return true;
 	}
 	return false;
@@ -242,14 +242,14 @@ static inline bool Lexer_string(Lexer *self){
 
 static inline void Lexer_step(Lexer *self){
 
-	#define CHECK(op)  if(Lexer_##op(self)) return
-	CHECK(whitespace);
-	CHECK(newLine);
-	CHECK(comment);
-	CHECK(grouping);
-	CHECK(number);
-	CHECK(route);
-	CHECK(string);
+	#define CHECK(type)  if(Lexer_try##type(self)) return
+	CHECK(Whitespace);
+	CHECK(NewLine);
+	CHECK(Comment);
+	CHECK(Grouping);
+	CHECK(Number);
+	CHECK(Route);
+	CHECK(String);
 
 	self->error = "invalid token";
 }
