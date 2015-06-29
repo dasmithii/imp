@@ -685,7 +685,7 @@ static Object *def_(Runtime *runtime
 	assert(Object_isValid(argv[1]));
 
 	Object *route = argv[0];
-	Object *value = unrouteInContext(argv[1], context);
+	Object *value = unrouteInContext(argv[1], caller);
 	if(!value){
 		if(BuiltIn_id(argv[1]) == BUILTIN_ROUTE){
 			Runtime_throwFormatted(runtime, "variable does not exist '%s'", ImpRoute_getRaw(argv[1]));
@@ -704,7 +704,7 @@ static Object *def_(Runtime *runtime
 
 	// TODO: use ImpRoute_submapping here
 
-	Object *par = context;
+	Object *par = caller;
 	int rargc = ImpRoute_argc(route);
 
 	for(int i = 0; i < rargc - 1; i++){
@@ -746,7 +746,7 @@ static Object *set_(Runtime *runtime
 	}
 
 	Object *route = argv[0];
-	Object *value = unrouteInContext(argv[1], context);
+	Object *value = unrouteInContext(argv[1], caller);
 	if(!value){
 		if(BuiltIn_id(argv[1]) == BUILTIN_ROUTE){
 			Runtime_throwFormatted(runtime, "variable does not exist '%s'", ImpRoute_getRaw(argv[1]));
@@ -756,7 +756,7 @@ static Object *set_(Runtime *runtime
 		return NULL;
 	}
 
-	Object *submapping = ImpRoute_submapping(route, context);
+	Object *submapping = ImpRoute_submapping(route, caller);
 	char field[32];
 	ImpRoute_argv(route, ImpRoute_argc(route) - 1, field);
 	

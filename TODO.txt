@@ -1,6 +1,6 @@
 Make prefix operators work
 Make method calls on expressions work
-
+Runtime_executeSourceInContextWithArguments
 
 NOW:
 
@@ -56,8 +56,6 @@ NOW:
  + Maybe make it so callMethod doesn't try underscore 
 
  + Use standardized hash algo for importer
-
- + Make set more method like 
 
  
 

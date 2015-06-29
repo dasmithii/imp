@@ -17,8 +17,6 @@
 #include <imp/runtime.h>
 
 
-
-
 // Activates <object> with given arguments on the <origin> 
 // object. This is particularly useful for method-type
 // objects.
@@ -399,7 +397,18 @@ Object *Runtime_executeInContext(Runtime *runtime
 		}
 		break;
 	case MACRO_NODE:
-		// TODO: expand and execute macro
+		// r = Runtime_make(runtime, Object);
+		// Object_reference(r);
+		// if(node.contents.non_leaf.argc % 2 != 0){
+		// 	Runtime_throw(runtime, "object literal requires pairs of inputs");
+		// }
+		// for(int i = 0; i < node.contents.non_leaf.argc; i += 2){
+		// 	Runtime_callMethod(runtime
+		// 		             , context
+		// 		             , r
+		// 		             , )
+		// }
+		// Object_unreference(r);
 		break;
 	case CLOSURE_NODE:
 		{
