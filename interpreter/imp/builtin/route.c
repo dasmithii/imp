@@ -8,8 +8,6 @@
 #include <imp/lexer.h>
 
 
-
-
 char *ImpRoute_getRaw(Object *self){
 	assert(Object_isValid(self));
 	return (char*) Object_getDataDeep(self, "__data");

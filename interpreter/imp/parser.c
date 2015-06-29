@@ -84,16 +84,16 @@ static int ParseNode_init(ParseTree *parent
 	}
 
 
-
-
-	// find and parse sub-nodes
+	// The following subCount, subCapacity, and subArray combine
+	// to form a dynamic array of ParseNodes. IMP_REGISTER_PARSED
+	// appends to this dynamic array.
 	size_t subCount = 0;
 	size_t subCapacity = 4;
 	ParseNode *subArray = malloc(subCapacity * sizeof(ParseNode));
 	if(!subArray){
 		abort();
 	}
-	#define IMP_REGISTER_SUB(node)       \
+	#define IMP_REGISTER_PARSED(node)    \
 		if(subCount == subCapacity){     \
 			subCapacity *= 2;            \
 			subArray = realloc(subArray, subCapacity * sizeof(ParseNode)); \
@@ -108,17 +108,24 @@ static int ParseNode_init(ParseTree *parent
 	int depth = 0;
 	Token *it = begin;
 	Token *prev = NULL;
+
+	// Iterate through tokens, tracking grouping level depth. The 
+	// goal here is to separate independent groupings and 
+	// recursively parse sub-groupings.
 	while(it < end){
 
-		// record beginning. parse prev if necessary
 		if(depth == 0){
 			if(prev){
+				// We have found an independent sub-grouping. 
+				// Parse and register it recursively.
 				ParseNode node;
 				if(ParseNode_init(parent, &node, prev, it)){
 					return 1;
 				}
-				IMP_REGISTER_SUB(node);
+				IMP_REGISTER_PARSED(node);
 			}
+
+			// Mark beginning of next sub grouping.
 			prev = it;
 			if(Token_isUnary(prev)){
 				while(Token_isUnary(it)){
@@ -150,7 +157,7 @@ static int ParseNode_init(ParseTree *parent
 	if(ParseNode_init(parent, &final, prev, it)){
 		return 1;
 	}
-	IMP_REGISTER_SUB(final);
+	IMP_REGISTER_PARSED(final);
 
 
 	if(beginType == TOKEN_CURLY_OPEN  ||

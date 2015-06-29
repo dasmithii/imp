@@ -253,14 +253,15 @@ static inline bool Lexer_tryString(Lexer *self){
 
 static inline void Lexer_step(Lexer *self){
 
-	#define CHECK(type)  if(Lexer_try##type(self)) return
-	CHECK(Whitespace);
-	CHECK(NewLine);
-	CHECK(Comment);
-	CHECK(Grouping);
-	CHECK(Number);
-	CHECK(Route);
-	CHECK(String);
+	#define IMP_CHECK(type)  if(Lexer_try##type(self)) return
+	IMP_CHECK(Whitespace);
+	IMP_CHECK(NewLine);
+	IMP_CHECK(Comment);
+	IMP_CHECK(Grouping);
+	IMP_CHECK(Number);
+	IMP_CHECK(Route);
+	IMP_CHECK(String);
+	#undef IMP_CHECK
 
 	self->error = "invalid token";
 }

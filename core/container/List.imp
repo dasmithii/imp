@@ -35,6 +35,24 @@
 	(self:size:++)
 })
 
+
+(def prepend {
+	(self:insert (@:get 0))
+	(def newNode (Node:~))
+	(set newNode:value (@:get 0))
+	(set newNode:next self:head)
+	(if self:size {
+		(set self:head:previous newNode)
+		(set self:head newNode)
+	}{
+		(set self:tail newNode)
+		(set self:head newNode)
+	})
+
+	(self:size:++)
+})
+
+
 (def getNode {
 	(def target (@:get 0))
 	// todo: check index:size
@@ -54,4 +72,19 @@
 (def get {
 	(def node (self:getNode (@:get 0)))
 	(return node:value)
+})
+
+
+(def asString {
+	(def r '[')
+	(def node self:head)
+	(while {return node} {
+		(r:concatenate (node:value:asString))
+		(if node:next {
+			(r:concatenate ', ')
+		})
+		(set node node:next)
+	})
+	(r:concatenate ']')
+	(return r)
 })

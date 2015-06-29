@@ -403,7 +403,7 @@ Object *Runtime_executeInContext(Runtime *runtime
 		break;
 	case CLOSURE_NODE:
 		{
-			r = Runtime_cloneField(runtime, "Closure");
+			r = Runtime_make(runtime, Closure);
 			Object_reference(r);
 			ImpClosure_compile(runtime, r, &node, scope);
 			Object_unreference(r);
