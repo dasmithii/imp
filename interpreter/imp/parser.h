@@ -10,7 +10,7 @@
 typedef enum {
 	BLOCK_NODE,
 	CALL_NODE,
-	MACRO_NODE,
+	OBJECT_NODE,
 	CLOSURE_NODE,
 	LEAF_NODE
 } ParseNodeType;

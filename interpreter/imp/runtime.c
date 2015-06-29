@@ -396,19 +396,32 @@ Object *Runtime_executeInContext(Runtime *runtime
 			free(subs);
 		}
 		break;
-	case MACRO_NODE:
-		// r = Runtime_make(runtime, Object);
-		// Object_reference(r);
-		// if(node.contents.non_leaf.argc % 2 != 0){
-		// 	Runtime_throw(runtime, "object literal requires pairs of inputs");
-		// }
-		// for(int i = 0; i < node.contents.non_leaf.argc; i += 2){
-		// 	Runtime_callMethod(runtime
-		// 		             , context
-		// 		             , r
-		// 		             , )
-		// }
-		// Object_unreference(r);
+	case OBJECT_NODE:
+		{
+			r = Runtime_make(runtime, Object);
+			Object_reference(r);
+			if(node.contents.non_leaf.argc % 2 != 0){
+				printf("%d\n", node.contents.non_leaf.argc);
+				Runtime_throwString(runtime, "object literal requires pairs of inputs");
+			}
+			for(int i = 0; i < node.contents.non_leaf.argc; i += 2){
+				Object *args[2];
+				args[0] = Runtime_executeInContext(runtime, r, node.contents.non_leaf.argv[i]);
+				if(BuiltIn_id(args[0]) != BUILTIN_ROUTE){
+					Runtime_throwString(runtime, "object literals require atom-value pairs");
+				}
+				Object_reference(args[0]);
+				args[1] = Runtime_executeInContext(runtime, r, node.contents.non_leaf.argv[i+1]);
+				Object_unreference(args[0]);
+				Runtime_callMethod(runtime
+					             , scope
+					             , r
+					             , "def"
+					             , 2
+					             , args);
+			}
+			Object_unreference(r);
+		}
 		break;
 	case CLOSURE_NODE:
 		{

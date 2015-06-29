@@ -41,7 +41,7 @@ static int ParseNode_init(ParseTree *parent
 
 	switch(begin[0].type){
 	case TOKEN_HARD_OPEN:
-		node->type = MACRO_NODE;
+		node->type = OBJECT_NODE;
 		if((end - 1)->type != TOKEN_HARD_CLOSE){
 			parent->error = strdup("unmatched hard bracket.");
 			return -1;
@@ -160,8 +160,7 @@ static int ParseNode_init(ParseTree *parent
 	IMP_REGISTER_PARSED(final);
 
 
-	if(beginType == TOKEN_CURLY_OPEN  ||
-	   beginType == TOKEN_HARD_OPEN){
+	if(beginType == TOKEN_CURLY_OPEN){
 		for(int i = 0; i < subCount; i++){
 			ParseNode *sub = subArray + i;
 			if(sub->type != CALL_NODE){
@@ -255,7 +254,7 @@ void ParseNode_print(ParseNode *self){
 	case CALL_NODE:
 		printf("(");
 		break;
-	case MACRO_NODE:
+	case OBJECT_NODE:
 		printf("[");
 		break;
 	case CLOSURE_NODE:
@@ -280,7 +279,7 @@ void ParseNode_print(ParseNode *self){
 	case CALL_NODE:
 		printf(")");
 		break;
-	case MACRO_NODE:
+	case OBJECT_NODE:
 		printf("]");
 		break;
 	case CLOSURE_NODE:

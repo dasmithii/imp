@@ -2,6 +2,9 @@ Make prefix operators work
 Make method calls on expressions work
 Runtime_executeSourceInContextWithArguments
 
+Make import a method
+
+
 NOW:
 
  + Make lexer store token texts contiguously
@@ -79,11 +82,7 @@ MEDIUM:
 
  + Prefix operators...
 
- + Implement macros
-
  + Generators
-
- + Object notation (maybe brackets and scrap macros?)
 
  + Make composition functions for objects 
      - &=: and in place (intersection)
