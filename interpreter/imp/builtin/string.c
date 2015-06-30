@@ -201,13 +201,30 @@ static Object *compare_(Runtime *runtime
 } 
 
 
+static Object *value_(Runtime *runtime
+	                , Object *context
+	                , Object *self
+	                , int argc
+	                , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "String:$ does not accept arguments");
+	}
+
+	Object *r = Runtime_make(runtime, String);
+	ImpString_setRaw(r, ImpString_getRaw(self));
+	return r;
+} 
+
+
 void ImpString_init(Object *self, Runtime *runtime){
 	assert(self);
 	BuiltIn_setId(self, BUILTIN_STRING);
 
 	Runtime_registerCMethod(runtime, self, "print", print_);
+	Runtime_registerCMethod(runtime, self, "asString", value_);
+	Runtime_registerCMethod(runtime, self, "$", value_);
 	Runtime_registerCMethod(runtime, self, "~", clone_);
-	Runtime_registerCMethod(runtime, self, "concatenate", concatenate_);
+	Runtime_registerCMethod(runtime, self, "+=", concatenate_);
 	Runtime_registerCMethod(runtime, self, "?", asBoolean_);
 
 	Runtime_registerCMethod(runtime, self, "<>", compare_);

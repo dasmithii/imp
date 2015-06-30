@@ -2,6 +2,7 @@
 #include <imp/object.h>
 #include <imp/builtin/general.h>
 #include <imp/builtin/number.h>
+#include <imp/builtin/string.h>
 #include <string.h>
 
 
@@ -215,3 +216,40 @@ Object *Array_withContents(Runtime *runtime
 }
 
 
+Object *Array_asString(Runtime *runtime
+	                 , Object *context
+	                 , Object *self
+	                 , int argc
+	                 , Object **argv){
+	Object *r = Runtime_make(runtime, String);
+	Object_reference(r);
+	ImpString_setRaw(r, "[");
+
+
+	const size_t size = getSize(self);
+	Object **buffer = getBuffer(self);
+
+	for(int i = 0; i < size; i++){
+		Object *s = Runtime_callMethod(runtime
+			                         , context
+			                         , buffer[i]
+			                         , "asString"
+			                         , 0
+			                         , NULL);
+
+		Runtime_callMethod(runtime
+			             , context
+			             , r
+			             , "+="
+			             , 1
+			             , &s);
+
+		if(i != size - 1){
+			ImpString_concatenateRaw(r, ", ");
+		}
+	}
+	ImpString_concatenateRaw(r, "]");
+
+	Object_unreference(r);
+	return r;
+}
