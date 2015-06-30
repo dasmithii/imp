@@ -40,8 +40,7 @@ static Object *add_(Runtime *runtime
 
 	double val = ImpNumber_getRaw(caller);
 	for(int i = 0; i < argc; i++){
-		Object *arg = unrouteInContext(argv[i], context);
-		if(!ImpNumber_isValid(arg)){
+		if(!ImpNumber_isValid(argv[i])){
 			Runtime_throwString(runtime, "Number:add accepts only numbers as arguments");
 			return NULL;
 		}
@@ -107,11 +106,10 @@ static Object *mult_(Runtime *runtime
 	}
 
 	for(int i = 0; i < argc; i++){
-		Object *arg = unrouteInContext(argv[i], context);
-		if(!ImpNumber_isValid(arg)){
+		if(!ImpNumber_isValid(argv[i])){
 			Runtime_throwString(runtime, "Number:mult accepts only numbers as arguments");
 		}
-		ImpNumber_mult(caller, arg);
+		ImpNumber_mult(caller, argv[i]);
 	}
 
 	return NULL;
@@ -139,12 +137,10 @@ static Object *div_(Runtime *runtime
 	if(argc != 1){
 		Runtime_throwString(runtime, "Number:div requires exactly one argument.");
 	} else{
-		Object *arg = unrouteInContext(argv[0], context);
-
-		if(!ImpNumber_isValid(arg)){
+		if(!ImpNumber_isValid(argv[0])){
 			Runtime_throwString(runtime, "Number:div argument must be of number type.");
 		} else {
-			ImpNumber_div(caller, arg);
+			ImpNumber_div(caller, argv[0]);
 		}
 	}
 
@@ -176,7 +172,7 @@ static Object *print_(Runtime *runtime
 }
 
 
-static Object *set_(Runtime *runtime
+static Object *setEq_(Runtime *runtime
 	              , Object *context
 	              , Object *caller
 	              , int argc
@@ -189,8 +185,7 @@ static Object *set_(Runtime *runtime
 		Runtime_throwString(runtime, "Number:set requires exactly one argument.");
 	} 
 
-	Object *arg = unrouteInContext(argv[0], context);
-	if(!ImpNumber_isValid(arg)){
+	if(!ImpNumber_isValid(argv[0])){
 		Runtime_throwString(runtime, "Number:set requires an argument of type number");
 	} else{
 		ImpNumber_setRaw(caller, ImpNumber_getRaw(argv[0]));
@@ -446,7 +441,7 @@ void ImpNumber_init(Object *self, Runtime *runtime){
 	Runtime_registerCMethod(runtime, self, "?", asBoolean_);
 
 	Runtime_registerCMethod(runtime, self, "print", print_);
-	Runtime_registerCMethod(runtime, self, "=", set_);
+	Runtime_registerCMethod(runtime, self, "=", setEq_);
 
 	Runtime_registerCMethod(runtime, self, "~", clone_);
 	Runtime_registerCMethod(runtime, self, "asString", asString_);
