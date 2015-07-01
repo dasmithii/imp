@@ -1,6 +1,8 @@
 (import 'core/io')
 (import 'core/control' self)
+(import 'core/container/Sequence')
 
+(set # Sequence)
 
 (def Node:~ {
 	(def r:# self)
@@ -54,37 +56,41 @@
 
 
 (def getNode {
-	(def target (@:get 0))
 	// todo: check index:size
-
-	(def i 0)
 	(def node self:head)
 
-	(while {i:< target} {
+	(repeat (@:get 0) {
 		(set node node:next)
-		(i:++)
 	})
 
 	(return node)
 })
 
 
-(def get {
+(def at {
 	(def node (self:getNode (@:get 0)))
 	(return node:value)
+})
+
+
+(def at= {
+	(io:writeLine 'at:' (@:get 0))
+	(def node (self:getNode (@:get 0))
+	(set node:value (@:get 1)))
 })
 
 
 (def asString {
 	(def r '[')
 	(def node self:head)
-	(while {return node} {
-		(r:concatenate (node:value:asString))
+	(while {(return node)} {
+		(r:+= (node:value:asString))
+
 		(if node:next {
-			(r:concatenate ', ')
+			(r:+= ', ')
 		})
 		(set node node:next)
 	})
-	(r:concatenate ']')
+	(r:+= ']')
 	(return r)
 })

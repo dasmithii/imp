@@ -69,14 +69,16 @@ static Object *sub_(Runtime *runtime
 	assert(Object_isValid(context));
 	assert(ImpNumber_isValid(caller));
 
-	if(argc != 1){
-		Runtime_throwString(runtime, "Number:sub requires exactly one argument.");
+	if(argc < 1){
+		Runtime_throwString(runtime, "Number:sub requires at least 1 argument.");
 	}
 
-	if(!ImpNumber_isValid(argv[0])){
-		Runtime_throwString(runtime, "Number:sub argument must be of number type.");
-	} else {
-		ImpNumber_sub(caller, argv[0]);
+	for(int i = 0; i < argc; i++){
+		if(!ImpNumber_isValid(argv[i])){
+			Runtime_throwString(runtime, "Number:sub argument must be of number type.");
+		} else {
+			ImpNumber_sub(caller, argv[i]);
+		}
 	}
 
 	return NULL;
@@ -412,6 +414,79 @@ static Object *squareRoot_(Runtime *runtime
 }
 
 
+static Object *floor_(Runtime *runtime
+	                , Object *context
+	                , Object *self
+	                , int argc
+	                , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "Number:floor does not accept arguments");
+	}
+	ImpNumber_setRaw(self, floor(ImpNumber_getRaw(self)));
+	return NULL;
+}
+
+
+static Object *floored_(Runtime *runtime
+	                , Object *context
+	                , Object *self
+	                , int argc
+	                , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "Number:floor does not accept arguments");
+	}
+	Object *r = Runtime_callMethod(runtime
+		                         , context
+		                         , self
+		                         , "$"
+		                         , 0
+		                         , NULL);
+	Runtime_callMethod(runtime
+		             , context
+		             , r
+		             , "floor"
+		             , 0
+		             , NULL);
+	return r;
+}
+
+
+static Object *round_(Runtime *runtime
+	                , Object *context
+	                , Object *self
+	                , int argc
+	                , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "Number:floor does not accept arguments");
+	}
+	ImpNumber_setRaw(self, ImpNumber_getRawRounded(self));
+	return NULL;
+}
+
+static Object *rounded_(Runtime *runtime
+	                , Object *context
+	                , Object *self
+	                , int argc
+	                , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "Number:floor does not accept arguments");
+	}
+	Object *r = Runtime_callMethod(runtime
+		                         , context
+		                         , self
+		                         , "$"
+		                         , 0
+		                         , NULL);
+	Runtime_callMethod(runtime
+		             , context
+		             , r
+		             , "round"
+		             , 0
+		             , NULL);
+	return r;
+}
+
+
 static Object *hashCode_(Runtime *runtime
 	                   , Object *context
 	                   , Object *self
@@ -456,6 +531,11 @@ void ImpNumber_init(Object *self, Runtime *runtime){
 	Runtime_registerCMethod(runtime, self, "asString", asString_);
 
 	Runtime_registerCMethod(runtime, self, "_hashCode", hashCode_);
+
+	Runtime_registerCMethod(runtime, self, "floor", floor_);
+	Runtime_registerCMethod(runtime, self, "floored", floored_);
+	Runtime_registerCMethod(runtime, self, "round", round_);
+	Runtime_registerCMethod(runtime, self, "rounded", rounded_);
 
 	ImpNumber_setRaw(self, 0);
 }

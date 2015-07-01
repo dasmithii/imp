@@ -7,6 +7,10 @@ Make import a method
 
 NOW:
 
+ + use <= for return
+
+ + Common ancestor methods
+
  + Make lexer store token texts contiguously
 
  + Use varargs on Runtime_callMethod

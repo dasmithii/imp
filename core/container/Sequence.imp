@@ -1,0 +1,48 @@
+// Sequence is a abstract type designed to be
+// cloned by ordered collections of all kinds. It 
+// does not contain data and thus cannot be used 
+// on its own.
+//
+// Cloners must implement size, at, and at= methods.
+
+
+(import 'core/control/if')
+(import 'core/control/while')
+
+
+(def getSizeFromMethodOrField {
+	(if (self:hasMethod 'size') {
+		(return (self:size))
+	} (self:hasKeyDeep 'size') {
+		(return self:size)
+	} {
+		(throw 'Sequence did not implement size')
+	}) 
+})
+
+
+(def each {
+	(def size (self:getSizeFromMethodOrField))
+	(def i 0)
+	(def f (@:get 0))
+	(while {i:< size} {
+		(f (self:at i))
+		(i:++)
+	})
+})
+
+(import 'core/io')
+
+(def reverse {
+	(def size (self:getSizeFromMethodOrField))
+	(def i 0)
+	(def mid (size:/ 2))
+	(mid:floor)
+	(while {i:< mid} {
+		(def i2 (size:- i 1))
+		(def temp (self:at i))
+		(self:at= i (self:at i2))
+		(self:at= i2 temp)
+		(i:++)
+	})
+})

@@ -38,7 +38,7 @@ static bool isZero(Runtime *runtime
 		Object_unreference(ctx);
 		Object_unreference(obj);
 		return ImpNumber_getRaw(asBoolean) == 0;
-	}
+	} 
 
 	Runtime_throwString(runtime, "object not boolean");
 	return false;

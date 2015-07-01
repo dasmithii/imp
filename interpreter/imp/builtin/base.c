@@ -221,27 +221,6 @@ static Object *hasMethod_(Runtime *runtime
 	return r;
 }
 
-static Object *hasSpecialMethod_(Runtime *runtime
-	                                   , Object *context
-	                                   , Object *caller
-	                                   , int argc
-	                                   , Object **argv){
-	if(argc != 1){
-		Runtime_throwString(runtime, "#:hasSpecialMethod requires exactly one argument");
-	}
-	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, "#:hasSpecialMethod requires its argument to be a string");
-	}
-	bool rawr = Object_hasSpecialMethod(caller, ImpString_getRaw(argv[0]));
-	Object *r = Runtime_cloneField(runtime, "Number");
-	if(rawr){
-		ImpNumber_setRaw(r, 1);
-	} else {
-		ImpNumber_setRaw(r, 0);
-	}
-	return r;
-}
-
 
 static Object *callMethod_(Runtime *runtime
 	                                   , Object *context
@@ -265,30 +244,6 @@ static Object *callMethod_(Runtime *runtime
 		                    , argc - 1
 		                    , argv + 1);
 }
-
-
-static Object *callSpecialMethod_(Runtime *runtime
-	                            , Object *context
-	                            , Object *caller
-	                            , int argc
-	                            , Object **argv){
-	if(argc == 0){
-		Runtime_throwString(runtime, "#:callSpecialMethod requires arguments");
-	}
-	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, "#:callSpecialMethod requires its argument to be a string");
-	}
-	char *methodName = ImpString_getRaw(argv[0]);
-	if(!Object_hasMethod(caller, methodName)){
-		Runtime_throwFormatted(runtime, "#:callSpecialMethod could not find method: '%s'", methodName);
-	}
-	return Runtime_callSpecialMethod(runtime
-		                           , context
-		                           , caller
-		                           , methodName
-		                           , argc - 1
-		                           , argv + 1);
-} 
 
 
 static Object *compare(Runtime *runtime
@@ -405,8 +360,9 @@ static Object *clone_(Runtime *runtime
 static Object *copyAndDo(Runtime *runtime
 	                   , Object *context
 	                   , Object *lo
-	                   , Object *ro
-	                   , char *op){
+	                   , char *op
+	                   , int argc
+	                   , Object **argv){
 	if(!Object_hasMethod(lo, op)){
 		Runtime_throwFormatted(runtime, "'%s' method not found", op);
 	}
@@ -421,7 +377,7 @@ static Object *copyAndDo(Runtime *runtime
 		Runtime_throwString(runtime, "copy returned NULL");
 	}
 	Object_reference(cp);
-	Runtime_callMethod(runtime, context, cp, op, 1, &ro);
+	Runtime_callMethod(runtime, context, cp, op, argc, argv);
 	Object_unreference(cp);
 	return cp;
 }
@@ -432,10 +388,7 @@ static Object *plus_(Runtime *runtime
 	                       , Object *self
 	                       , int argc
 	                       , Object **argv){
-	if(argc != 1){
-		Runtime_throwString(runtime, "#:+ requires exactly 1 arguments");
-	}
-	return copyAndDo(runtime, context, self, argv[0], "+=");
+	return copyAndDo(runtime, context, self, "+=", argc, argv);
 } 
 
 static Object *minus_(Runtime *runtime
@@ -443,10 +396,7 @@ static Object *minus_(Runtime *runtime
 	                        , Object *self
 	                        , int argc
 	                        , Object **argv){
-	if(argc != 1){
-		Runtime_throwString(runtime, "#:- requires exactly 1 arguments");
-	}
-	return copyAndDo(runtime, context, self, argv[0], "-=");
+	return copyAndDo(runtime, context, self, "-=", argc, argv);
 } 
 
 static Object *div_(Runtime *runtime
@@ -454,10 +404,7 @@ static Object *div_(Runtime *runtime
 	                      , Object *self
 	                      , int argc
 	                      , Object **argv){
-	if(argc != 1){
-		Runtime_throwString(runtime, "#:/ requires exactly 1 arguments");
-	}
-	return copyAndDo(runtime, context, self, argv[0], "/=");
+	return copyAndDo(runtime, context, self, "/=", argc, argv);
 } 
 
 static Object *times_(Runtime *runtime
@@ -465,10 +412,7 @@ static Object *times_(Runtime *runtime
 	                      , Object *self
 	                      , int argc
 	                      , Object **argv){
-	if(argc != 1){
-		Runtime_throwString(runtime, "#:* requires exactly 1 arguments");
-	}
-	return copyAndDo(runtime, context, self, argv[0], "*=");
+	return copyAndDo(runtime, context, self, "*=", argc, argv);
 } 
 
 static Object *mod_(Runtime *runtime
@@ -476,10 +420,7 @@ static Object *mod_(Runtime *runtime
 	              , Object *self
 	              , int argc
 	              , Object **argv){
-	if(argc != 1){
-		Runtime_throwString(runtime, "#:% requires exactly 1 arguments");
-	}
-	return copyAndDo(runtime, context, self, argv[0], "%=");
+	return copyAndDo(runtime, context, self, "%=", argc, argv);
 } 
 
 
@@ -488,10 +429,7 @@ static Object *exp_(Runtime *runtime
 	              , Object *self
 	              , int argc
 	              , Object **argv){
-	if(argc != 1){
-		Runtime_throwString(runtime, "#:^ requires exactly 1 arguments");
-	}
-	return copyAndDo(runtime, context, self, argv[0], "^=");
+	return copyAndDo(runtime, context, self, "^=", argc, argv);
 } 
 
 
@@ -776,11 +714,9 @@ void ImpBase_init(Object *self, Runtime *runtime){
 	assert(self);
 	BuiltIn_setId(self, BUILTIN_OBJECT);
 	Runtime_registerCMethod(runtime, self, "hasMethod", hasMethod_);
-	Runtime_registerCMethod(runtime, self, "hasSpecialMethod", hasSpecialMethod_);
 	Runtime_registerCMethod(runtime, self, "callMethod", callMethod_);
-	Runtime_registerCMethod(runtime, self, "callSpecialMethod", callSpecialMethod_);
 	Runtime_registerCMethod(runtime, self, "hasKeyShallow", hasKeyShallow_);
-	Runtime_registerCMethod(runtime, self, "kasKeyDeep", hasKeyDeep_);
+	Runtime_registerCMethod(runtime, self, "hasKeyDeep", hasKeyDeep_);
 	Runtime_registerCMethod(runtime, self, "removeKeyShallow", removeKeyShallow_);
 	Runtime_registerCMethod(runtime, self, "getDeep", getDeep_);
 	Runtime_registerCMethod(runtime, self, "getShallow", getShallow_);

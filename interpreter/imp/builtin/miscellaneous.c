@@ -82,6 +82,6 @@ void ImpMisc_init(Object *self, Runtime *runtime){
 
 	Runtime_executeSourceInContext(runtime
 		                         , "(def nil:asString 'nil')"
-		                         "\n(def nil:? {0})"
+		                         "\n(def nil:? {return 0})"
 		                         , runtime->Object);
 }
