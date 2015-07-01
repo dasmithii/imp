@@ -218,7 +218,16 @@ double ImpNumber_getRaw(Object *self){
 }
 
 int ImpNumber_getRawRounded(Object *self){
-	return (int) (ImpNumber_getRaw(self) + .5);
+	double raw = ImpNumber_getRaw(self);
+	const bool sign = raw < 0;
+	if(sign){
+		raw *= -1;
+	}
+	int r = (int) raw + .5;
+	if(sign){
+		r *= -1;
+	}
+	return r;
 }
 
 static Object *clone_(Runtime *runtime

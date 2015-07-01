@@ -21,12 +21,16 @@ char *ImpString_getRaw(Object *self){
 }
 
 
-void ImpString_setRaw(Object *self, char *text){
+void ImpString_setRawPointer(Object *self, char *text){
 	assert(ImpString_isValid(self));
 	assert(text);
-	Object_putDataDeep(self, "__data", strdup(text));
+	Object_putDataDeep(self, "__data", text);
 	Object *size = Object_getDeep(self, "size");
 	ImpNumber_setRaw(size, (double) strlen(text));
+}
+
+void ImpString_setRaw(Object *self, char *text){
+	ImpString_setRawPointer(self, strdup(text));
 }
 
 
@@ -216,6 +220,49 @@ static Object *value_(Runtime *runtime
 } 
 
 
+static Object *duplicate_(Runtime *runtime
+	                    , Object *context
+	                    , Object *self
+	                    , int argc
+	                    , Object **argv){
+	if(argc != 1){
+		Runtime_throwString(runtime, "String:*= requires exactly 1 argument");
+	}
+
+	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
+		Runtime_throwString(runtime, "String:*= requires numeric argument");
+	}
+
+	int coef = ImpNumber_getRawRounded(argv[0]);
+	char *raw = ImpString_getRaw(self);
+	const size_t rawLen = strlen(raw);
+
+	if(coef == 0){
+		ImpString_setRaw(self, "");
+		return NULL;
+	} else if(coef < 0){
+		for(int i = 0; i < rawLen/2; i++){
+			const char tmp = raw[rawLen - 1 - i];
+			raw[rawLen - 1 - i] = raw[i];
+			raw[i] = tmp;
+		}
+		coef *= -1;
+	}
+
+	char *newRaw = malloc(coef * rawLen + 1);
+	if(!newRaw){
+		abort();
+	}
+	newRaw[coef * rawLen] = 0;
+	for(int i = 0; i < coef; i++){
+		memcpy(newRaw + i * rawLen, raw, rawLen);
+	}
+	ImpString_setRawPointer(self, newRaw);
+
+	return NULL;
+}
+
+
 void ImpString_init(Object *self, Runtime *runtime){
 	assert(self);
 	BuiltIn_setId(self, BUILTIN_STRING);
@@ -225,6 +272,7 @@ void ImpString_init(Object *self, Runtime *runtime){
 	Runtime_registerCMethod(runtime, self, "$", value_);
 	Runtime_registerCMethod(runtime, self, "~", clone_);
 	Runtime_registerCMethod(runtime, self, "+=", concatenate_);
+	Runtime_registerCMethod(runtime, self, "*=", duplicate_);
 	Runtime_registerCMethod(runtime, self, "?", asBoolean_);
 
 	Runtime_registerCMethod(runtime, self, "<>", compare_);
