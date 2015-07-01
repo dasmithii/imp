@@ -15,8 +15,8 @@ Tutorial
                          Functions
 
     Above, we import the standard 'io' module and call its 
-    'writeLine' function a string. Resulting is an instance of
-    software's greatest cliché.
+    'writeLine' function on a string. Resulting is an instance
+    of software's greatest cliché.
 
     The following produces identical output:
 
@@ -32,8 +32,8 @@ Tutorial
 
                        Object Literals
 
-    Arbitrary objects can be formed using hard brackets in 
-    combination with key-value pairs.
+    Arbitrary objects can be formed surrounding key-value pairs
+    with hard brackets:
 
       >  (def someObject [
              field1 'I am a field.'
@@ -41,7 +41,7 @@ Tutorial
              field3 'Shut it, you two.'
          ])
 
-    Nested object literals are allowed:
+    Note that nesting is allowed:
 
       >  (def anotherObject [
              nestedObject [
