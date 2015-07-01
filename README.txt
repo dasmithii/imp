@@ -12,27 +12,42 @@ Overview
 
 Tutorial
 
-                        Grouping Operators
+                         Functions
 
-    Above, parentheses activate the printer object with a
-    single argument. Resulting is an instance of software's
-    greatest cliché.
+    Above, we import the standard 'io' module and call its 
+    'writeLine' function a string. Resulting is an instance of
+    software's greatest cliché.
 
     The following produces identical output:
 
-      >  (io:writeLine [{(return 'Hello, world')}])
+      >  (import 'core/io')
+      >  (def sayHello {io:writeLine 'Hello, World!'})
+      >  (sayHello)
 
-    This is because, in imp, parentheses are function calls;
-    curly braces define code blocks; and hard brackets expand
-    macros. The macro expands to 'Hello, world', and thus we
-    have (io:writeLine 'Hello, world').
+    This is because, in imp, curly braces define code blocks, 
+    and because our code block contains only one statement, 
+    parenthesis are implied.
 
-    Take note of the similarity between function calls and
-    macro expansions. Each requires one activate-able object
-    and may accept arbitrary arguments. Accordingly, activate-
-    able objects can be used for either purpose. There is no
-    difference in semantics between macro code and function
-    code, as there is in C.
+
+
+                       Object Literals
+
+    Arbitrary objects can be formed using hard brackets in 
+    combination with key-value pairs.
+
+      >  (def someObject [
+             field1 'I am a field.'
+             field2 'No you are not!'
+             field3 'Shut it, you two.'
+         ])
+
+    Nested object literals are allowed:
+
+      >  (def anotherObject [
+             nestedObject [
+                 field 'I am a field'
+             ]
+         ])
 
 
 
@@ -155,7 +170,7 @@ Installation
 Disclaimer
 
     Note that Imp remains in early-stage development. The
-    language, though powerful, is incomplete and quite rough
+    language, though usable, is incomplete and quite rough
     around the edges. There are many bugs; documentation is
     scarce; and API changes ought to be expected. Accordingly, 
     serious projects should choose a more mature language to
