@@ -2,6 +2,7 @@
 #include <imp/object.h>
 #include <imp/builtin/general.h>
 #include <imp/builtin/number.h>
+#include <imp/builtin/importer.h>
 #include <imp/builtin/string.h>
 #include <string.h>
 
@@ -40,48 +41,48 @@ Object *Array_clone(Runtime *runtime
 }
 
 
-Object *Array_get(Runtime *runtime
-	            , Object *context
-	            , Object *self
-	            , int argc
-	            , Object **argv){
+Object *Array_at(Runtime *runtime
+	           , Object *context
+	           , Object *self
+	           , int argc
+	           , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Array:get requires exactly 1 argument");
+		Runtime_throwString(runtime, "Array:at requires exactly 1 argument");
 	}
 
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, "Array:get requires numeric index");
+		Runtime_throwString(runtime, "Array:at requires numeric index");
 	}
 
 	int size = getSize(self);
 	int i = ImpNumber_getRawRounded(argv[0]);
 
 	if(i < 0 || i >= size){
-		Runtime_throwFormatted(runtime, "Array:get index out of bounds %d/%d", i, size);
+		Runtime_throwFormatted(runtime, "Array:at index out of bounds %d/%d", i, size);
 	}
 
 	return getBuffer(self)[i];
 }
 
 
-Object *Array_set(Runtime *runtime
+static Object *atEq_(Runtime *runtime
 	            , Object *context
 	            , Object *self
 	            , int argc
 	            , Object **argv){
 	if(argc != 2){
-		Runtime_throwString(runtime, "Array:set requires exactly 2 arguments");
+		Runtime_throwString(runtime, "Array:at= requires exactly 2 arguments");
 	}
 
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, "Array:set requires numeric index");
+		Runtime_throwString(runtime, "Array:at= requires numeric index");
 	}
 
 	int size = getSize(self);
 	int i = ImpNumber_getRawRounded(argv[0]);
 
 	if(i < 0 || i >= size){
-		Runtime_throwFormatted(runtime, "Array:set index out of bounds %d/%d", i, size);
+		Runtime_throwFormatted(runtime, "Array:at= index out of bounds %d/%d", i, size);
 	}
 
 	getBuffer(self)[i] = argv[1];
@@ -252,4 +253,15 @@ Object *Array_asString(Runtime *runtime
 
 	Object_unreference(r);
 	return r;
+}
+
+
+Object *Array_onImport(Runtime *runtime
+	                 , Object *context
+	                 , Object *Array
+	                 , int argc
+	                 , Object **argv){
+	Object_putShallow(Array, "#", Imp_import(runtime, "core/container/Sequence"));
+	Runtime_registerCMethod(runtime, Array, "at=", atEq_);
+	return NULL;
 }

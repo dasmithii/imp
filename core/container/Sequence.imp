@@ -24,7 +24,7 @@
 (def each {
 	(def size (self:getSizeFromMethodOrField))
 	(def i 0)
-	(def f (@:get 0))
+	(def f (@:at 0))
 	(while {i:< size} {
 		(f (self:at i))
 		(i:++)

@@ -1,9 +1,9 @@
 (import 'core/control/while')
 
 (def _activate {
-	(def n (@:get 0))
+	(def n (@:at 0))
 	(set n (n:$))
-	(def f (@:get 1))
+	(def f (@:at 1))
 	(while n {
 		(f)
 		(n:--)

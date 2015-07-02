@@ -173,7 +173,7 @@ static Object *slotNames_(Runtime *runtime
 		Runtime_callMethod(runtime
 			             , context
 			             , r
-			             , "set"
+			             , "at="
 			             , 2
 			             , args);
 		ImpNumber_setRaw(index, 1 + ImpNumber_getRaw(index));
