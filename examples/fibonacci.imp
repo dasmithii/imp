@@ -7,7 +7,7 @@
 (def n1 1)        // - higher iterator
 (def temp 0)      // - swapper variable
 
-(repeat 10 {
+(repeat 25 {
 	(io:writeLine n0)
 	(temp:= n1)
 	(n1:+= n0)

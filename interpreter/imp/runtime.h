@@ -85,8 +85,6 @@ void Runtime_throwFormatted(Runtime *runtime, const char *format, ...);
 
 //// garbage collection
 bool Runtime_isManaged(Runtime *self, Object *object);
-void Runtime_markRecursive(Runtime *runtime, Object *object);
-void Runtime_collectObject(Runtime *runtime, Object *object);
 int Runtime_objectCount(Runtime *self);
 
 

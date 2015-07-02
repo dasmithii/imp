@@ -110,7 +110,7 @@ void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object 
 }
 
 
-static Object *collect_(Runtime *runtime
+static Object *clean_(Runtime *runtime
 	                  , Object *context
 	                  , Object *caller
 	                  , int argc
@@ -126,16 +126,16 @@ static Object *collect_(Runtime *runtime
 }
 
 
-static Object *mark_(Runtime *runtime
+static Object *_markInternalsRecursively(Runtime *runtime
 	               , Object *context
-	               , Object *caller
+	               , Object *self
 	               , int argc
 	               , Object **argv){
 	assert(runtime);
-
-	Internal *raw = ImpClosure_getRaw(caller);
+	
+	Internal *raw = ImpClosure_getRaw(self);
 	if(raw && raw->context){
-		Runtime_markRecursive(runtime, raw->context);
+		Runtime_callMethod(runtime, context, raw->context, "_markRecursively", 0, NULL);
 	}
 	return NULL;
 }
@@ -146,6 +146,6 @@ void ImpClosure_init(Object *self, Runtime *runtime){
 
 	BuiltIn_setId(self, BUILTIN_CLOSURE);
 	Object_registerCActivator(self, activate_);
-	Runtime_registerCMethod(runtime, self, "_collect", collect_);
-	Runtime_registerCMethod(runtime, self, "_mark", mark_);
+	Runtime_registerCMethod(runtime, self, "_clean", clean_);
+	Runtime_registerCMethod(runtime, self, "_markInternalsRecursively", _markInternalsRecursively);
 }

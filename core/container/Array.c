@@ -131,7 +131,7 @@ Object *Array_resizeTo(Runtime *runtime
 }
 
 
-Object *Array__mark(Runtime *runtime
+Object *Array__markInternalsRecursively(Runtime *runtime
 	             , Object *context
 	             , Object *self
 	             , int argc
@@ -145,7 +145,7 @@ Object *Array__mark(Runtime *runtime
 		const size_t size = getSize(self);
 		for(int i = 0; i < size; i++){
 			if(buffer[i]){
-				Runtime_markRecursive(runtime, buffer[i]);
+				Runtime_callMethod(runtime, NULL, buffer[i], "_markRecursively", 0, NULL);
 			}
 		}
 	}

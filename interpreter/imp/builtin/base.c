@@ -728,21 +728,35 @@ static Object *set_(Runtime *runtime
 }
 
 
+static Object *markRecursively_(Runtime *runtime
+	               , Object *context
+	               , Object *self
+	               , int argc
+	               , Object **argv){
+	if(!self || self->gc_mark){
+		return NULL;
+	}
 
-static Object *mark_(Runtime *runtime
-	              , Object *context
-	              , Object *caller
-	              , int argc
-	              , Object **argv){
+	// mark this object
+	self->gc_mark = true;
+
+	// mark all non-primitive fields recursively
+	for(int i = 0; i < self->slotCount; i++){
+		if(!Slot_isPrimitive(self->slots + i)){
+			markRecursively_(runtime
+				           , context
+				           , Slot_object(self->slots + i)
+				           , 0
+				           , NULL);
+		}
+	}
+
+	// if object has special internals to mark
+	if(Object_hasMethod(self, "_markInternalsRecursively")){
+		Runtime_callMethod(runtime, context, self, "_markInternalsRecursively", 0, NULL);
+	}
+	return NULL;
 }
-
-static Object *collect_(Runtime *runtime
-	              , Object *context
-	              , Object *caller
-	              , int argc
-	              , Object **argv){
-}
-
 
 
 void ImpBase_init(Object *self, Runtime *runtime){
@@ -784,8 +798,7 @@ void ImpBase_init(Object *self, Runtime *runtime){
 
 	Runtime_registerCMethod(runtime, self, "hashCode", hashCode_);
 
-	Runtime_registerCMethod(runtime, self, "_mark", mark_);
-	Runtime_registerCMethod(runtime, self, "_collect", collect_);
+	Runtime_registerCMethod(runtime, self, "_markRecursively", markRecursively_);
 }
 
 

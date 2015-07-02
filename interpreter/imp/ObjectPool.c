@@ -9,17 +9,6 @@
 
 
 
-
-
-typedef struct {
-
-} Pool;
-
-
-
-
-
-
 typedef struct FreeList {
 	Object *block;
 	size_t blockSize;
@@ -145,7 +134,7 @@ static inline void Crate_markReferencedObjects(Crate *self, Runtime *runtime){
 			frees = frees->nextNode;
 		} else {
 			if(Object_referenceCount(object) > 0){
-				Runtime_markRecursive(runtime, object);
+				Runtime_callMethod(runtime, NULL, object, "_markRecursively", 0, NULL);
 			}
 			object++;
 		}
@@ -165,8 +154,28 @@ static inline void Crate_free(Crate *self){
 }
 
 
+static void Crate_callUnmarkedObjectCleanupFunctions(Crate *self, Runtime *runtime){
+	FreeList *frees = &self->freeSlots;
+	Object *object = self->slots;
+	while(object < self->slots + self->capacity){
+		if(frees && frees->block == object){
+			object += frees->blockSize;
+			frees = frees->nextNode;
+		} else {
+			if(!object->gc_mark){
+				if(Object_hasMethod(object, "_clean")){
+					Runtime_callMethod(runtime, NULL, object, "_clean", 0, NULL);
+				}
+			}
+			object++;
+		}
+	}
+
+}
+
+
 // returns # of objects cleaned
-static inline int Crate_collectUnmarkedObjects(Crate *self, Runtime *runtime){
+static int Crate_freeUnmarkedObjects(Crate *self, Runtime *runtime){
 	int n = 0;
 
 	FreeList *frees = &self->freeSlots;
@@ -177,7 +186,7 @@ static inline int Crate_collectUnmarkedObjects(Crate *self, Runtime *runtime){
 			frees = frees->nextNode;
 		} else {
 			if(!object->gc_mark){
-				Runtime_collectObject(runtime, object);
+				Object_clean(object);
 				n++;
 			}
 			object++;
@@ -317,13 +326,26 @@ static void ImpObjectPool_markAndSweep(ImpObjectPool self){
 
 	// mark other accessible allocations
 	if(self->runtime->lastReturnValue){
-		Runtime_markRecursive(self->runtime, self->runtime->lastReturnValue);
+		Runtime_callMethod(self->runtime
+			             , NULL
+			             , self->runtime->lastReturnValue
+			             , "_markRecursively"
+			             , 0
+			             , NULL);
 	}
 
-	// clean unmarked objects, rebuild free lists
+
+	// call cleanup functions
 	crate = self->first;
 	while(crate){
-		self->objectCount -= Crate_collectUnmarkedObjects(crate, self->runtime);
+		Crate_callUnmarkedObjectCleanupFunctions(crate, self->runtime);
+		crate = crate->successor;
+	}
+
+	// delete unmarked objects, rebuild free lists
+	crate = self->first;
+	while(crate){
+		self->objectCount -= Crate_freeUnmarkedObjects(crate, self->runtime);
 		crate = crate->successor;
 	}
 

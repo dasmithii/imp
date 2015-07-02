@@ -1,3 +1,8 @@
+Reworking GC _collect and _mark
+
+ + might need to make objects marked by default to prevent
+   collection of objects created within _collect methods
+
 Make prefix operators work
 Make method calls on expressions work
 Runtime_executeSourceInContextWithArguments
@@ -5,6 +10,7 @@ Runtime_executeSourceInContextWithArguments
 Make import a method
 
  + Make it so files can import eachother (lazy execution)
+ + Make libraries compile w/o debug symbols. Go faster
 
 
 BUG: object litteral not passing correct 'self'

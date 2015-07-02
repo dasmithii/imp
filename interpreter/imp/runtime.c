@@ -134,49 +134,6 @@ Object *Runtime_activate(Runtime *runtime
 }
 
 
-void Runtime_markRecursive(Runtime *runtime, Object *object){
-	assert(runtime);
-	assert(Object_isValid(object));
-
-	if(!object){
-		return;
-	}
-
-	if(object->gc_mark){
-		return;
-	}
-	object->gc_mark = true;
-
-	if(Object_hasSpecialMethod(object, "mark")){
-		Runtime_callSpecialMethod(runtime
-			                    , NULL
-			                    , object
-			                    , "mark"
-			                    , 0
-			                    , NULL);
-	}
-
-	for(int i = 0; i < object->slotCount; i++){
-		if(!Slot_isPrimitive(object->slots + i)){
-			Runtime_markRecursive(runtime, Slot_object(object->slots + i));
-		}
-	}
-}
-
-
-void Runtime_collectObject(Runtime *self, Object *object){
-	if(Object_hasSpecialMethod(object, "collect")){
-		Runtime_callSpecialMethod(self
-			                    , NULL
-			                    , object
-			                    , "collect"
-			                    , 0
-			                    , NULL);
-	}
-	Object_clean(object);
-}
-
-
 Object *Runtime_rawObject(Runtime *self){
 	assert(self);
 	return ImpObjectPool_allocate(self->objectPool);
