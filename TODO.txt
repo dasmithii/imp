@@ -13,6 +13,9 @@ Make import a method
  + Make libraries compile w/o debug symbols. Go faster
 
 
+ + Maybe optimize loops to re-use scopes
+
+
 BUG: object litteral not passing correct 'self'
 
 NOW:

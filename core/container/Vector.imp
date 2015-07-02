@@ -53,7 +53,7 @@
 
 
 (def append {
-	(if (self:size:== self:buffer:size) {
+	(if (self:size:>= self:buffer:size) {
 		(self:expand)
 	})
 	(self:size:++)

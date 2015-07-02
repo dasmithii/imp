@@ -114,15 +114,13 @@ Object *Array_resizeTo(Runtime *runtime
 		Object_putDataDeep(self, "__data", NULL);
 	} else {
 		Object **oldBuffer = getBuffer(self);
-		Object **newBuffer = realloc(oldBuffer, newSize * sizeof(Object*));
+		Object **newBuffer = calloc(newSize, sizeof(Object*));
 		if(!newBuffer){
 			Runtime_throwFormatted(runtime, "Array:resize failed to allocate buffer of length %s", newSize);
 		}
-		if(newSize > oldSize){
-			for(int i = oldSize; i < newSize; i++){
-				newBuffer[i] = NULL;
-			}
-		}
+
+		memcpy(newBuffer, oldBuffer, oldSize * sizeof(Object*));
+		Object_putDataDeep(self, "__data", newBuffer);
 	}
 
 	ImpNumber_setRaw(Object_getDeep(self, "size"), (double) newSize);
