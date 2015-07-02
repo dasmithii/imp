@@ -1,28 +1,61 @@
 (import 'core/control' self)
 (import 'core/container/Array')
+(import 'core/container/Sequence')
 
-(def minimumCapacity 4)
+(set # Sequence)
 
 (def ~ {
 	(def r:# self)
 	(def r:size 0)
-	(def r:buffer (Array:withSize minimumCapacity))
+	(def r:buffer (Array:withSize 4))
 	(return r)
-}
-
-
-(def get {
-	(if (@:size:!= 1) {
-		(throw 'Vector:get requires exactly 1 argument')
-	})
-	(def i (@:get 0))
-	(if (|| (i:>= self:size) (i:< 0)) {
-		(throw 'index out of bounds')
-	})
-	(return (self:buffer:get i))
 })
 
 
-(def set {
-	
+(def checkIndexBounds {
+	(def index (@:at 0))
+	(if (index:< 0)          {throw 'negative index'})
+	(if (index:>= self:size) {throw 'index out of bounds'})
+})
+
+
+(def at {
+	(self:checkIndexBounds (@:at 0))
+	(return (self:buffer:at (@:at 0)))
+})
+
+
+(def at= {
+	(self:checkIndexBounds (@:at 0))
+	(self:buffer:at= (@:at 0) (@:at 1))
+})
+
+
+(def setCapacity {
+	(def target (@:at 0))
+	(if (target:< self:size) {
+		(throw 'cannot set capacity below size')
+	})
+	(self:buffer:resizeTo target)
+})
+
+
+(def tighten {
+	(self:setCapacity self:size)
+})
+
+
+(def expand {
+	// set capacity to 2(capacity+1)
+	(def p1 (self:buffer:size:+ 1))
+	(self:setCapacity (p1:* 2))
+})
+
+
+(def append {
+	(if (self:size:== self:buffer:size) {
+		(self:expand)
+	})
+	(self:size:++)
+	(self:at= (self:size:- 1) (@:at 0))
 })

@@ -78,19 +78,3 @@
 	(def node (self:getNode (@:get 0))
 	(set node:value (@:get 1)))
 })
-
-
-(def asString {
-	(def r '[')
-	(def node self:head)
-	(while {(return node)} {
-		(r:+= (node:value:asString))
-
-		(if node:next {
-			(r:+= ', ')
-		})
-		(set node node:next)
-	})
-	(r:+= ']')
-	(return r)
-})

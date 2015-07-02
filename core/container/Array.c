@@ -90,7 +90,7 @@ static Object *atEq_(Runtime *runtime
 }
 
 
-Object *Array_resize(Runtime *runtime
+Object *Array_resizeTo(Runtime *runtime
 	               , Object *context
 	               , Object *self
 	               , int argc
@@ -144,7 +144,9 @@ Object *Array__mark(Runtime *runtime
 	if(buffer){
 		const size_t size = getSize(self);
 		for(int i = 0; i < size; i++){
-			Runtime_markRecursive(runtime, buffer[i]);
+			if(buffer[i]){
+				Runtime_markRecursive(runtime, buffer[i]);
+			}
 		}
 	}
 	return NULL;
@@ -211,45 +213,6 @@ Object *Array_withContents(Runtime *runtime
 	}
 	memcpy(data, argv, argc * sizeof(Object*));
 	Object_putDataShallow(r, "__data", data);
-
-	Object_unreference(r);
-	return r;
-}
-
-
-Object *Array_asString(Runtime *runtime
-	                 , Object *context
-	                 , Object *self
-	                 , int argc
-	                 , Object **argv){
-	Object *r = Runtime_make(runtime, String);
-	Object_reference(r);
-	ImpString_setRaw(r, "[");
-
-
-	const size_t size = getSize(self);
-	Object **buffer = getBuffer(self);
-
-	for(int i = 0; i < size; i++){
-		Object *s = Runtime_callMethod(runtime
-			                         , context
-			                         , buffer[i]
-			                         , "asString"
-			                         , 0
-			                         , NULL);
-
-		Runtime_callMethod(runtime
-			             , context
-			             , r
-			             , "+="
-			             , 1
-			             , &s);
-
-		if(i != size - 1){
-			ImpString_concatenateRaw(r, ", ");
-		}
-	}
-	ImpString_concatenateRaw(r, "]");
 
 	Object_unreference(r);
 	return r;

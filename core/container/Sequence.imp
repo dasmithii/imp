@@ -46,3 +46,19 @@
 		(i:++)
 	})
 })
+
+
+(def asString {
+	(def size (self:getSizeFromMethodOrField))
+	(def i 0)
+	(def r '[')
+	(while {i:< size} {
+		(r:+= (self:at i))
+		(if (i:!= (size:- 1)) {
+			(r:+= ', ')
+		})
+		(i:++)
+	})
+	(r:+= ']')
+	(return r)
+})

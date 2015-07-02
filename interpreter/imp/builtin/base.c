@@ -526,10 +526,10 @@ static bool objectsAreEqual(Runtime *runtime
 }
 
 static Object *equals_(Runtime *runtime
-	                         , Object *context
-	                         , Object *self
-	                         , int argc
-	                         , Object **argv){
+	                 , Object *context
+	                 , Object *self
+	                 , int argc
+	                 , Object **argv){
 	if(argc < 1){
 		Runtime_throwString(runtime, "#:== requires arguments");
 	}
@@ -549,6 +549,26 @@ static Object *equals_(Runtime *runtime
 	Object_unreference(r);
 	return r;
 } 
+
+static Object *notEq_(Runtime *runtime
+	                , Object *context
+	                , Object *self
+	                , int argc
+	                , Object **argv){
+	Object *equals = Runtime_callMethod(runtime
+		                              , context
+		                              , self
+		                              , "=="
+		                              , argc
+		                              , argv);
+	return Runtime_callMethod(runtime
+		                    , context
+		                    , equals
+		                    , "!"
+		                    , 0
+		                    , NULL);
+} 
+
 
 static Object *is_(Runtime *runtime
 	                     , Object *context
@@ -709,6 +729,21 @@ static Object *set_(Runtime *runtime
 
 
 
+static Object *mark_(Runtime *runtime
+	              , Object *context
+	              , Object *caller
+	              , int argc
+	              , Object **argv){
+}
+
+static Object *collect_(Runtime *runtime
+	              , Object *context
+	              , Object *caller
+	              , int argc
+	              , Object **argv){
+}
+
+
 
 void ImpBase_init(Object *self, Runtime *runtime){
 	assert(self);
@@ -741,10 +776,16 @@ void ImpBase_init(Object *self, Runtime *runtime){
 	Runtime_registerCMethod(runtime, self, "^", exp_);
 	Runtime_registerCMethod(runtime, self, "$", value_);
 	Runtime_registerCMethod(runtime, self, "==", equals_);
+	Runtime_registerCMethod(runtime, self, "!=", notEq_);
 	Runtime_registerCMethod(runtime, self, "is", is_);
 
 	Runtime_registerPrivelegedCMethod(runtime, self, "def", def_);
 	Runtime_registerPrivelegedCMethod(runtime, self, "set", set_);
 
 	Runtime_registerCMethod(runtime, self, "hashCode", hashCode_);
+
+	Runtime_registerCMethod(runtime, self, "_mark", mark_);
+	Runtime_registerCMethod(runtime, self, "_collect", collect_);
 }
+
+

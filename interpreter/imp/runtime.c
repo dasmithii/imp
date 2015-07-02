@@ -138,6 +138,10 @@ void Runtime_markRecursive(Runtime *runtime, Object *object){
 	assert(runtime);
 	assert(Object_isValid(object));
 
+	if(!object){
+		return;
+	}
+
 	if(object->gc_mark){
 		return;
 	}
@@ -406,12 +410,12 @@ Object *Runtime_executeInContext(Runtime *runtime
 			}
 			for(int i = 0; i < node.contents.non_leaf.argc; i += 2){
 				Object *args[2];
-				args[0] = Runtime_executeInContext(runtime, r, node.contents.non_leaf.argv[i]);
+				args[0] = Runtime_executeInContext(runtime, scope, node.contents.non_leaf.argv[i]);
 				if(BuiltIn_id(args[0]) != BUILTIN_ROUTE){
 					Runtime_throwString(runtime, "object literals require atom-value pairs");
 				}
 				Object_reference(args[0]);
-				args[1] = Runtime_executeInContext(runtime, r, node.contents.non_leaf.argv[i+1]);
+				args[1] = Runtime_executeInContext(runtime, scope, node.contents.non_leaf.argv[i+1]);
 				Object_unreference(args[0]);
 				Runtime_callMethod(runtime
 					             , scope

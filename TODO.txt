@@ -4,8 +4,10 @@ Runtime_executeSourceInContextWithArguments
 
 Make import a method
 
+ + Make it so files can import eachother (lazy execution)
 
 
+BUG: object litteral not passing correct 'self'
 
 NOW:
 

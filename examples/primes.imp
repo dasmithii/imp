@@ -1,7 +1,10 @@
 #!/usr/bin/env imp
 
+
 (import 'core/control' self)
 (import 'core/io')
+(import 'core/container/Vector')
+
 
 (def max 100)
 (io:writeLine 'Printing prime numbers below' max '...')
@@ -10,10 +13,10 @@
 (def primes (Vector:~))
 
 (def check {
-	(def n (@:get 0))
+	(def n (@:at 0))
 	(def i 0)
-	(while {i:< (primes:size)} {
-		(def p (primes:get i))
+	(while {i:< primes:size} {
+		(def p (primes:at i))
 		(def mp (n:% p))
 		(if (mp:!) {
 			(return 0)
