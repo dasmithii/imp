@@ -62,3 +62,41 @@
 	(r:+= ']')
 	(return r)
 })
+
+
+(def firstIndex {
+	(def size (self:getSizeFromMethodOrField))
+	(if (size:<= 0) {
+		(throw 'index out of bounds')
+	})
+	(return 0)
+})
+
+
+(def lastIndex {
+	(def size (self:getSizeFromMethodOrField))
+	(if (size:<= 0) {
+		(throw 'index out of bounds')
+	})
+	(return (size:- 1))
+})
+
+
+(def first {
+	(return (self:at (self:firstIndex)))
+})
+
+
+(def last {
+	(return (self:at (self:lastIndex)))
+})
+
+
+(def checkIndexBounds {
+	(def index (@:at 0))
+	(def size (self:getSizeFromMethodOrField))
+	(if (index:< 0)          {throw 'negative index'})
+	(if (index:>= size)      {throw 'index out of bounds'})
+})
+
+

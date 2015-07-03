@@ -12,13 +12,6 @@
 })
 
 
-(def checkIndexBounds {
-	(def index (@:at 0))
-	(if (index:< 0)          {throw 'negative index'})
-	(if (index:>= self:size) {throw 'index out of bounds'})
-})
-
-
 (def at {
 	(self:checkIndexBounds (@:at 0))
 	(return (self:buffer:at (@:at 0)))
@@ -58,4 +51,36 @@
 	})
 	(self:size:++)
 	(self:at= (self:size:- 1) (@:at 0))
+})
+
+
+(def tightenIfNecessary {
+	(if (self:size:< (self:buffer:size:/10)) {
+		(self:tighten)
+	})
+})
+
+
+(def remove {
+	(def i (@:at 0))
+	(self:checkIndexBounds i)
+	(def j (i:+ 1))
+	(def sm1 (self:size:- 1))
+	(while (i:< sm1) {
+		(self:at= i (self:at j))
+		(i:++)
+		(j:++)
+	})
+	(self:size:--)
+	(self:tightenIfNecessary)
+})
+
+
+(def removeLast {
+	(self:remove (self:lastIndex))
+})
+
+
+(def removeFirst {
+	(self:remove (self:lastIndex))
 })
