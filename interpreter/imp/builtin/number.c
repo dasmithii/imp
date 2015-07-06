@@ -487,6 +487,83 @@ static Object *rounded_(Runtime *runtime
 }
 
 
+static Object *square_(Runtime *runtime
+	                 , Object *context
+	                 , Object *self
+	                 , int argc
+	                 , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "Number:square does not accept arguments");
+	}
+	const double raw = ImpNumber_getRaw(self);
+	ImpNumber_setRaw(self, raw * raw);
+	return NULL;
+}
+
+static Object *squared_(Runtime *runtime
+	                  , Object *context
+	                  , Object *self
+	                  , int argc
+	                  , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "Number:squared does not accept arguments");
+	}
+	Object *r = Runtime_callMethod(runtime
+		                         , context
+		                         , self
+		                         , "$"
+		                         , 0
+		                         , NULL);
+	Runtime_callMethod(runtime
+		             , context
+		             , r
+		             , "square"
+		             , 0
+		             , NULL);
+	return r;
+}
+
+
+
+static Object *cube_(Runtime *runtime
+	               , Object *context
+	               , Object *self
+	               , int argc
+	               , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "Number:floor does not accept arguments");
+	}
+	const double raw = ImpNumber_getRaw(self);
+	ImpNumber_setRaw(self, raw * raw * raw);
+	return NULL;
+}
+
+static Object *cubed_(Runtime *runtime
+	               , Object *context
+	               , Object *self
+	               , int argc
+	               , Object **argv){
+	if(argc != 0){
+		Runtime_throwString(runtime, "Number:floor does not accept arguments");
+	}
+	Object *r = Runtime_callMethod(runtime
+		                         , context
+		                         , self
+		                         , "$"
+		                         , 0
+		                         , NULL);
+	Runtime_callMethod(runtime
+		             , context
+		             , r
+		             , "cube"
+		             , 0
+		             , NULL);
+	return r;
+}
+
+
+
+
 static Object *hashCode_(Runtime *runtime
 	                   , Object *context
 	                   , Object *self
@@ -536,6 +613,12 @@ void ImpNumber_init(Object *self, Runtime *runtime){
 	Runtime_registerCMethod(runtime, self, "floored", floored_);
 	Runtime_registerCMethod(runtime, self, "round", round_);
 	Runtime_registerCMethod(runtime, self, "rounded", rounded_);
+
+	Runtime_registerCMethod(runtime, self, "square", square_);
+	Runtime_registerCMethod(runtime, self, "squared", squared_);
+	Runtime_registerCMethod(runtime, self, "cube", cube_);
+	Runtime_registerCMethod(runtime, self, "cubed", cubed_);
+
 
 	ImpNumber_setRaw(self, 0);
 }
