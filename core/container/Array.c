@@ -18,29 +18,6 @@ static int getSize(Object *array){
 }
 
 
-
-Object *Array_clone(Runtime *runtime
-	              , Object *context
-	              , Object *base
-	              , int argc
-	              , Object **argv){
-	if(argc != 0){
-		Runtime_throwString(runtime, "Array:~ does not accept arguments");
-	}
-
-	Object *r = Runtime_simpleClone(runtime, base);
-	Object_reference(r);
-
-	Object *size = Runtime_make(runtime, Number);
-	ImpNumber_setRaw(size, 0);
-	Object_putShallow(r, "size", size);
-	Object_putDataShallow(r, "__data", NULL);
-
-	Object_unreference(r);
-	return r;
-}
-
-
 Object *Array_at(Runtime *runtime
 	           , Object *context
 	           , Object *self
@@ -114,13 +91,16 @@ Object *Array_resizeTo(Runtime *runtime
 		Object_putDataDeep(self, "__data", NULL);
 	} else {
 		Object **oldBuffer = getBuffer(self);
-		Object **newBuffer = calloc(newSize, sizeof(Object*));
+		Object **newBuffer = malloc(newSize * sizeof(Object*));  // TODO: use realloc here
 		if(!newBuffer){
 			Runtime_throwFormatted(runtime, "Array:resize failed to allocate buffer of length %s", newSize);
 		}
 
 		memcpy(newBuffer, oldBuffer, oldSize * sizeof(Object*));
-		Object_putDataDeep(self, "__data", newBuffer);
+		for(int i = oldSize; i < newSize; i++){
+			newBuffer[i] = runtime->nil;
+		}
+		Object_putDataDeep(self, "__data", newBuffer); // implicitly frees oldBuffer
 	}
 
 	ImpNumber_setRaw(Object_getDeep(self, "size"), (double) newSize);
@@ -181,9 +161,12 @@ Object *Array_withSize(Runtime *runtime
 
 	Object **data = NULL;
 	if(size){
-		data = calloc(size, sizeof(Object*));
+		data = malloc(size * sizeof(Object*));
 		if(!data){
 			Runtime_throwString(runtime, "Array:withSize ... malloc failed");
+		}
+		for(int i = 0; i < size; i++){
+			data[i] = runtime->nil;
 		}
 	}
 	Object_putDataShallow(r, "__data", data);

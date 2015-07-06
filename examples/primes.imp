@@ -31,7 +31,7 @@
 })
 
 (def i 3)
-(while {i:< 100} {
+(while {i:< max} {
 	(if (check i) {
 		(primes:append (i:$))
 		(io:writeLine i)
