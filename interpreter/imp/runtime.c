@@ -362,7 +362,7 @@ Object *Runtime_executeInContext(Runtime *runtime
 			r = Runtime_make(runtime, Object);
 			Object_reference(r);
 			if(node.contents.non_leaf.argc % 2 != 0){
-				printf("%d\n", node.contents.non_leaf.argc);
+				printf("%zu\n", node.contents.non_leaf.argc);
 				Runtime_throwString(runtime, "object literal requires pairs of inputs");
 			}
 			for(int i = 0; i < node.contents.non_leaf.argc; i += 2){

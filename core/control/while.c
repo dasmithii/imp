@@ -78,7 +78,7 @@ Object *while_activate(Runtime *runtime
 		// check condition
 		Object *c = condition;
 		if(Object_canBeActivated(c)){
-			c = Runtime_activate(runtime, context, condition, 0, NULL);
+			c = Runtime_activateOn(runtime, context, condition, 0, NULL, Object_getDeep(context, "self"));
 		}
 		if(isZero(runtime, context, c)){
 			break;

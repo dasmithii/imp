@@ -74,7 +74,7 @@ Object *if_activate(Runtime *runtime
 	for(int i = 0; i < argc - 1; i += 2){
 		Object *cond = argv[i];
 		if(Object_canBeActivated(cond)){
-			cond = Runtime_activate(runtime, context, cond, 0, NULL);
+			cond = Runtime_activateOn(runtime, context, cond, 0, NULL, Object_getDeep(context, "self"));
 		}
 		if(!isZero(runtime, context, cond)){
 			Object *r = Runtime_activateOn(runtime, context, argv[i+1], 0, NULL, Object_getDeep(context, "self"));

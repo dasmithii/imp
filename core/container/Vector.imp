@@ -55,7 +55,7 @@
 
 
 (def tightenIfNecessary {
-	(if (self:size:< (self:buffer:size:/10)) {
+	(if (self:size:< (self:buffer:size:/ 10)) {
 		(self:tighten)
 	})
 })
@@ -65,8 +65,7 @@
 	(def i (@:at 0))
 	(self:checkIndexBounds i)
 	(def j (i:+ 1))
-	(def sm1 (self:size:- 1))
-	(while (i:< sm1) {
+	(while {j:< self:size} {
 		(self:at= i (self:at j))
 		(i:++)
 		(j:++)
