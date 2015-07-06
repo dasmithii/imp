@@ -7,6 +7,7 @@
 
 
 typedef struct {
+	char file[256];
 	Token *buffer;
 	size_t size;
 	char *error;

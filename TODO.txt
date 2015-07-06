@@ -73,8 +73,6 @@ NOW:
 
  + Make argument expansion/pass
 
- + Maybe make it so callMethod doesn't try underscore 
-
  + Use standardized hash algo for importer
 
  
@@ -83,11 +81,6 @@ NOW:
 MAJOR:
 
  + Design and implement standard library.
-
- + Consolidate memory using a hybrid free list instead of
-   fragmented malloc calls all over the place. Capitalize
-   on repeat object sizes.
-
 
 
 
@@ -120,7 +113,7 @@ MINOR:
 
 MAYBE:
  
- + Make carrots variable expansion operators.
+ + Make carrots variable expansion operators?
 
  + Prototype multiplexing (multiple inheritance).
 

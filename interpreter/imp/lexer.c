@@ -19,14 +19,15 @@
 #include <imp/lexer.h>
 #include <imp/token.h>
 
+#include "position.h"
+
 
 
 
 typedef struct {
 	char *code;
-	char *position;
-	size_t line;
-	size_t column;
+	char *ptr;
+	Position position;
 
 	size_t tokenCount;
 	size_t tokenCapacity;
@@ -41,9 +42,8 @@ static inline Lexer Lexer_of(char *code){
 
 	Lexer r = {
 		.code = code,
-		.position = code,
-		.line = 0,
-		.column = 0,
+		.ptr = code,
+		.position = {.line = 0, .column = 0},
 		.tokenCount = 0,
 		.tokenCapacity = 5
 	};
@@ -59,6 +59,7 @@ static inline Lexer Lexer_of(char *code){
 
 
 static inline void Lexer_register(Lexer *self, Token token){
+	token.position = self->position;
 	// expand token buffer if necessary
 	if(self->tokenCount == self->tokenCapacity){
 		self->tokenCapacity *= 2;
@@ -76,13 +77,13 @@ static inline void Lexer_register(Lexer *self, Token token){
 
 
 static inline void Lexer_shiftRightBy(Lexer *self, int n){
-	self->position += n;
-	self->column += n;
+	self->ptr += n;
+	Position_shift(&self->position, n);
 }
 
 
 static inline bool Lexer_tryWhitespace(Lexer *self){
-	if(*self->position == ' ' || *self->position == '\t'){
+	if(*self->ptr == ' ' || *self->ptr == '\t'){
 		Lexer_shiftRightBy(self, 1);
 		return true;
 	}
@@ -91,10 +92,9 @@ static inline bool Lexer_tryWhitespace(Lexer *self){
 
 
 static inline bool Lexer_tryNewLine(Lexer *self){
-	if(*self->position == '\n'){
-		self->column = 0;
-		self->line++;
-		self->position++;
+	if(*self->ptr == '\n'){
+		Position_newLine(&self->position);
+		self->ptr++;
 		return true;
 	}
 	return false;
@@ -102,10 +102,10 @@ static inline bool Lexer_tryNewLine(Lexer *self){
 
 
 static inline bool Lexer_tryComment(Lexer *self){
-	if(self->position[0] == '/' && 
-	   self->position[1] == '/'){
+	if(self->ptr[0] == '/' && 
+	   self->ptr[1] == '/'){
 		Lexer_shiftRightBy(self, 2);
-		while(*self->position && self->position[0] != '\n'){
+		while(*self->ptr && self->ptr[0] != '\n'){
 			Lexer_shiftRightBy(self, 1);
 		}
 		return true;
@@ -123,7 +123,7 @@ static inline bool Lexer_tryGrouping(Lexer *self){
 			return true;                        \
 		}
 
-	switch(*self->position){
+	switch(*self->ptr){
 	PAIRING('(', SOFT_OPEN)
 	PAIRING(')', SOFT_CLOSE)
 	PAIRING('[', HARD_OPEN)
@@ -137,14 +137,14 @@ static inline bool Lexer_tryGrouping(Lexer *self){
 
 
 static inline bool Lexer_tryNumber(Lexer *self){
-	char *c = self->position;
+	char *c = self->ptr;
 	if(*c == '-') {
 		++c;
 	}
 	if(isdigit(c[0]) || (c[0] == '.' && isdigit(c[1]))){
 		Token t = {.type = TOKEN_NUMBER};
-		char *begin = self->position;
-		t.data.number = strtod(begin, &self->position);
+		char *begin = self->ptr;
+		t.data.number = strtod(begin, &self->ptr);
 		Lexer_register(self, t);
 		return true;
 	}
@@ -199,19 +199,19 @@ bool isValidRouteText(char *text){
 
 
 static inline bool Lexer_tryRoute(Lexer *self){
-	if(isValidRouteBegin(self->position[0])){
+	if(isValidRouteBegin(self->ptr[0])){
 		Token token = {.type = TOKEN_ROUTE};
-		char *begin = self->position;
-		while(isValidRouteChar(self->position[0])){
+		char *begin = self->ptr;
+		while(isValidRouteChar(self->ptr[0])){
 			Lexer_shiftRightBy(self, 1);
 		}
-		token.data.text = malloc(1 + self->position - begin);
+		token.data.text = malloc(1 + self->ptr - begin);
 		if(!token.data.text){
 			self->error = "failed malloc";
 			return true;
 		}
-		token.data.text[self->position - begin] = 0;
-		memcpy(token.data.text, begin, (self->position - begin));
+		token.data.text[self->ptr - begin] = 0;
+		memcpy(token.data.text, begin, (self->ptr - begin));
 		Lexer_register(self, token);
 		return true;
 	}
@@ -220,28 +220,28 @@ static inline bool Lexer_tryRoute(Lexer *self){
 
 
 static inline bool Lexer_tryString(Lexer *self){
-	char d = self->position[0]; // delimitter
+	char d = self->ptr[0]; // delimitter
 	if(d == '"' || d == '\'' || d == '`'){
 		Lexer_shiftRightBy(self, 1);
 
 		Token token = {.type = TOKEN_STRING};
-		char *begin = self->position;
+		char *begin = self->ptr;
 
-		while(self->position[0] != d){
-			if(self->position[0] == 0){
+		while(self->ptr[0] != d){
+			if(self->ptr[0] == 0){
 				self->error = "unterminated string";
 				return true;
 			}
 			Lexer_shiftRightBy(self, 1);
 		}
 
-		token.data.text = malloc(1 + self->position - begin);
+		token.data.text = malloc(1 + self->ptr - begin);
 		if(!token.data.text){
 			self->error = "failed malloc";
 			return true;
 		}
-		token.data.text[self->position - begin] = 0;
-		memcpy(token.data.text, begin, (self->position - begin));
+		token.data.text[self->ptr - begin] = 0;
+		memcpy(token.data.text, begin, (self->ptr - begin));
 		Lexer_register(self, token);
 
 		Lexer_shiftRightBy(self, 1);
@@ -271,7 +271,7 @@ static inline void Lexer_run(Lexer *self){
 	Token t = {.type = TOKEN_SOFT_OPEN};
 	Lexer_register(self, t);
 
-	while(*self->position){
+	while(*self->ptr){
 		Lexer_step(self);
 		if(self->error){
 			return;
@@ -297,7 +297,7 @@ Tokenization lex(char *code){
 	};
 	if(lexer.error){
 		r.error = malloc(strlen(r.error) + 32);
-		sprintf(r.error, "line %zu, column %zu: %s", lexer.line, lexer.column, lexer.error);
+		sprintf(r.error, "line %zu, column %zu: %s", lexer.position.line, lexer.position.column, lexer.error);
 	}
 
 	return r;

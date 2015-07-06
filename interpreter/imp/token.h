@@ -3,6 +3,8 @@
 
 #include <stdbool.h>
 
+#include "position.h"
+
 
 
 
@@ -22,6 +24,7 @@ typedef enum {
 
 
 typedef struct {
+	Position position;
 	TokenType type;
 	union {
 		char *text;
