@@ -31,6 +31,7 @@ typedef struct {
 	Object *Array;
 	Object *Closure;
 	Object *Route;
+	Object *nil;
 
 	Object *Importer; // activate-able import object
 	Object *imports; // cache of dlls

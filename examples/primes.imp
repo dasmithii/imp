@@ -14,9 +14,13 @@
 
 (def check {
 	(def n (@:at 0))
+	(def nRoot (n:squareRoot))
 	(def i 0)
 	(while {i:< primes:size} {
 		(def p (primes:at i))
+		(if (nRoot:< p) {
+			(break)
+		})
 		(def mp (n:% p))
 		(if (mp:!) {
 			(return 0)

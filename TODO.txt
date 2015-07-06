@@ -1,3 +1,11 @@
++ Generators + yielding
+
++ Provide mechanism for creating control structures (which
+  handle breaks and continues, etc).
+
+  On that note, implement breaks and continues better.
+
+
 Reworking GC _collect and _mark
 
  + might need to make objects marked by default to prevent
@@ -37,8 +45,6 @@ NOW:
  + Make Number:asString accept format
 
  + Check arguments on core .imp files
-
- + Make primes example stop at square route.
 
  + string methods
 

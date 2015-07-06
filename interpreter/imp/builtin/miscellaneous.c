@@ -83,5 +83,7 @@ void ImpMisc_init(Object *self, Runtime *runtime){
 	Runtime_executeSourceInContext(runtime
 		                         , "(def nil:asString 'nil')"
 		                         "\n(def nil:? {return 0})"
-		                         , runtime->Object);
+		                         , runtime->root_scope);
+	runtime->nil = Object_getShallow(runtime->root_scope, "nil");
+	Object_reference(runtime->nil); // nil is eternal
 }
