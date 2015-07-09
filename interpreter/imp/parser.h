@@ -1,6 +1,8 @@
 #ifndef IMP_PARSER_H_
 #define IMP_PARSER_H_
 
+#include <stdbool.h>
+
 #include <imp/lexer.h>
 #include <imp/token.h>
 
@@ -18,13 +20,9 @@ typedef enum {
 
 typedef struct ParseNode {
 	ParseNodeType type;
-	union {
-		Token *token;
-		struct {
-			size_t argc;
-			struct ParseNode *argv;
-		} non_leaf;
-	} contents;
+	Token *token;            // could use union here... fuck it though
+	size_t argc;             //   it's simpler this way
+	struct ParseNode *argv;
 } ParseNode;
 
 
@@ -49,6 +47,8 @@ ParseNode ParseNode_deepCopy(ParseNode *self);
 
 // for parse nodes without a parent tree
 void ParseNode_deepClean(ParseNode *self);
+
+bool ParseNode_isContextualRoute(ParseNode *self);
 
 
 #endif

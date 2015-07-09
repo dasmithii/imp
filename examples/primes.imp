@@ -21,8 +21,7 @@
 		(if (nRoot:< p) {
 			(break)
 		})
-		(def mp (n:% p))
-		(if (mp:!) {
+		(if ((n:% p):!) {
 			(return 0)
 		})
 		(i:++)

@@ -68,7 +68,7 @@ Object *Runtime_activateOn(Runtime *runtime
 			}
 			argv2[0] = origin;
 			for(int i = 1; i < argc2; i++){
-				argv2[i] = unrouteInContext(argv[i - 1], context);
+				argv2[i] = unroute(argv[i - 1]);
 				Object_reference(argv2[i]);
 			}
 
@@ -87,7 +87,7 @@ Object *Runtime_activateOn(Runtime *runtime
 				abort();
 			}
 			for(int i = 0; i < argc; i++){
-				argv2[i] = unrouteInContext(argv[i], context);
+				argv2[i] = unroute(argv[i]);
 				Object_reference(argv2[i]);
 			}
 
@@ -233,6 +233,7 @@ static Object *Runtime_tokenToObject(Runtime *self, Object *scope, Token *token)
 			Object *route = Runtime_clone(self, self->Route);
 			assert(token->data.text);
 			ImpRoute_setRaw(route, token->data.text);
+			ImpRoute_setContext(route, scope);
 			r = route;
 			break;
 		}
@@ -283,37 +284,27 @@ Object *Runtime_executeInContext(Runtime *runtime
 
 	Object_reference(scope);
 
-	// // check if block has only one statement
-	// if(node.type == BLOCK_NODE  && node.contents.non_leaf.argc == 1 &&
-	//    (node.contents.non_leaf.argv[0].type != LEAF_NODE ||
-	//    	node.contents.non_leaf.argv[0].contents.token->type != TOKEN_SOFT_OPEN)){
-	// 	node.contents.non_leaf.argv[0].type = CALL_NODE;
-	// }
 
 	switch(node.type){
 	case LEAF_NODE:
 		{
-			r = Runtime_tokenToObject(runtime, scope, node.contents.token);
+			r = Runtime_tokenToObject(runtime, scope, node.token);
+			if(Token_isContextualRoute(node.token)){
+				Object_reference(r);
+				ImpRoute_setContext(r, Runtime_executeInContext(runtime, scope, node.argv[0]));
+				Object_unreference(r);
+			}
 			break;
 		}
 	case BLOCK_NODE:
 		{
 			Runtime_clearReturnValue(runtime);
 
-			// // check if block has only one statement
-			// if(node.contents.non_leaf.argc >= 1  &&
-			//    (node.contents.non_leaf.argv[0].type != LEAF_NODE ||
-			//    	(node.contents.non_leaf.argv[0].contents.token->type != TOKEN_SOFT_OPEN &&
-			//    	 node.contents.non_leaf.argv[0].contents.token->type != TOKEN_HARD_OPEN))){
-			// 	printf("hey\n");
-			// 	ParseNode_print(&node.contents.non_leaf.argv[0]);
-			// }
 
-
-			for(int i = 0; i < node.contents.non_leaf.argc; i++){
+			for(int i = 0; i < node.argc; i++){
 				Runtime_executeInContext(runtime
 					                   , scope
-					                   , node.contents.non_leaf.argv[i]);
+					                   , node.argv[i]);
 				if(runtime->returnWasCalled){
 					break;
 				}
@@ -325,21 +316,21 @@ Object *Runtime_executeInContext(Runtime *runtime
 	case CALL_NODE:
 		{
 			// iterate through parse node... TODO: mark these in collection
-			Object **subs = malloc(node.contents.non_leaf.argc * sizeof(Object*));
+			Object **subs = malloc(node.argc * sizeof(Object*));
 			if(!subs){
 				abort();
 			}
-			for(int i = 0; i < node.contents.non_leaf.argc; i++){
+			for(int i = 0; i < node.argc; i++){
 				subs[i] = Runtime_executeInContext(runtime
 					                             , scope
-					                             , node.contents.non_leaf.argv[i]);
+					                             , node.argv[i]);
 
 				if(subs[i]){
 					Object_reference(subs[i]);
 				}
 			}
 
-			const int argc = node.contents.non_leaf.argc - 1;
+			const int argc = node.argc - 1;
 			Object **argv =  subs + 1;
 
 			r = Runtime_activate(runtime
@@ -348,7 +339,7 @@ Object *Runtime_executeInContext(Runtime *runtime
 	               , argc
 	               , argv);
 
-			for(int i = 0; i < node.contents.non_leaf.argc; i++){
+			for(int i = 0; i < node.argc; i++){
 				if(subs[i]){
 					Object_unreference(subs[i]);
 				}
@@ -361,18 +352,18 @@ Object *Runtime_executeInContext(Runtime *runtime
 		{
 			r = Runtime_make(runtime, Object);
 			Object_reference(r);
-			if(node.contents.non_leaf.argc % 2 != 0){
-				printf("%zu\n", node.contents.non_leaf.argc);
+			if(node.argc % 2 != 0){
+				printf("%zu\n", node.argc);
 				Runtime_throwString(runtime, "object literal requires pairs of inputs");
 			}
-			for(int i = 0; i < node.contents.non_leaf.argc; i += 2){
+			for(int i = 0; i < node.argc; i += 2){
 				Object *args[2];
-				args[0] = Runtime_executeInContext(runtime, scope, node.contents.non_leaf.argv[i]);
+				args[0] = Runtime_executeInContext(runtime, scope, node.argv[i]);
 				if(BuiltIn_id(args[0]) != BUILTIN_ROUTE){
 					Runtime_throwString(runtime, "object literals require atom-value pairs");
 				}
 				Object_reference(args[0]);
-				args[1] = Runtime_executeInContext(runtime, scope, node.contents.non_leaf.argv[i+1]);
+				args[1] = Runtime_executeInContext(runtime, scope, node.argv[i+1]);
 				Object_unreference(args[0]);
 				Runtime_callMethod(runtime
 					             , scope

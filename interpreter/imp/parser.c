@@ -24,6 +24,8 @@ static int ParseNode_init(ParseTree *parent
 	assert(begin);
 	assert(end);
 
+	node->argc = 0;
+
 	// check if leaf node
 	if(end == begin + 1){
 		if(!Token_isUnary(begin) && !Token_isLiteral(begin)){
@@ -31,7 +33,7 @@ static int ParseNode_init(ParseTree *parent
 			return 1;
 		}
 		node->type = LEAF_NODE;
-		node->contents.token = begin;
+		node->token = begin;
 		return 0;
 	}
 
@@ -67,10 +69,10 @@ static int ParseNode_init(ParseTree *parent
 			return 1;
 		}
 		node->type = CALL_NODE;
-		node->contents.non_leaf.argc = 2;
-		node->contents.non_leaf.argv = malloc(2 * sizeof(ParseNode));
-		return ParseNode_init(parent, node->contents.non_leaf.argv, begin, begin + 1)     ||
-		       ParseNode_init(parent, node->contents.non_leaf.argv + 1, begin + 1, end);
+		node->argc = 2;
+		node->argv = malloc(2 * sizeof(ParseNode));
+		return ParseNode_init(parent, node->argv, begin, begin + 1)     ||
+		       ParseNode_init(parent, node->argv + 1, begin + 1, end);
 	}
 
 	// remove beginning and trailing grouping operators
@@ -93,16 +95,32 @@ static int ParseNode_init(ParseTree *parent
 	if(!subArray){
 		abort();
 	}
-	#define IMP_REGISTER_PARSED(node)    \
-		if(subCount == subCapacity){     \
-			subCapacity *= 2;            \
-			subArray = realloc(subArray, subCapacity * sizeof(ParseNode)); \
-			if(!subArray){               \
-				abort();                 \
-			}                            \
-		}                                \
-		subArray[subCount] = node;       \
-		subCount++
+	#define IMP_REGISTER_PARSED(node)                  \
+		if(ParseNode_isContextualRoute(&node)){        \
+			if(subCount == 0){                         \
+				printf("ERROR ERROR: invalid :route"); \
+				exit(1);                               \
+			} else {                                   \
+				node.argc = 1;                         \
+				node.argv = malloc(sizeof(ParseNode)); \
+				if(!node.argv){                             \
+					abort();                           \
+				}                                      \
+				node.argv[0] = subArray[subCount - 1]; \
+				subArray[subCount - 1] = node;         \
+			}                                          \
+		} else {                                       \
+			if(subCount == subCapacity){               \
+				subCapacity *= 2;                      \
+				subArray = realloc(subArray, subCapacity * sizeof(ParseNode)); \
+				if(!subArray){                         \
+					abort();                           \
+				}                                      \
+			}                                          \
+			subArray[subCount] = node;                 \
+			subCount++;                                \
+		}
+
 
 
 	int depth = 0;
@@ -122,7 +140,7 @@ static int ParseNode_init(ParseTree *parent
 				if(ParseNode_init(parent, &node, prev, it)){
 					return 1;
 				}
-				IMP_REGISTER_PARSED(node);
+				IMP_REGISTER_PARSED(node)
 			}
 
 			// Mark beginning of next sub grouping.
@@ -157,7 +175,7 @@ static int ParseNode_init(ParseTree *parent
 	if(ParseNode_init(parent, &final, prev, it)){
 		return 1;
 	}
-	IMP_REGISTER_PARSED(final);
+	IMP_REGISTER_PARSED(final)
 
 
 	if(beginType == TOKEN_CURLY_OPEN){
@@ -167,33 +185,35 @@ static int ParseNode_init(ParseTree *parent
 				// translate from {<code>} to {(return (<code>))}
 
 
-				node->contents.non_leaf.argc = 1;
-				node->contents.non_leaf.argv = malloc(sizeof(ParseNode));
+				node->argc = 1;
+				node->argv = malloc(sizeof(ParseNode));
 				// TODO: check return.
 		
-				ParseNode *rn = node->contents.non_leaf.argv;
-				rn->contents.non_leaf.argc = 2;
-				rn->contents.non_leaf.argv = malloc(2 * sizeof(ParseNode));
+				ParseNode *rn = node->argv;
+				rn->argc = 2;
+				rn->argv = malloc(2 * sizeof(ParseNode));
 				// TODO: check return.
 				rn->type = CALL_NODE;
 
-				ParseNode *rnav = rn->contents.non_leaf.argv;
+				ParseNode *rnav = rn->argv;
 
 
 				rnav[0].type = LEAF_NODE;
-				rnav[0].contents.token = &RETURN_TOKEN;
+				rnav[0].token = &RETURN_TOKEN;
+				rnav[0].argc = 0;
 
 				rnav[1].type = CALL_NODE;
-				rnav[1].contents.non_leaf.argc = subCount;
-				rnav[1].contents.non_leaf.argv = subArray;
+				rnav[1].argc = subCount;
+				rnav[1].argv = subArray;
 	
 				return 0;
 			}
 		}
 	}
 
-	node->contents.non_leaf.argc = subCount;
-	node->contents.non_leaf.argv = subArray;
+	// TODO: realloc subArray to minimize memory used
+	node->argc = subCount;
+	node->argv = subArray;
 	return 0;
 }
 
@@ -220,17 +240,14 @@ int ParseTree_init(ParseTree *tree, char *code){
 }
 
 
-static void ParseNode_clean(ParseNode *node){
-	assert(node);
+static void ParseNode_clean(ParseNode *self){
+	assert(self);
 
-	if(node->type != LEAF_NODE){
-		const size_t argc = node->contents.non_leaf.argc;
-		if(argc > 0){
-			for(int i = 0; i < argc; ++i){
-				ParseNode_clean(node->contents.non_leaf.argv + i);
-			}
-			free(node->contents.non_leaf.argv);
+	if(self->argc){
+		for(int i = 0; i < self->argc; ++i){
+			ParseNode_clean(self->argv + i);
 		}
+		free(self->argv);
 	}
 }
 
@@ -263,13 +280,13 @@ void ParseNode_print(ParseNode *self){
 	}
 
 	if(self->type == LEAF_NODE){
-		Token_print(self->contents.token);
+		Token_print(self->token);
 	} else {
-		if(self->contents.non_leaf.argc > 0){
-			ParseNode_print(self->contents.non_leaf.argv);
-			for(int i = 1; i < self->contents.non_leaf.argc; i++){
+		if(self->argc > 0){
+			ParseNode_print(self->argv);
+			for(int i = 1; i < self->argc; i++){
 				printf(" ");
-				ParseNode_print(self->contents.non_leaf.argv + i);
+				ParseNode_print(self->argv + i);
 			}
 		}
 	}
@@ -302,17 +319,20 @@ ParseNode ParseNode_deepCopy(ParseNode *self){
 	ParseNode r;
 	r.type = self->type;
 	if(r.type == LEAF_NODE){
-		r.contents.token = Token_copy(self->contents.token);
-	} else {
-		size_t argc = self->contents.non_leaf.argc;
-		r.contents.non_leaf.argc = self->contents.non_leaf.argc;
-		r.contents.non_leaf.argv = malloc(argc * sizeof(ParseNode));
-		if(!r.contents.non_leaf.argv){
+		r.token = Token_copy(self->token);
+	}
+
+	r.argc = self->argc;
+	if(r.argc){
+		r.argv = malloc(r.argc * sizeof(ParseNode));
+		if(!r.argv){
 			abort();
 		}
-		for(int i = 0; i < argc; i++){
-			r.contents.non_leaf.argv[i] = ParseNode_deepCopy(self->contents.non_leaf.argv + i);
+		for(int i = 0; i < r.argc; i++){
+			r.argv[i] = ParseNode_deepCopy(self->argv + i);
 		}
+	} else {
+		r.argv = NULL;
 	}
 	return r;
 }
@@ -325,15 +345,20 @@ void ParseNode_deepClean(ParseNode *self){
 	assert(self);
 
 	if(self->type == LEAF_NODE){
-		Token_free(self->contents.token);
-		self->contents.token = NULL;
-	} else {
-		size_t argc = self->contents.non_leaf.argc;
-		for(int i = 0; i < argc; i++){
-			ParseNode_deepClean(self->contents.non_leaf.argv + i);
-		}
-		free(self->contents.non_leaf.argv);
-		self->contents.non_leaf.argc = 0;
+		Token_free(self->token);
 	}
+
+	if(self->argc > 0){
+		for(int i = 0; i < self->argc; i++){
+			ParseNode_deepClean(self->argv + i);
+		}
+		free(self->argv);
+	}
+}
+
+
+bool ParseNode_isContextualRoute(ParseNode *self){
+	return self->type == LEAF_NODE 
+	    && Token_isContextualRoute(self->token);
 }
 

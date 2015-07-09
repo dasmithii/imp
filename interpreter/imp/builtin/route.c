@@ -8,9 +8,19 @@
 #include <imp/lexer.h>
 
 
-char *ImpRoute_getRaw(Object *self){
+typedef struct {
+	char *text;
+	Object *context;
+} Internal;
+
+static Internal *getInternal(Object *self){
 	assert(Object_isValid(self));
-	return (char*) Object_getDataDeep(self, "__data");
+	return (Internal*) Object_getDataDeep(self, "__data");
+}
+
+
+char *ImpRoute_getRaw(Object *self){
+	return getInternal(self)->text;
 }
 
 
@@ -24,14 +34,17 @@ bool ImpRoute_isValid(Object *obj){
 void ImpRoute_setRaw(Object *self, char *text){
 	assert(self);
 	assert(isValidRouteText(text));
-	Object_putDataDeep(self, "__data", strdup(text));
+	Internal *i = getInternal(self);
+	if(i->text){
+		free(i->text);
+	}
+	i->text = strdup(text);
 }
 
 
 void ImpRoute_print(Object *self){
 	assert(ImpRoute_isValid(self));
-	char *data = Object_getDataDeep(self, "__data");
-	printf("%s", data);
+	printf("%s", ImpRoute_getRaw(self));
 }
 
 
@@ -47,7 +60,7 @@ static Object *print_(Runtime *runtime
 	if(argc != 0){
 		Runtime_throwString(runtime, "Route:print does not accept arguments");
 	} else {
-		Runtime_print(runtime, context, ImpRoute_mapping(caller, context));
+		Runtime_print(runtime, context, ImpRoute_mapping(caller));
 	}
 
 	return NULL;	
@@ -75,8 +88,37 @@ static Object *clone_(Runtime *runtime
 	}
 
 	Object *r = Runtime_simpleClone(runtime, caller);
-	Object_putDataShallow(r, "__data", strdup(ImpRoute_getRaw(caller)));
+	Internal *i = malloc(sizeof(Internal));
+	i->text = NULL;
+	i->context = NULL;
+	Object_putDataShallow(r, "__data", i);
 	return r;
+}
+
+
+static Object *mark_(Runtime *runtime
+	                , Object *context
+	                , Object *self
+	                , int argc
+	                , Object **argv){
+	assert(runtime);
+	assert(Object_isValid(self));
+
+	if(argc != 0){
+		Runtime_throwString(runtime, "Route:_mark does not accept arguments");
+		return NULL;
+	}
+
+	Internal *i = getInternal(self);
+	if(i){
+		Runtime_callMethod(runtime
+			             , context
+			             , i->context
+			             , "_markRecursively"
+			             , 0
+			             , NULL);
+	}
+	return NULL;
 }
 
 
@@ -92,8 +134,8 @@ static Object *activate_(Runtime *runtime
 	Object *r = NULL;
 	bool found = true;
 
-	Object *mapping = ImpRoute_mapping(caller, context);
-	Object *submapping = ImpRoute_submapping(caller, context);
+	Object *mapping = ImpRoute_mapping(caller);
+	Object *submapping = ImpRoute_submapping(caller);
 	if(!submapping){
 		submapping = mapping;
 	}
@@ -126,15 +168,20 @@ void ImpRoute_init(Object *self, Runtime *runtime){
 	assert(self);
 	BuiltIn_setId(self, BUILTIN_ROUTE);
 	Runtime_registerCMethod(runtime, self, "~", clone_);
+	Runtime_registerCMethod(runtime, self, "_markInternalsRecursively", mark_);
 	Runtime_registerPrivelegedCMethod(runtime, self, "print", print_);
 	Object_registerCActivator(self, activate_);
 	Object_putDataShallow(self, "__privilege", NULL);
-	ImpRoute_setRaw(self, "defaultRoute");
 }
 
 
 int ImpRoute_argc_(char *raw){
 	assert(raw);
+
+	while(*raw == ':'){
+		++raw;
+	}
+
 	int r = 1;
 	while(*raw){
 		if(*raw == ':'){
@@ -156,6 +203,10 @@ void ImpRoute_argv_(char *raw, int i, char *dest){
 	assert(raw);
 	assert(i < ImpRoute_argc_(raw));
 	assert(dest);
+
+	while(*raw == ':'){
+		++raw;
+	}
 
 	int c = 0;
 	while(c < i){
@@ -219,30 +270,35 @@ Object *ImpRoute_mapping_(char *self, Object *context){
 }
 
 
-Object *ImpRoute_mapping(Object *self, Object *context){
+Object *ImpRoute_mapping(Object *self){
 	assert(ImpRoute_isValid(self));
-	assert(Object_isValid(context));
-	return ImpRoute_mapping_(ImpRoute_getRaw(self), context);
+	const Internal *const i = getInternal(self);
+	return ImpRoute_mapping_(i->text, i->context);
 }
 
 
-Object *ImpRoute_submapping(Object *self, Object *context){
+Object *ImpRoute_submapping(Object *self){
 	assert(ImpRoute_isValid(self));
-	assert(Object_isValid(context));
-	return ImpRoute_submapping_(ImpRoute_getRaw(self), context);
+	const Internal *const i = getInternal(self);
+	return ImpRoute_submapping_(i->text, i->context);
 }
 
 
-Object *unrouteInContext(Object *obj, Object *ctx){
+Object *unroute(Object *obj){
 	if(!obj){
 		return NULL;
 	}
 	assert(Object_isValid(obj));
-	assert(Object_isValid(ctx));
 
 	if(BuiltIn_id(obj) == BUILTIN_ROUTE){
-		return ImpRoute_mapping(obj, ctx);
+		return ImpRoute_mapping(obj);
 	}
 	return obj;
 }
+
+
+void ImpRoute_setContext(Object *self, Object *context){
+	getInternal(self)->context = context;
+}
+// TODO: mark 
 

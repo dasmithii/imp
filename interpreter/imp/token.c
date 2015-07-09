@@ -161,3 +161,9 @@ bool Token_isLiteral(Token *self){
 	       self->type == TOKEN_ROUTE    ||
 	       self->type == TOKEN_NUMBER;
 }
+
+
+bool Token_isContextualRoute(Token *self){
+	return self->type == TOKEN_ROUTE
+	    && self->data.text[0] == ':';
+}

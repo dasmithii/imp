@@ -1,10 +1,5 @@
-ROUTES
-
-  give route->internal a ImpClosure field which, when evaled,
-  returns the real context. if null do regular
-
-  
-
++ Repeat is 25% slower than while. Figure out how to 
+  improve this.
 
 + Make subdirectory 'abstract' in 'core/container'
 
@@ -21,11 +16,11 @@ Reworking GC _collect and _mark
  + might need to make objects marked by default to prevent
    collection of objects created within _collect methods
 
-Make prefix operators work
-Make method calls on expressions work
-Runtime_executeSourceInContextWithArguments
+ + Make prefix operators work
 
-Make import a method
+ + Runtime_executeSourceInContextWithArguments
+
+ + Make import a method
 
  + Make it so files can import eachother (lazy execution)
  + Make libraries compile w/o debug symbols. Go faster
@@ -104,8 +99,6 @@ MEDIUM:
 
  + Handle exception catch cleanups.
  
- + Replace slot system with legit accessor.
-
  + Prefix operators...
 
  + Generators

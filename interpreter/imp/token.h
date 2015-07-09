@@ -52,5 +52,6 @@ bool Token_isGrouping(Token *self);
 bool Token_isTextual(Token *self);
 bool Token_isLiteral(Token *self);
 
+bool Token_isContextualRoute(Token *self);
 
 #endif

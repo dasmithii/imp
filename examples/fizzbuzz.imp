@@ -7,13 +7,11 @@
 
 (while {i:<= 100} {
 	(def shouldPrintNumber 1)
-	(def m3 (i:% 3))
-	(def m5 (i:% 5))
-	(if (m3:== 0) {
+	(if ((i:% 3):!) {
 		(io:write 'Fizz')
 		(shouldPrintNumber:= 0)
 	})
-	(if (m5:== 0) {
+	(if ((i:% 5):!) {
 		(io:write 'Buzz')
 		(shouldPrintNumber:= 0)
 	})
