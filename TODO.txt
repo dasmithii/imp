@@ -1,3 +1,13 @@
+ROUTES
+
+  give route->internal a ImpClosure field which, when evaled,
+  returns the real context. if null do regular
+
+  
+
+
++ Make subdirectory 'abstract' in 'core/container'
+
 + Generators + yielding
 
 + Provide mechanism for creating control structures (which
