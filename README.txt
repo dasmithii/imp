@@ -32,8 +32,8 @@ Tutorial
 
                        Object Literals
 
-    Arbitrary objects can be formed surrounding key-value pairs
-    with hard brackets:
+    Arbitrary objects can be formed by surrounding key-value
+    pairs with hard brackets:
 
       >  (def someObject [
              field1 'I am a field.'
