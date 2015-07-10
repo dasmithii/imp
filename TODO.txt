@@ -1,133 +1,98 @@
-+ Repeat is 25% slower than while. Figure out how to 
-  improve this.
-
-+ Make subdirectory 'abstract' in 'core/container'
-
-+ Generators + yielding
-
-+ Provide mechanism for creating control structures (which
-  handle breaks and continues, etc).
-
-  On that note, implement breaks and continues better.
+BIG:
+ + Concurrency.
+ + Exceptions.
 
 
-Reworking GC _collect and _mark
 
- + might need to make objects marked by default to prevent
-   collection of objects created within _collect methods
+OBJECT LITERALS:
 
- + Make prefix operators work
-
- + Runtime_executeSourceInContextWithArguments
-
- + Make import a method
-
- + Make it so files can import eachother (lazy execution)
- + Make libraries compile w/o debug symbols. Go faster
+ + Fix bug where the wrong 'self' value is being passed.
+ + Add optional final closure argument for initialization
+   processes.
 
 
- + Maybe optimize loops to re-use scopes
+
+CONTROL STRUCTURES:
+ 
+ + Repeat is 25% slower than while. Figure out how to 
+   improve this.
 
 
-BUG: object litteral not passing correct 'self'
 
-NOW:
+DATA STRUCTURES:
 
- + use <= for return
+ + Make subdirectory 'abstract' in 'core/container'. Define
+   abstract structures. Make a few implementations of them.
+ + Provide mechanism for creating control structures (which
+   handle breaks and continues, etc).
+ + Add support for break and continue calls in nested
+   loops.
 
- + Common ancestor methods
 
- + Make lexer store token texts contiguously
 
- + Use varargs on Runtime_callMethod
+MODULES:
 
+ + Functional programming.
+ + Networking.
+ + Regex.
+ + Testing.
+
+
+
+MISCELANEOUS:
+
+ + Generators + yielding
+ + Make importer cache symbols.
+ + Make import a method.
+ + Add Runtime_executeSourceInContextWithArguments.
  + Make imports un-import at end of file.
-
- + Make importer cache symbols
-
- + Setup runtime to use init methods in place of clones (like python)
-
  + Make Number:asString accept format
-
- + Check arguments on core .imp files
-
- + string methods
-
- + CLI module
- + tester module
-
- + Make control structures builtin?
-
- + Make address type
-
- + Make legit ':' operator.
-
- + Form iterator idioms
-
- + Add (implements x y) function for interface checking.
-
- + Fix hashmap.
-
- + Make regex module
-
- + Make Go-inspired defer
-
- + Make break and continue accept arguments to deal with
-   nested loops.
-
+ + Setup runtime to use init methods in place of clones (like python).
+ + Make Go-inspired defer.
  + Protect against circular prototype linkage.
 
- + Cap slot name sizes
 
- + Make number type handle infinite precision integers?, binary,
-   and hex, as well as the existing double. Magic.
 
- + Make argument expansion/pass
+PARSER:
+ + Make prefix operators work.
 
- + Use standardized hash algo for importer
 
+
+OPTIMIZATION:
+ + Make libraries compile w/o debug symbols.
+ + Make loops to re-use scopes
+ + Use standardized hash algo for importer.
+
+
+
+PROTOTYPAL PROGRAMMING:
  
-
-
-MAJOR:
-
- + Design and implement standard library.
-
-
-
-MEDIUM:
-
- + Handle exception catch cleanups.
- 
- + Prefix operators...
-
- + Generators
-
+ + Common ancestor methods.
+ + Prototype multiplexing (multiple inheritance).
  + Make composition functions for objects 
-     - &=: and in place (intersection)
-     - |=: or in place (union)
-     - 
-
- + Make clonable Runtime module for executing sub programs
+   - &=: and in place (intersection)
+   - |=: or in place (union) 
 
 
 
-MINOR:
+UNIMPORTANT:
 
- + Improve internal module code scanner. Use regex
-   or something.
-
+ + Cap slot name sizes.
+ + Make clonable Runtime module for executing sub programs.
 
 
 
 MAYBE:
+
+ + Make number type handle infinite precision integers?, binary,
+   and hex, as well as the existing double. Magic.
+
+
  
- + Make carrots variable expansion operators?
-
- + Prototype multiplexing (multiple inheritance).
 
 
 
 
-LATER:
-  + Concurrency!!!
+
+
+
