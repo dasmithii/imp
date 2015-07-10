@@ -145,30 +145,6 @@ static void getNameOfImport(char *dest, char *path){
 }
 
 
-static Object *contextForImportName(Runtime *runtime
-	                                          , Object *context
-	                                          , char *importName){
-	if(Object_hasKeyDeep(context, importName)){
-		Runtime_throwFormatted(runtime, "import collision at '%s'", importName);
-	}
-
-	Object_reference(context);
-	Object *r = Runtime_simpleClone(runtime, context);
-	Object_putShallow(context, importName, r);
-	Object_unreference(context);
-	return r;
-}
-
-
-static Object *contextForImportPath(Runtime *runtime
-	                                          , Object *context
-	                                          , char *importPath){
-	char importName[128];
-	getNameOfImport(importName, importPath);
-	return contextForImportName(runtime, context, importName);
-}
-
-
 static bool endswith(char *whole, char *part){
 	int wholeLen = strlen(whole);
 	int partLen = strlen(part);
@@ -354,44 +330,52 @@ static Object *importWithoutUsingCache(Runtime *runtime, char *modulePath){ // m
 		Runtime_throwString(runtime, "cannot import empty string.");
 	}
 
+	// Create import context.
 	Object *r = Runtime_make(runtime, Object);
 	Object_reference(r); // permanent reference (modules aren't ever collected)
 
+	char buf[128]; // buffer for trying different extentions
+
+	// Try importing local package.
 	if(isDirectory(modulePath)){
 		importPackageTo(runtime, modulePath, r);
 		return r;
 	}
 
-	char buf[128];
+	// Try importing global package.
+	sprintf(buf, "%s/index/%s", runtime->root, modulePath);
+	if(isDirectory(buf)){
+		importPackageTo(runtime, buf, r);
+		return r;
+	}
 
-	// check <local>.imp
+	// Try importing local .imp file.
 	sprintf(buf, "%s.imp", modulePath);
 	if(pathExists(buf)){
 		importRegularModuleTo(runtime, buf, r);
 		return r;
 	}
 
-	// check <local>.c 
+	// Try importing local .c file.
 	sprintf(buf, "%s.c", modulePath);
 	if(pathExists(buf)){
 		importInternalModuleTo(runtime, buf, r);
 		return r;
 	}
 
-	// check <global>.imp
+	// Try importing global .imp file.
 	sprintf(buf, "%s/index/%s.imp", runtime->root, modulePath);
 	if(pathExists(buf)){
 		importRegularModuleTo(runtime, buf, r);
 		return r;
 	}
 
-	// check <global>.c
+	// Try importing global .c file.
 	sprintf(buf, "%s/index/%s.c", runtime->root, modulePath);
 	if(pathExists(buf)){
 		importInternalModuleTo(runtime, buf, r);
 		return r;
 	}
-
 
 	Runtime_throwFormatted(runtime, "failed to import '%s' (path does not exist)", modulePath);
 	return NULL;
