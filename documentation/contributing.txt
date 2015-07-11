@@ -1,14 +1,11 @@
 Overview
 
-
     This file will guide you in acclimating to the imp
     codebase and contribution process. 
 
 
 
-
 Rules
-
 
     1. Never commit to master. Instead, use a branch named
        named after your bugfix/improvement/feature.
@@ -22,9 +19,7 @@ Rules
 
 
 
-
 Directory Structure
-
 
     /bin and /build store compiler output.
 

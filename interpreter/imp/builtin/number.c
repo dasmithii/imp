@@ -13,6 +13,7 @@
 
 
 
+
 bool ImpNumber_isValid(Object *self){
 	return Object_isValid(self) &&
 	       BuiltIn_id(self) == BUILTIN_NUMBER;
@@ -618,7 +619,6 @@ void ImpNumber_init(Object *self, Runtime *runtime){
 	Runtime_registerCMethod(runtime, self, "squared", squared_);
 	Runtime_registerCMethod(runtime, self, "cube", cube_);
 	Runtime_registerCMethod(runtime, self, "cubed", cubed_);
-
 
 	ImpNumber_setRaw(self, 0);
 }

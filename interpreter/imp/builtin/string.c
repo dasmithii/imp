@@ -241,7 +241,7 @@ static Object *duplicate_(Runtime *runtime
 		ImpString_setRaw(self, "");
 		return NULL;
 	} else if(coef < 0){
-		for(int i = 0; i < rawLen/2; i++){
+		for(size_t i = 0; i < rawLen/2; i++){
 			const char tmp = raw[rawLen - 1 - i];
 			raw[rawLen - 1 - i] = raw[i];
 			raw[i] = tmp;

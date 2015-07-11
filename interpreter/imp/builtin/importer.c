@@ -14,6 +14,8 @@
 #include "string.h"
 
 
+
+
 bool ImpImporter_isValid(Object *self){
 	return Object_isValid(self) &&
 	       BuiltIn_id(self) == BUILTIN_IMPORTER;
@@ -26,15 +28,6 @@ static bool pathExists(const char *path) {
     return result == 0;
 }
 
-static bool isFile(const char *path){
-	struct stat s;
-	if(stat(path,&s) == 0){
-	    if(s.st_mode & S_IFREG){
-	        return true;
-	    }
-	}
-	return false;
-}
 
 static bool isDirectory(const char *path){
 	if(!pathExists(path)){

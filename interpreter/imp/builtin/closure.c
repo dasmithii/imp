@@ -1,11 +1,13 @@
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
 
 #include "closure.h"
 #include "general.h"
 #include "route.h"
+
+
 
 
 // Internally, closures store an AST, a pointer to the

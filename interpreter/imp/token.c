@@ -1,8 +1,7 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <assert.h>
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include <imp/token.h>
 
@@ -64,7 +63,7 @@ void Token_printType(Token *token){
 	assert(token);
 	switch(token->type){
 	case TOKEN_ROUTE:
-		printf("atom");
+		printf("route");
 		break;
 	case TOKEN_NUMBER:
 		printf("number");

@@ -78,12 +78,10 @@ void Imp_index(char *dest, char *src){
 	char full_dest[64];
 	sprintf(full_dest, "%s/%s/%s", root, "index", dest);
 
-
 	if(fileExists(full_dest)){
 		fprintf(stderr, "Code is already indexed at that destination. Please choose another destination, or delete the existing code first.");
 		exit(1);
 	}
-
 
 	struct stat s;
 	if(stat(src, &s) == 0){

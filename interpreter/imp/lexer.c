@@ -309,7 +309,7 @@ void Tokenization_clean(Tokenization *self){
 	if(self->error){
 		free(self->error);
 	}
-	for(int i = 0; i < self->size; i++){
+	for(size_t i = 0; i < self->size; i++){
 		Token_clean(self->buffer + i);
 	}
 	free(self->buffer);
@@ -319,7 +319,7 @@ void Tokenization_clean(Tokenization *self){
 void Tokenization_print(Tokenization *self){
 	assert(self);
 	assert(!self->error);
-	for(int i = 0; i < self->size; i++){
+	for(size_t i = 0; i < self->size; i++){
 		Token_printVerbose(self->buffer + i);
 		printf(" ");
 	}

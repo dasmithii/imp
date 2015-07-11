@@ -5,8 +5,6 @@
 #include <imp/parser.h>
 #include "ObjectPool.h"
 
-#include <setjmp.h>
-
 
 
 

@@ -119,7 +119,7 @@ static inline Object *Crate_allocateObject(Crate *self){
 
 
 static inline void Crate_unmarkObjects(Crate *self){
-	for(int i = 0; i < self->capacity; i++){
+	for(size_t i = 0; i < self->capacity; i++){
 		Object_unmark(self->slots + i);
 	}
 }
@@ -200,7 +200,7 @@ static int Crate_freeUnmarkedObjects(Crate *self, Runtime *runtime){
 	// setup free lists.
 	Object *beg = NULL;
 	size_t size = 0;
-	for(int i = 0; i < self->capacity; i++){
+	for(size_t i = 0; i < self->capacity; i++){
 		if(!self->slots[i].gc_mark){
 			if(beg){
 				size++;

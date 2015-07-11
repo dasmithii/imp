@@ -121,7 +121,7 @@ Object *Array__markInternalsRecursively(Runtime *runtime
 	Object **buffer = getBuffer(self);
 	if(buffer){
 		const size_t size = getSize(self);
-		for(int i = 0; i < size; i++){
+		for(size_t i = 0; i < size; i++){
 			if(buffer[i]){
 				Runtime_callMethod(runtime, NULL, buffer[i], "_markRecursively", 0, NULL);
 			}

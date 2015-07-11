@@ -4,22 +4,23 @@
 #include "../object.h"
 
 
-// management functions
-void ImpNumber_init(Object *self, Runtime *runtime);
 
-// in place arithmatic
+
+void ImpNumber_init(Object *self, Runtime *runtime);
+bool ImpNumber_isValid(Object *self);
+void ImpNumber_print(Object *self);
+
 void ImpNumber_add(Object *self, Object *other);
 void ImpNumber_sub(Object *self, Object *other);
 void ImpNumber_mult(Object *self, Object *other);
 void ImpNumber_div(Object *self, Object *other);
 
-// utilities
-void ImpNumber_print(Object *self);
 void ImpNumber_set(Object *self, Object *value);
 void ImpNumber_setRaw(Object *self, double value);
 double ImpNumber_getRaw(Object *self);
 int ImpNumber_getRawRounded(Object *self);
-bool ImpNumber_isValid(Object *self);
+
+
 
 
 #endif

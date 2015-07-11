@@ -5,13 +5,16 @@
 
 #include "general.h"
 #include "route.h"
+#include "../c.h"
 #include <imp/lexer.h>
+
 
 
 typedef struct {
 	char *text;
 	Object *context;
 } Internal;
+
 
 static Internal *getInternal(Object *self){
 	assert(Object_isValid(self));

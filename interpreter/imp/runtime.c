@@ -301,7 +301,7 @@ Object *Runtime_executeInContext(Runtime *runtime
 			Runtime_clearReturnValue(runtime);
 
 
-			for(int i = 0; i < node.argc; i++){
+			for(size_t i = 0; i < node.argc; i++){
 				Runtime_executeInContext(runtime
 					                   , scope
 					                   , node.argv[i]);
@@ -320,7 +320,7 @@ Object *Runtime_executeInContext(Runtime *runtime
 			if(!subs){
 				abort();
 			}
-			for(int i = 0; i < node.argc; i++){
+			for(size_t i = 0; i < node.argc; i++){
 				subs[i] = Runtime_executeInContext(runtime
 					                             , scope
 					                             , node.argv[i]);
@@ -339,7 +339,7 @@ Object *Runtime_executeInContext(Runtime *runtime
 	               , argc
 	               , argv);
 
-			for(int i = 0; i < node.argc; i++){
+			for(size_t i = 0; i < node.argc; i++){
 				if(subs[i]){
 					Object_unreference(subs[i]);
 				}
@@ -356,7 +356,7 @@ Object *Runtime_executeInContext(Runtime *runtime
 				printf("%zu\n", node.argc);
 				Runtime_throwString(runtime, "object literal requires pairs of inputs");
 			}
-			for(int i = 0; i < node.argc; i += 2){
+			for(size_t i = 0; i < node.argc; i += 2){
 				Object *args[2];
 				args[0] = Runtime_executeInContext(runtime, scope, node.argv[i]);
 				if(BuiltIn_id(args[0]) != BUILTIN_ROUTE){

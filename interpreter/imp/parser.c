@@ -179,7 +179,7 @@ static int ParseNode_init(ParseTree *parent
 
 
 	if(beginType == TOKEN_CURLY_OPEN){
-		for(int i = 0; i < subCount; i++){
+		for(size_t i = 0; i < subCount; i++){
 			ParseNode *sub = subArray + i;
 			if(sub->type != CALL_NODE){
 				// translate from {<code>} to {(return (<code>))}
@@ -244,7 +244,7 @@ static void ParseNode_clean(ParseNode *self){
 	assert(self);
 
 	if(self->argc){
-		for(int i = 0; i < self->argc; ++i){
+		for(size_t i = 0; i < self->argc; ++i){
 			ParseNode_clean(self->argv + i);
 		}
 		free(self->argv);
@@ -284,7 +284,7 @@ void ParseNode_print(ParseNode *self){
 	} else {
 		if(self->argc > 0){
 			ParseNode_print(self->argv);
-			for(int i = 1; i < self->argc; i++){
+			for(size_t i = 1; i < self->argc; i++){
 				printf(" ");
 				ParseNode_print(self->argv + i);
 			}
@@ -328,7 +328,7 @@ ParseNode ParseNode_deepCopy(ParseNode *self){
 		if(!r.argv){
 			abort();
 		}
-		for(int i = 0; i < r.argc; i++){
+		for(size_t i = 0; i < r.argc; i++){
 			r.argv[i] = ParseNode_deepCopy(self->argv + i);
 		}
 	} else {
@@ -349,7 +349,7 @@ void ParseNode_deepClean(ParseNode *self){
 	}
 
 	if(self->argc > 0){
-		for(int i = 0; i < self->argc; i++){
+		for(size_t i = 0; i < self->argc; i++){
 			ParseNode_deepClean(self->argv + i);
 		}
 		free(self->argv);

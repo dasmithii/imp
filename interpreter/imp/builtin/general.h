@@ -5,6 +5,8 @@
 #include "../c.h"
 
 
+
+
 typedef enum {
 	BUILTIN_ROUTE,
 	BUILTIN_STRING,
@@ -25,6 +27,8 @@ void BuiltIn_setId(Object *self, BuiltinId id);
 BuiltinId BuiltIn_id(Object *self);
 BuiltinId BuiltIn_protoId(Object *self);
 bool BuiltIn_protoHadId(Object *self, BuiltinId biid);
+
+
 
 
 #endif
