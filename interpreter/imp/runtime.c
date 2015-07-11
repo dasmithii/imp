@@ -366,7 +366,7 @@ Object *Runtime_executeInContext(Runtime *runtime
 				args[1] = Runtime_executeInContext(runtime, scope, node.argv[i+1]);
 				Object_unreference(args[0]);
 				Runtime_callMethod(runtime
-					             , scope
+					             , r   
 					             , r
 					             , "def"
 					             , 2

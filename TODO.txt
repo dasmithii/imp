@@ -6,7 +6,6 @@ BIG:
 
 OBJECT LITERALS:
 
- + Fix bug where the wrong 'self' value is being passed.
  + Add optional final closure argument for initialization
    processes.
 
