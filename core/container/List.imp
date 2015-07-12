@@ -1,6 +1,6 @@
 (import 'core/io')
 (import 'core/control' self)
-(import 'core/container/Sequence')
+(import 'core/container/abstract/Sequence')
 
 (set # Sequence)
 

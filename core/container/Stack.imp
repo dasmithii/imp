@@ -1,0 +1,24 @@
+(import 'core/container/Vector')
+
+
+(set # Vector)
+
+
+(def ~ Vector:~)
+
+
+(def push {
+	(self:append (@:at 0))
+})
+
+
+(def pop {
+	(def r (self:top))
+	(self:removeLast)
+	(return r)
+})
+
+
+(def top {
+	(return (self:last))
+})

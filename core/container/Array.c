@@ -205,7 +205,7 @@ Object *Array_onImport(Runtime *runtime
 	                 , Object *Array
 	                 , int argc
 	                 , Object **argv){
-	Object_putShallow(Array, "#", Imp_import(runtime, "core/container/Sequence"));
+	Object_putShallow(Array, "#", Imp_import(runtime, "core/container/abstract/Sequence"));
 	Runtime_registerCMethod(runtime, Array, "at=", atEq_);
 	return NULL;
 }
