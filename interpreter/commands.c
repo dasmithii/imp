@@ -2,8 +2,12 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
+
+#include <signal.h>
+#include <setjmp.h>
 
 #include <imp/runtime.h>
 
@@ -40,16 +44,121 @@ static char *readFile(char *path){
 }
 
 
+static bool readCommand(char **toVar){
+	size_t used = 0;
+	size_t cap = 256;
+	*toVar = realloc(*toVar, cap);
+	**toVar = 0;
+	if(*toVar == NULL){
+		perror("Failed to malloc command buffer.");
+		return false;
+	}
+
+	// Read lines until we are at a line break and the
+	// grouping depth is 0.
+	size_t depth = 0;
+	size_t nopen = 0;
+	bool first = true;
+	do {
+		if(first){
+			first = false;
+		} else if(isatty(fileno(stdin))){
+			printf("   ");
+		}
+		#define MAX_LINE_LENGTH 1024
+		char line[MAX_LINE_LENGTH];
+		if(!fgets(line, MAX_LINE_LENGTH, stdin)){
+			// reached EOF
+			return false;
+		}
+
+		// Skip shebang lines.
+		if(*line == '#'){
+			continue;
+		}
+
+		// Update depth. Skip comments.
+		char *cp = line;
+		while(*cp){
+			const char c = *cp;
+			if(c == '(' || c == '{' || c == '['){
+				depth++; nopen++;
+			} else if(c == ')' || c == '}' || c == ']'){
+				depth--;
+			} else if(c == '/' && cp[1] == '/'){
+				break;
+			}
+			cp++;
+		}
+
+		// Lengthen command buffer if necessary. Concatenate line 
+		// onto it.
+		used += strlen(line);
+		if(used >= cap){
+			cap = used * 2;
+			*toVar = realloc(*toVar, cap);
+			if(*toVar == NULL){
+				perror("failed to realloc command buffer");
+				abort();
+			}
+		}
+
+		strcat(*toVar, line);
+	} while(depth > 0 || nopen == 0);
+
+	return true;
+}
+
+
+static sigjmp_buf intbuf;
+
+
+static void onsigint(int sig){
+	signal(sig, SIG_IGN);
+	printf("\n");
+	signal(SIGINT, onsigint);
+	longjmp(intbuf, 1);
+}
+
+
+
 void Imp_launchREPL(){
-	Runtime runtime;
-	Runtime_init(&runtime, root, 0, NULL);
+	volatile Runtime runtime;
+	Runtime_init((Runtime*) &runtime, root, 0, NULL);
+
+	volatile char *volatile command = NULL;
+
+	if(isatty(fileno(stdin))){
+		printf("\n"
+			   "   Imp %s  - Welcome!\n"
+			   "   Use CTRL-D to exit and CTRL-C to abandon a line.\n\n", IMP_VERSION);
+
+		if(signal(SIGINT, onsigint) == SIG_ERR){
+			perror("failed to set signal handler");
+			abort();
+		}
+	}
 
 	for(;;){
-		char input[128];
-		printf(" > ");
-		fgets(input, 128, stdin);
-		Runtime_executeSource(&runtime, input);
+		if(isatty(fileno(stdin))){
+			printf(" > ");
+		}
+
+		if(!setjmp(intbuf)){
+			if(!readCommand((char**) &command)){
+				break;
+			}
+			Runtime_executeSource((Runtime*)&runtime, (char*) command);
+		}
+ 
 		// TODO: check for exceptions
+		// TODO: print output if not null
+	}
+
+	// TODO: clean runtime
+
+	if(command){
+		free((void*)command);
 	}
 }
 

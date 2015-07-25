@@ -2,6 +2,10 @@ BIG:
  + Concurrency.
  + Exceptions.
  + REPL.
+     - Print command output if not null.
+     - Catch exceptions.
+     - Cleanup after CTRL-C. As of now, every interupt leaks memory.
+ + Errors.
 
 
 

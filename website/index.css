@@ -1,0 +1,20 @@
+* {
+	font-family: "Comic Sans MS", cursive, sans-serif;
+}
+
+body {
+	text-align: center;
+	padding-top: 1cm;
+}
+
+table#layout {
+	width: 22cm;
+	background: green;
+	margin: 0 auto;
+}
+
+#menu {
+	text-align: right;
+	width: 5cm;
+	background: red;
+}
