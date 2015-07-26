@@ -1,6 +1,9 @@
 BIG:
  + Concurrency.
  + Exceptions.
+     - Cleanup referenced objects and mallocs left behind on throw->catch
+       transitions.
+     - Make 'finally' part.
  + REPL.
      - Print command output if not null.
      - Catch exceptions.
