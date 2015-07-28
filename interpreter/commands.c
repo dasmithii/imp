@@ -123,8 +123,17 @@ static void onsigint(int sig){
 
 
 void Imp_launchREPL(){
+	const char *const prefix = "(exceptions:try {";
+	const char *const postfix = "} {io:writeLine 'Uncaught exception:' (@:at 0) '!!!'})";
+	const size_t prefixLen = strlen(prefix);
+	const size_t postfixLen = strlen(postfix);
+
+
 	volatile Runtime runtime;
 	Runtime_init((Runtime*) &runtime, root, 0, NULL);
+
+	Runtime_executeSource((Runtime*) &runtime, "(import 'core/exceptions')");
+	Runtime_executeSource((Runtime*) &runtime, "(import 'core/io')");
 
 	volatile char *volatile command = NULL;
 
@@ -148,7 +157,13 @@ void Imp_launchREPL(){
 			if(!readCommand((char**) &command)){
 				break;
 			}
-			Runtime_executeSource((Runtime*)&runtime, (char*) command);
+
+			char *inTry = malloc(prefixLen + postfixLen + strlen((char*)command) + 1);
+			if(!inTry){
+				abort();
+			}
+			sprintf(inTry, "%s%s%s", prefix, command, postfix);
+			Runtime_executeSource((Runtime*)&runtime, inTry);
 		}
  
 		// TODO: check for exceptions

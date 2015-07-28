@@ -8,6 +8,7 @@
 #include <imp/builtin/string.h>
 
 
+
 Object *exceptions_try(Runtime *runtime
 	                 , Object *context
 	                 , Object *module
@@ -24,16 +25,16 @@ Object *exceptions_try(Runtime *runtime
 
 	if(!setjmp(*jbptr)){
 		Object_putDataShallow(context, "__try", jbptr);  // note: jbptr will be cleaned when tryctx is collected
+		Object_putShallow(context, "_catch", argv[1]);
 		Runtime_activate(runtime
 			           , context
 			           , argv[0]
 			           , 0
 			           , NULL);
-	} else {
-		Runtime_activate(runtime, context, argv[1], 0, NULL);
 	}
 
 	Object_remShallow(context, "__try");
+	Object_remShallow(context, "_catch");
 
 	return NULL;
 }
@@ -52,6 +53,15 @@ Object *exceptions_throw(Runtime *runtime
 	// a pointer to a jmp_buf. 
 	jmp_buf *jbuf = Object_getDataDeep(context, "__try");
 	if(jbuf){
+		Object *catchFunction = Object_getDeep(context, "_catch");
+		if(!catchFunction){
+			perror("no catch function");
+		}
+		Runtime_activate(runtime
+			           , context
+			           , catchFunction
+			           , 1
+			           , argv);
 		longjmp(*jbuf, 1);
 	}
 
