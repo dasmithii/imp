@@ -15,7 +15,7 @@ Object *exceptions_try(Runtime *runtime
 	                 , int argc
 	                 , Object **argv){
 	if(argc != 2){
-		Runtime_throwString(runtime, "try requires exactly 2 inputs");
+		Runtime_throwString(runtime, context,  "try requires exactly 2 inputs");
 	}
 
 	jmp_buf *jbptr = malloc(sizeof(jmp_buf));  
@@ -46,7 +46,7 @@ Object *exceptions_throw(Runtime *runtime
 	                   , int argc
 	                   , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "throw requires an argument");
+		Runtime_throwString(runtime, context, "throw requires an argument");
 	}
 
 	// Check for __try field, which, if present, will contain

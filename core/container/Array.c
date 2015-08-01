@@ -24,18 +24,18 @@ Object *Array_at(Runtime *runtime
 	           , int argc
 	           , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Array:at requires exactly 1 argument");
+		Runtime_throwString(runtime, context, "Array:at requires exactly 1 argument");
 	}
 
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, "Array:at requires numeric index");
+		Runtime_throwString(runtime, context, "Array:at requires numeric index");
 	}
 
 	int size = getSize(self);
 	int i = ImpNumber_getRawRounded(argv[0]);
 
 	if(i < 0 || i >= size){
-		Runtime_throwFormatted(runtime, "Array:at index out of bounds %d/%d", i, size);
+		Runtime_throwFormatted(runtime, context, "Array:at index out of bounds %d/%d", i, size);
 	}
 
 	return getBuffer(self)[i];
@@ -48,18 +48,18 @@ static Object *atEq_(Runtime *runtime
 	            , int argc
 	            , Object **argv){
 	if(argc != 2){
-		Runtime_throwString(runtime, "Array:at= requires exactly 2 arguments");
+		Runtime_throwString(runtime, context, "Array:at= requires exactly 2 arguments");
 	}
 
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, "Array:at= requires numeric index");
+		Runtime_throwString(runtime, context, "Array:at= requires numeric index");
 	}
 
 	int size = getSize(self);
 	int i = ImpNumber_getRawRounded(argv[0]);
 
 	if(i < 0 || i >= size){
-		Runtime_throwFormatted(runtime, "Array:at= index out of bounds %d/%d", i, size);
+		Runtime_throwFormatted(runtime, context, "Array:at= index out of bounds %d/%d", i, size);
 	}
 
 	getBuffer(self)[i] = argv[1];
@@ -73,18 +73,18 @@ Object *Array_resizeTo(Runtime *runtime
 	               , int argc
 	               , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Array:resize requires exactly 1 arguments");
+		Runtime_throwString(runtime, context, "Array:resize requires exactly 1 arguments");
 	}
 
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, "Array:resize requires a numeric index");
+		Runtime_throwString(runtime, context, "Array:resize requires a numeric index");
 	}
 
 	int oldSize = getSize(self);
 	int newSize = ImpNumber_getRawRounded(argv[0]);
 
 	if(newSize < 0){
-		Runtime_throwString(runtime, "Array:resize requires non-negative argument");
+		Runtime_throwString(runtime, context, "Array:resize requires non-negative argument");
 	}
 
 	if(newSize == 0){
@@ -93,7 +93,7 @@ Object *Array_resizeTo(Runtime *runtime
 		Object **oldBuffer = getBuffer(self);
 		Object **newBuffer = malloc(newSize * sizeof(Object*));  // TODO: use realloc here
 		if(!newBuffer){
-			Runtime_throwFormatted(runtime, "Array:resize failed to allocate buffer of length %s", newSize);
+			Runtime_throwFormatted(runtime, context, "Array:resize failed to allocate buffer of length %s", newSize);
 		}
 
 		memcpy(newBuffer, oldBuffer, oldSize * sizeof(Object*));
@@ -115,7 +115,7 @@ Object *Array__markInternalsRecursively(Runtime *runtime
 	             , int argc
 	             , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Array:mark does not accept arguments");
+		Runtime_throwString(runtime, context, "Array:mark does not accept arguments");
 	}
 
 	Object **buffer = getBuffer(self);
@@ -138,16 +138,16 @@ Object *Array_withSize(Runtime *runtime
 	             , int argc
 	             , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Array:withSize requires exactly one argument");
+		Runtime_throwString(runtime, context, "Array:withSize requires exactly one argument");
 	}
 
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, "Array:withSize requires numeric argument");
+		Runtime_throwString(runtime, context, "Array:withSize requires numeric argument");
 	}
 	const int size = ImpNumber_getRawRounded(argv[0]);
 
 	if(size < 0){
-		Runtime_throwString(runtime, "Array:withSize requires non-negative argument");
+		Runtime_throwString(runtime, context, "Array:withSize requires non-negative argument");
 	}
 
 	Object *r = Runtime_simpleClone(runtime, Array);
@@ -163,7 +163,7 @@ Object *Array_withSize(Runtime *runtime
 	if(size){
 		data = malloc(size * sizeof(Object*));
 		if(!data){
-			Runtime_throwString(runtime, "Array:withSize ... malloc failed");
+			Runtime_throwString(runtime, context, "Array:withSize ... malloc failed");
 		}
 		for(int i = 0; i < size; i++){
 			data[i] = runtime->nil;
@@ -190,7 +190,7 @@ Object *Array_withContents(Runtime *runtime
 
 	Object **data = calloc(argc, sizeof(Object*));
 	if(!data){
-		Runtime_throwString(runtime, "Array:withSize ... malloc failed");
+		Runtime_throwString(runtime, context, "Array:withSize ... malloc failed");
 	}
 	memcpy(data, argv, argc * sizeof(Object*));
 	Object_putDataShallow(r, "__data", data);
@@ -205,7 +205,7 @@ Object *Array_onImport(Runtime *runtime
 	                 , Object *Array
 	                 , int argc
 	                 , Object **argv){
-	Object_putShallow(Array, "#", Imp_import(runtime, "core/container/abstract/Sequence"));
+	Object_putShallow(Array, "#", Imp_import(runtime, "core/container/abstract/Sequence", context));
 	Runtime_registerCMethod(runtime, Array, "at=", atEq_);
 	return NULL;
 }

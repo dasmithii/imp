@@ -45,7 +45,7 @@ Object *Runtime_activateOn(Runtime *runtime
 	} else {
 		internal = Object_getDataDeep(object, "__activate");
 		if(!internal){
-			Runtime_throwString(runtime, "object not activatable");
+			Runtime_throwString(runtime, context, "object not activatable");
 			goto fuckit;
 		}
 
@@ -113,7 +113,7 @@ Object *Runtime_activateOn(Runtime *runtime
 	if(special || internal){
 		return r;
 	}
-	Runtime_throwString(runtime, "Object not callable.");
+	Runtime_throwString(runtime, context, "Object not callable.");
 	return NULL;
 }
 
@@ -176,7 +176,7 @@ void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 	IMP_INIT(Closure);
 	IMP_INIT_IN_SLOT(Importer, "import");
 
-	self->Array = Imp_import(self, "core/container/Array");
+	self->Array = Imp_import(self, "core/container/Array", self->root_scope);
 	Object_reference(self->Array);
 
 	ImpMisc_init(self->Object, self);
@@ -354,13 +354,13 @@ Object *Runtime_executeInContext(Runtime *runtime
 			Object_reference(r);
 			if(node.argc % 2 != 0){
 				printf("%zu\n", node.argc);
-				Runtime_throwString(runtime, "object literal requires pairs of inputs");
+				Runtime_throwString(runtime, scope, "object literal requires pairs of inputs");
 			}
 			for(size_t i = 0; i < node.argc; i += 2){
 				Object *args[2];
 				args[0] = Runtime_executeInContext(runtime, scope, node.argv[i]);
 				if(BuiltIn_id(args[0]) != BUILTIN_ROUTE){
-					Runtime_throwString(runtime, "object literals require atom-value pairs");
+					Runtime_throwString(runtime, scope, "object literals require atom-value pairs");
 				}
 				Object_reference(args[0]);
 				args[1] = Runtime_executeInContext(runtime, scope, node.argv[i+1]);
@@ -402,7 +402,7 @@ Object *Runtime_executeSourceInContext(Runtime *self
 
 	int rc = ParseTree_init(&tree, code);
 	if(rc){
-		Runtime_throwString(self, tree.error);
+		Runtime_throwString(self, context, tree.error);
 	} else {
 		if(!Object_hasKeyDeep(context, "self")){
 			Object_putShallow(context, "self", context);
@@ -420,43 +420,42 @@ Object *Runtime_executeSource(Runtime *self, char *code){
 }
 
 
-void Runtime_throw(Runtime *runtime, Object *exception){
-	assert(runtime);
-	assert(exception);
-
+void Runtime_throw(Runtime *runtime, Object *context, Object *exception){
+	Object_reference(context);
 	Object_reference(exception);
-
-	fprintf(stderr, "Uncaught exception: ");
-	if(BuiltIn_id(exception) == BUILTIN_STRING){
-		fprintf(stderr, "%s", ImpString_getRaw(exception));
-	} else {
-		Runtime_print(runtime, NULL, exception);
-	}
-	fprintf(stderr, ".\n");
-
+	Object *lib = Imp_import(runtime, "core/exceptions", context);
+	Object_unreference(context);
 	Object_unreference(exception);
 
-	exit(1);
+	Runtime_callMethod(runtime
+		             , context
+		             , lib
+		             , "throw"
+		             , 1
+		             , &exception);
 }
 
 
-void Runtime_throwString(Runtime *runtime, char *exception){
+void Runtime_throwString(Runtime *runtime, Object *context, char *exception){
 	assert(runtime);
 	assert(exception);
 
-	Object *obj = Runtime_cloneField(runtime, "String");
+	Object_reference(context);
+	Object *obj = Runtime_make(runtime, String);
 	ImpString_setRaw(obj, exception);
-	Runtime_throw(runtime, obj);
+	Object_unreference(context);
+
+	Runtime_throw(runtime, context, obj);
 }
 
 
-void Runtime_throwFormatted(Runtime *runtime, const char *format, ...){
+void Runtime_throwFormatted(Runtime *runtime, Object *context, const char *format, ...){
     va_list args;
     va_start(args, format);
 
     char str[256];
     vsprintf(str, format, args);
-    Runtime_throwString(runtime, str);
+    Runtime_throwString(runtime, context, str);
 
     fprintf(stderr, ".\n");
     va_end(args);
@@ -505,7 +504,7 @@ Object *Runtime_callSpecialMethod(Runtime *runtime
 	if(method){
 		return Runtime_activateOn(runtime, context, method, argc, argv, object);
 	}
-	Runtime_throwFormatted(runtime, "method '%s' does not exist", buf);
+	Runtime_throwFormatted(runtime, context, "method '%s' does not exist", buf);
 	return NULL;
 }
 
@@ -521,7 +520,7 @@ Object *Runtime_callMethod(Runtime *runtime
 	if(method){
 		return Runtime_activateOn(runtime, context, method, argc, argv, object);
 	}
-	Runtime_throwFormatted(runtime, "method '%s' does not exist", methodName);
+	Runtime_throwFormatted(runtime, context, "method '%s' does not exist", methodName);
 	return NULL;
 }
 

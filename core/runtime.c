@@ -11,7 +11,7 @@ Object *Runtime_clone(Runtime *runtime
 	                , int argc
 	                , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Runtime:clone does not accept arguments");
+		Runtime_throwString(runtime, context, "Runtime:clone does not accept arguments");
 	}
 	Object *r = Runtime_simpleClone(runtime, base);
 	Object_putDataShallow(r, "__data", runtime);
@@ -25,7 +25,7 @@ Object *Runtime_collect(Runtime *runtime
 	                  , int argc
 	                  , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Runtime:collect does not accept arguments");
+		Runtime_throwString(runtime, context, context, "Runtime:collect does not accept arguments");
 	}
 	// get rid of runtime pointer so its not freed by gc
 	Runtime *ptr = Object_getDataShallow(r, "__data");
@@ -42,7 +42,7 @@ Object *runtime_rawObject(Runtime *runtime
 	              , int argc
                   , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "runtime:rawObject does not accept arguments");
+		Runtime_throwString(runtime, context, "runtime:rawObject does not accept arguments");
 	}
 	return Runtime_rawObject(runtime);
 }
@@ -54,10 +54,10 @@ Object *runtime_executeSource(Runtime *runtime
 	                        , int argc
                             , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "runtime:executeSource requires exactly one argument");
+		Runtime_throwString(runtime, context, "runtime:executeSource requires exactly one argument");
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-				Runtime_throwString(runtime, "runtime:executeSource requires a string argument");
+				Runtime_throwString(runtime, context, "runtime:executeSource requires a string argument");
 	}
 	return Runtime_executeSource(runtime, ImpString_getRaw(argv[0]));
 }
@@ -69,7 +69,7 @@ Object *runtime_throw(Runtime *runtime
 	                , int argc
                     , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "runtime:throw requires exactly one argument");
+		Runtime_throwString(runtime, context, "runtime:throw requires exactly one argument");
 	}
 	Runtime_throw(runtime, argv[0]);
 	return NULL;
@@ -82,7 +82,7 @@ Object *runtime_objectCount(Runtime *runtime
 	                      , int argc
                           , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "runtime:objectCount does not accept arguments");
+		Runtime_throwString(runtime, context, "runtime:objectCount does not accept arguments");
 	}
 	Object *r = Runtime_cloneField(runtime, "Number");
 	ImpNumber_setRaw(r, (double) Runtime_objectCount(runtime));

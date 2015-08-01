@@ -8,7 +8,7 @@
 
 
 void ImpImporter_init(Object *self, Runtime *runtime);
-Object *Imp_import(Runtime *runtime, char *module);
+Object *Imp_import(Runtime *runtime, char *module, Object *context);
 
 
 

@@ -25,7 +25,7 @@ Object *random_activate(Runtime *runtime
 	                  , int argc
 	                  , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "random:Number does not accept arguments");
+		Runtime_throwString(runtime, context, "random:Number does not accept arguments");
 	}
 	Object *r = Runtime_make(runtime, Number);
 	ImpNumber_setRaw(r, (double) rand());
@@ -39,11 +39,11 @@ Object *random_between(Runtime *runtime
 	                 , int argc
 	                 , Object **argv){
 	if(argc != 2){
-		Runtime_throwString(runtime, "random:between requires exactly 2 arguments");
+		Runtime_throwString(runtime, context, "random:between requires exactly 2 arguments");
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER ||
 	   BuiltIn_id(argv[1]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, "random:between requires numbers as arguments");
+		Runtime_throwString(runtime, context, "random:between requires numbers as arguments");
 	}
 
 	const double n0 = ImpNumber_getRaw(argv[0]);
@@ -61,7 +61,7 @@ Object *random_unit(Runtime *runtime
 	              , int argc
 	              , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "random:unit does not accept arguments");
+		Runtime_throwString(runtime, context, "random:unit does not accept arguments");
 	}
 	Object *r = Runtime_make(runtime, Number);
 	ImpNumber_setRaw(r, (double) rand() / (double) RAND_MAX);

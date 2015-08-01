@@ -35,14 +35,14 @@ static Object *add_(Runtime *runtime
 	assert(ImpNumber_isValid(caller));
 
 	if(argc == 0){
-		Runtime_throwString(runtime, "Number:add requires at least one argument.");
+		Runtime_throwString(runtime, context, "Number:add requires at least one argument.");
 		return NULL;
 	}
 
 	double val = ImpNumber_getRaw(caller);
 	for(int i = 0; i < argc; i++){
 		if(!ImpNumber_isValid(argv[i])){
-			Runtime_throwString(runtime, "Number:add accepts only numbers as arguments");
+			Runtime_throwString(runtime, context, "Number:add accepts only numbers as arguments");
 			return NULL;
 		}
 		val += ImpNumber_getRaw(argv[i]);
@@ -71,12 +71,12 @@ static Object *sub_(Runtime *runtime
 	assert(ImpNumber_isValid(caller));
 
 	if(argc < 1){
-		Runtime_throwString(runtime, "Number:sub requires at least 1 argument.");
+		Runtime_throwString(runtime, context, "Number:sub requires at least 1 argument.");
 	}
 
 	for(int i = 0; i < argc; i++){
 		if(!ImpNumber_isValid(argv[i])){
-			Runtime_throwString(runtime, "Number:sub argument must be of number type.");
+			Runtime_throwString(runtime, context, "Number:sub argument must be of number type.");
 		} else {
 			ImpNumber_sub(caller, argv[i]);
 		}
@@ -105,12 +105,12 @@ static Object *mult_(Runtime *runtime
 	assert(ImpNumber_isValid(caller));
 
 	if(argc == 0){
-		Runtime_throwString(runtime, "Number:mult requires at least one argument.");
+		Runtime_throwString(runtime, context, "Number:mult requires at least one argument.");
 	}
 
 	for(int i = 0; i < argc; i++){
 		if(!ImpNumber_isValid(argv[i])){
-			Runtime_throwString(runtime, "Number:mult accepts only numbers as arguments");
+			Runtime_throwString(runtime, context, "Number:mult accepts only numbers as arguments");
 		}
 		ImpNumber_mult(caller, argv[i]);
 	}
@@ -138,10 +138,10 @@ static Object *div_(Runtime *runtime
 
 
 	if(argc != 1){
-		Runtime_throwString(runtime, "Number:div requires exactly one argument.");
+		Runtime_throwString(runtime, context, "Number:div requires exactly one argument.");
 	} else{
 		if(!ImpNumber_isValid(argv[0])){
-			Runtime_throwString(runtime, "Number:div argument must be of number type.");
+			Runtime_throwString(runtime, context, "Number:div argument must be of number type.");
 		} else {
 			ImpNumber_div(caller, argv[0]);
 		}
@@ -167,7 +167,7 @@ static Object *print_(Runtime *runtime
 	assert(ImpNumber_isValid(caller));
 
 	if(argc > 0){
-		Runtime_throwString(runtime, "Number:print does not accept arguments.");
+		Runtime_throwString(runtime, context, "Number:print does not accept arguments.");
 	}
 
 	ImpNumber_print(caller);
@@ -185,11 +185,11 @@ static Object *setEq_(Runtime *runtime
 	assert(Object_isValid(caller));
 
 	if(argc != 1){
-		Runtime_throwString(runtime, "Number:set requires exactly one argument.");
+		Runtime_throwString(runtime, context, "Number:set requires exactly one argument.");
 	} 
 
 	if(!ImpNumber_isValid(argv[0])){
-		Runtime_throwString(runtime, "Number:set requires an argument of type number");
+		Runtime_throwString(runtime, context, "Number:set requires an argument of type number");
 	} else{
 		ImpNumber_setRaw(caller, ImpNumber_getRaw(argv[0]));
 	}
@@ -243,7 +243,7 @@ static Object *clone_(Runtime *runtime
 	assert(argc == 0);
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "Number:~ does not accept arguments");
+		Runtime_throwString(runtime, context, "Number:~ does not accept arguments");
 	}
 
 	Object *r = Runtime_simpleClone(runtime, self);
@@ -282,11 +282,11 @@ static Object *cmp_(Runtime *runtime
 	              , int argc
 	              , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Number:<> requires exactly one argument");
+		Runtime_throwString(runtime, context, "Number:<> requires exactly one argument");
 	}
 
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, "Number:<> requires another number as its argument");
+		Runtime_throwString(runtime, context, "Number:<> requires another number as its argument");
 	}
 
 	Object *r = Runtime_cloneField(runtime, "Number");
@@ -309,11 +309,11 @@ static Object *mod_(Runtime *runtime
 	              , int argc
 	              , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Number:%= requires exactly one argument");
+		Runtime_throwString(runtime, context, "Number:%= requires exactly one argument");
 	}
 
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, "Number:%= requires another number as its argument");
+		Runtime_throwString(runtime, context, "Number:%= requires another number as its argument");
 	}
 
 	ImpNumber_setRaw(caller, fmod(ImpNumber_getRaw(caller), ImpNumber_getRaw(argv[0])));
@@ -327,11 +327,11 @@ static Object *powEq_(Runtime *runtime
 	                , int argc
 	                , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "Number:**= requires exactly one argument");
+		Runtime_throwString(runtime, context, "Number:**= requires exactly one argument");
 	}
 
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, "Number:**= requires another number as its argument");
+		Runtime_throwString(runtime, context, "Number:**= requires another number as its argument");
 	}
 
 	ImpNumber_setRaw(caller, pow(ImpNumber_getRaw(caller), ImpNumber_getRaw(argv[0])));
@@ -345,7 +345,7 @@ static Object *inc_(Runtime *runtime
 	              , int argc
 	              , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Number:++ does not accept");
+		Runtime_throwString(runtime, context, "Number:++ does not accept");
 	}
 
 	ImpNumber_setRaw(caller, ImpNumber_getRaw(caller) + 1);
@@ -358,7 +358,7 @@ static Object *dec_(Runtime *runtime
 	              , int argc
 	              , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Number:-- does not accept");
+		Runtime_throwString(runtime, context, "Number:-- does not accept");
 	}
 
 	ImpNumber_setRaw(caller, ImpNumber_getRaw(caller) - 1);
@@ -371,7 +371,7 @@ static Object *copy_(Runtime *runtime
 	               , int argc
 	               , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Number:$ does not accept arguments");
+		Runtime_throwString(runtime, context, "Number:$ does not accept arguments");
 	}
 
 	Object *r = Runtime_simpleClone(runtime, self); 
@@ -388,7 +388,7 @@ static Object *asBoolean_(Runtime *runtime
 	                    , int argc
 	                    , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Number:? does not accept arguments");
+		Runtime_throwString(runtime, context, "Number:? does not accept arguments");
 	}
 
 	Object *r = Runtime_make(runtime, Number);
@@ -403,11 +403,11 @@ static Object *squareRoot_(Runtime *runtime
 	                     , int argc
 	                     , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Number:squareRoot does not accept arguments");
+		Runtime_throwString(runtime, context, "Number:squareRoot does not accept arguments");
 	}
 	double raw = ImpNumber_getRaw(self);
 	if(raw < 0){
-		Runtime_throwString(runtime, "cannot take square root of negative number");
+		Runtime_throwString(runtime, context, "cannot take square root of negative number");
 	}
 	Object *r = Runtime_make(runtime, Number);
 	ImpNumber_setRaw(r, sqrt(raw));
@@ -421,7 +421,7 @@ static Object *floor_(Runtime *runtime
 	                , int argc
 	                , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Number:floor does not accept arguments");
+		Runtime_throwString(runtime, context, "Number:floor does not accept arguments");
 	}
 	ImpNumber_setRaw(self, floor(ImpNumber_getRaw(self)));
 	return NULL;
@@ -434,7 +434,7 @@ static Object *floored_(Runtime *runtime
 	                , int argc
 	                , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Number:floor does not accept arguments");
+		Runtime_throwString(runtime, context, "Number:floor does not accept arguments");
 	}
 	Object *r = Runtime_callMethod(runtime
 		                         , context
@@ -458,7 +458,7 @@ static Object *round_(Runtime *runtime
 	                , int argc
 	                , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Number:floor does not accept arguments");
+		Runtime_throwString(runtime, context, "Number:floor does not accept arguments");
 	}
 	ImpNumber_setRaw(self, ImpNumber_getRawRounded(self));
 	return NULL;
@@ -470,7 +470,7 @@ static Object *rounded_(Runtime *runtime
 	                , int argc
 	                , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Number:floor does not accept arguments");
+		Runtime_throwString(runtime, context, "Number:floor does not accept arguments");
 	}
 	Object *r = Runtime_callMethod(runtime
 		                         , context
@@ -494,7 +494,7 @@ static Object *square_(Runtime *runtime
 	                 , int argc
 	                 , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Number:square does not accept arguments");
+		Runtime_throwString(runtime, context, "Number:square does not accept arguments");
 	}
 	const double raw = ImpNumber_getRaw(self);
 	ImpNumber_setRaw(self, raw * raw);
@@ -507,7 +507,7 @@ static Object *squared_(Runtime *runtime
 	                  , int argc
 	                  , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Number:squared does not accept arguments");
+		Runtime_throwString(runtime, context, "Number:squared does not accept arguments");
 	}
 	Object *r = Runtime_callMethod(runtime
 		                         , context
@@ -532,7 +532,7 @@ static Object *cube_(Runtime *runtime
 	               , int argc
 	               , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Number:floor does not accept arguments");
+		Runtime_throwString(runtime, context, "Number:floor does not accept arguments");
 	}
 	const double raw = ImpNumber_getRaw(self);
 	ImpNumber_setRaw(self, raw * raw * raw);
@@ -545,7 +545,7 @@ static Object *cubed_(Runtime *runtime
 	               , int argc
 	               , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "Number:floor does not accept arguments");
+		Runtime_throwString(runtime, context, "Number:floor does not accept arguments");
 	}
 	Object *r = Runtime_callMethod(runtime
 		                         , context
@@ -571,7 +571,7 @@ static Object *hashCode_(Runtime *runtime
 	                   , int argc
 	                   , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "#:hashCode does not accept arguments");
+		Runtime_throwString(runtime, context, "#:hashCode does not accept arguments");
 	}
 
 	Object *r = Runtime_cloneField(runtime, "Number");

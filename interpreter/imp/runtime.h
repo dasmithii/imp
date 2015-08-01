@@ -77,9 +77,9 @@ void Runtime_clearReturnValue(Runtime *self);
 
 
 //// exception handling
-void Runtime_throw(Runtime *runtime, Object *exception);
-void Runtime_throwString(Runtime *runtime, char *exception);
-void Runtime_throwFormatted(Runtime *runtime, const char *format, ...);
+void Runtime_throw(Runtime *runtime, Object *context, Object *exception);
+void Runtime_throwString(Runtime *runtime, Object *context, char *exception);
+void Runtime_throwFormatted(Runtime *runtime, Object *context, const char *format, ...);
 
 
 //// garbage collection

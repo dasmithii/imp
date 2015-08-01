@@ -40,7 +40,7 @@ static bool isZero(Runtime *runtime
 		return ImpNumber_getRaw(asBoolean) == 0;
 	}
 
-	Runtime_throwString(runtime, "object not boolean");
+	Runtime_throwString(runtime, ctx, "object not boolean");
 	return false;
 }
 
@@ -66,11 +66,11 @@ Object *while_activate(Runtime *runtime
 	Object *step = argv[1];
 
 	if(argc != 2){
-		Runtime_throwString(runtime, "while requires exactly 2 arguments");
+		Runtime_throwString(runtime, context, "while requires exactly 2 arguments");
 	} 
 
 	if(BuiltIn_id(step) != BUILTIN_CLOSURE){
-		Runtime_throwString(runtime, "while step must be a closure");
+		Runtime_throwString(runtime, context, "while step must be a closure");
 	}
 
 

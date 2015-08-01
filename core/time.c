@@ -16,10 +16,10 @@ Object *time_seconds(Runtime *runtime
 	               , int argc
 	               , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "time:seconds requires exactly one argument");
+		Runtime_throwString(runtime, context, "time:seconds requires exactly one argument");
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, "time:seconds requires numeric argument");
+		Runtime_throwString(runtime, context, "time:seconds requires numeric argument");
 	}
 	Object *r = Runtime_make(runtime, Number);
 	ImpNumber_setRaw(r, MICROSECONDS_PER_SECOND * ImpNumber_getRaw(argv[0]));
@@ -33,10 +33,10 @@ Object *time_milliseconds(Runtime *runtime
 	                    , int argc
 	                    , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "time:milliseconds requires exactly one argument");
+		Runtime_throwString(runtime, context, "time:milliseconds requires exactly one argument");
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, "time:milliseconds requires numeric argument");
+		Runtime_throwString(runtime, context, "time:milliseconds requires numeric argument");
 	}
 	Object *r = Runtime_make(runtime, Number);
 	ImpNumber_setRaw(r, MICROSECONDS_PER_MILLISECOND * ImpNumber_getRaw(argv[0]));
@@ -50,10 +50,10 @@ Object *time_minutes(Runtime *runtime
 	               , int argc
 	               , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "time:minutes requires exactly one argument");
+		Runtime_throwString(runtime, context, "time:minutes requires exactly one argument");
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, "time:minutes requires numeric argument");
+		Runtime_throwString(runtime, context, "time:minutes requires numeric argument");
 	}
 	Object *r = Runtime_make(runtime, Number);
 	ImpNumber_setRaw(r, SECONDS_PER_MINUTE * MICROSECONDS_PER_SECOND * ImpNumber_getRaw(argv[0]));
@@ -67,10 +67,10 @@ Object *time_hours(Runtime *runtime
 	             , int argc
 	             , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "time:hours requires exactly one argument");
+		Runtime_throwString(runtime, context, "time:hours requires exactly one argument");
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, "time:hours requires numeric argument");
+		Runtime_throwString(runtime, context, "time:hours requires numeric argument");
 	}
 	Object *r = Runtime_make(runtime, Number);
 	ImpNumber_setRaw(r, MINUTE_PER_HOUR * SECONDS_PER_MINUTE * MICROSECONDS_PER_SECOND * ImpNumber_getRaw(argv[0]));

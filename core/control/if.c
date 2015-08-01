@@ -40,7 +40,7 @@ static bool isZero(Runtime *runtime
 		return ImpNumber_getRaw(asBoolean) == 0;
 	} 
 
-	Runtime_throwString(runtime, "object not boolean");
+	Runtime_throwString(runtime, ctx, "object not boolean");
 	return false;
 }
 
@@ -60,13 +60,13 @@ Object *if_activate(Runtime *runtime
 	assert(Object_isValid(context));
 
 	if(argc < 2){
-		Runtime_throwString(runtime, "if given insufficient arguments");
+		Runtime_throwString(runtime, context, "if given insufficient arguments");
 	}
 
 	// check that all provided blocks are valid
 	for(int i = 1; i < argc; i += 2){
 		if(BuiltIn_id(argv[i]) != BUILTIN_CLOSURE){
-			Runtime_throwString(runtime, "if requires closure arguments");
+			Runtime_throwString(runtime, context, "if requires closure arguments");
 			return NULL;
 		}
 	}

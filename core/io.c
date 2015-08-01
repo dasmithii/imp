@@ -45,11 +45,11 @@ Object *io_File_open(Runtime *runtime
 	assert(Object_isValid(caller));
 	
 	if(argc != 2){
-		Runtime_throwString(runtime, "File:open requires exactly two arguments (path and mode)");
+		Runtime_throwString(runtime, context, "File:open requires exactly two arguments (path and mode)");
 	}
 
 	if(BuiltIn_id(argv[0]) != BUILTIN_STRING || BuiltIn_id(argv[1]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, "File:open requires strings as its arguments");
+		Runtime_throwString(runtime, context, "File:open requires strings as its arguments");
 	}
 
 	char *path = ImpString_getRaw(argv[0]);
@@ -57,7 +57,7 @@ Object *io_File_open(Runtime *runtime
 
 	FILE *fp = fopen(path, mode);
 	if(!fp){
-		Runtime_throwFormatted(runtime, "file '%s' could not be opened in mode '%s'", path, mode);
+		Runtime_throwFormatted(runtime, context, "file '%s' could not be opened in mode '%s'", path, mode);
 	}
 
 	Object *r = Runtime_clone(runtime, caller);
@@ -77,12 +77,12 @@ Object *io_File_close(Runtime *runtime
 	assert(Object_isValid(caller));
 	assert(Object_isValid(context));
 	if(argc != 0){
-		Runtime_throwString(runtime, "File:close does not accept arguments");
+		Runtime_throwString(runtime, context,  "File:close does not accept arguments");
 	}
 
 	FILE *fp = File_getRaw(caller);
 	if(!fp){
-		Runtime_throwString(runtime, "attempted to close non-open file");
+		Runtime_throwString(runtime, context, "attempted to close non-open file");
 	}
 	fclose(fp);
 	File_setRaw(caller, NULL);
@@ -99,12 +99,12 @@ Object *io_File_readCharacter(Runtime *runtime
 	assert(Object_isValid(context));
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "File:readCharacter does not accept arguments");
+		Runtime_throwString(runtime, context, "File:readCharacter does not accept arguments");
 	}
 
 	FILE *fp = File_getRaw(caller);
 	if(!fp){
-		Runtime_throwString(runtime, "attempted to read from unopened file");
+		Runtime_throwString(runtime, context, "attempted to read from unopened file");
 	}
 
 	char buf[2];
@@ -127,12 +127,12 @@ Object *io_File_readLine(Runtime *runtime
 	assert(Object_isValid(context));
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "File:readLine does not accept arguments");
+		Runtime_throwString(runtime, context, "File:readLine does not accept arguments");
 	}
 
 	FILE *fp = File_getRaw(caller);
 	if(!fp){
-		Runtime_throwString(runtime, "attempted to read from unopened file");
+		Runtime_throwString(runtime, context, "attempted to read from unopened file");
 	}
 
 	Object *r = Runtime_make(runtime, String);
@@ -141,7 +141,7 @@ Object *io_File_readLine(Runtime *runtime
 		ssize_t read;
 		read = getline(&line, &len, fp);
 	if(read == -1){
-		Runtime_throwString(runtime, "failed to getline");
+		Runtime_throwString(runtime, context, "failed to getline");
 	}
 	ImpString_setRaw(r, line);
 	free(line);
@@ -159,12 +159,12 @@ Object *io_File_read(Runtime *runtime
 	assert(Object_isValid(context));
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "File:read does not accept arguments");
+		Runtime_throwString(runtime, context, "File:read does not accept arguments");
 	}
 
 	FILE *fp = File_getRaw(caller);
 	if(!fp){
-		Runtime_throwString(runtime, "attempted to read from unopened file");
+		Runtime_throwString(runtime, context, "attempted to read from unopened file");
 	}
 
 	char *contents;
@@ -197,12 +197,12 @@ Object *io_File_write(Runtime *runtime
 	assert(Object_isValid(caller));
 
 	if(argc == 0){
-		Runtime_throwString(runtime, "File:write requires at least one argument");
+		Runtime_throwString(runtime, context, "File:write requires at least one argument");
 	}
 
 	FILE *fp = File_getRaw(caller);
 	if(!fp){
-		Runtime_throwString(runtime, "tried writing to nonexistent file");
+		Runtime_throwString(runtime, context, "tried writing to nonexistent file");
 	}
 
 	for(int i = 0; i < argc; i++){
@@ -213,17 +213,17 @@ Object *io_File_write(Runtime *runtime
 		} else if(Object_hasMethod(argv[i], "asString")){
 			Object *s = Runtime_callMethod(runtime, context, argv[i], "asString", 0, NULL);
 			if(BuiltIn_id(s) != BUILTIN_STRING){
-				Runtime_throwString(runtime, "asString method did not return string");
+				Runtime_throwString(runtime, context, "asString method did not return string");
 			}
 			fprintf(fp, "%s", ImpString_getRaw(s));
 		} else if(Object_hasKeyDeep(argv[i], "asString")){
 			Object *as = Object_getDeep(argv[i], "asString");
 			if(BuiltIn_id(as) != BUILTIN_STRING){
-				Runtime_throwString(runtime, "asString field was not string");
+				Runtime_throwString(runtime, context, "asString field was not string");
 			}
 			fprintf(fp, "%s", ImpString_getRaw(as));
 		} else {
-			Runtime_throwString(runtime, "File:write given unwritable parameter(s)");
+			Runtime_throwString(runtime, context, "File:write given unwritable parameter(s)");
 		}
 
 		if(i != argc - 1){

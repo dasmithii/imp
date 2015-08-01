@@ -71,7 +71,7 @@ static Object *activate_(Runtime *runtime
 	if(argc > 0){
 		Object_putShallow(scope, "self", argv[0]);
 	} else {
-		Runtime_throwString(runtime, "closure not provided with self argument");
+		Runtime_throwString(runtime, context, "closure not provided with self argument");
 	}
 
 	Object *r = Runtime_executeInContext(runtime

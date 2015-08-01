@@ -36,13 +36,13 @@ Object *os_eachItemIn(Runtime *runtime
 	                , int argc
                     , Object **argv){
 	if(argc != 2){
-		Runtime_throwString(runtime, "os:eachFileNameIn requires exactly one argument");
+		Runtime_throwString(runtime, context, "os:eachFileNameIn requires exactly one argument");
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, "os:eachFileNameIn requires String as first argument");
+		Runtime_throwString(runtime, context, "os:eachFileNameIn requires String as first argument");
 	}
 	if(!Object_canBeActivated(argv[1])){
-		Runtime_throwString(runtime, "os:eachFileNameIn requires activate-able object as second argument");
+		Runtime_throwString(runtime, context, "os:eachFileNameIn requires activate-able object as second argument");
 	}
 
 	DIR           *d;
@@ -72,10 +72,10 @@ Object *os_filesIn(Runtime *runtime
 	             , int argc
 	             , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "os:filesIn requires exactly one argument");
+		Runtime_throwString(runtime, context, "os:filesIn requires exactly one argument");
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, "os:filesIn requires stringified argument");
+		Runtime_throwString(runtime, context, "os:filesIn requires stringified argument");
 	}
 
 	Object *r = Runtime_make(runtime, Vector);

@@ -13,10 +13,10 @@ Object *coroutine_sleep(Runtime *runtime
 	                  , int argc
 	                  , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "coroutine:sleep requires an argument");
+		Runtime_throwString(runtime, context, "coroutine:sleep requires an argument");
 	}
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, "coroutine:sleep requires numeric argument");
+		Runtime_throwString(runtime, context, "coroutine:sleep requires numeric argument");
 	}
 	double raw = ImpNumber_getRaw(argv[0]);
 	usleep((unsigned int) raw);

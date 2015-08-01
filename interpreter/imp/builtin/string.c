@@ -49,7 +49,7 @@ static Object *print_(Runtime *runtime
 	assert(ImpString_isValid(caller));
 
 	if(argc > 0){
-		Runtime_throwString(runtime, "String:print does not accept arguments.");
+		Runtime_throwString(runtime, context, "String:print does not accept arguments.");
 	} else {
 		ImpString_print(caller);
 	}
@@ -67,7 +67,7 @@ static Object *clone_(Runtime *runtime
 	assert(ImpString_isValid(caller));
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "String:~ does not accept arguments.");
+		Runtime_throwString(runtime, context, "String:~ does not accept arguments.");
 		return NULL;
 	}
 
@@ -108,7 +108,7 @@ Object *concatenate_(Runtime *runtime
 	assert(ImpString_isValid(caller));
 
 	if(argc != 1){
-		Runtime_throwString(runtime, "String:concatenate requires exactly one argument");
+		Runtime_throwString(runtime, context, "String:concatenate requires exactly one argument");
 		return NULL;
 	}
 
@@ -123,10 +123,10 @@ Object *concatenate_(Runtime *runtime
 			                  , 0
 			                  , NULL);
 		if(BuiltIn_id(ro) != BUILTIN_STRING){
-			Runtime_throwString(runtime, ":asString did not return string");
+			Runtime_throwString(runtime, context, ":asString did not return string");
 		}
 	} else {
-		Runtime_throwString(runtime, "String:concatenate requires stringifiable argument");
+		Runtime_throwString(runtime, context, "String:concatenate requires stringifiable argument");
 	}
 	ImpString_concatenateRaw(caller, ImpString_getRaw(ro));
 	return NULL;
@@ -142,7 +142,7 @@ static Object *asBoolean_(Runtime *runtime
 	assert(ImpString_isValid(caller));
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "String:? does not accept arguments.");
+		Runtime_throwString(runtime, context, "String:? does not accept arguments.");
 		return NULL;
 	}
 
@@ -162,7 +162,7 @@ static Object *hashCode_(Runtime *runtime
 	                   , int argc
 	                   , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "String:hashCode does not accept arguments");
+		Runtime_throwString(runtime, context, "String:hashCode does not accept arguments");
 	}
 
 	Object *r = Runtime_cloneField(runtime, "Number");
@@ -191,11 +191,11 @@ static Object *compare_(Runtime *runtime
 	                  , int argc
 	                  , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "String:<> requires one argument");
+		Runtime_throwString(runtime, context, "String:<> requires one argument");
 	}
 
 	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, "String:<> requires string argument");
+		Runtime_throwString(runtime, context, "String:<> requires string argument");
 	}
 
 	Object *r = Runtime_cloneField(runtime, "Number");
@@ -211,7 +211,7 @@ static Object *value_(Runtime *runtime
 	                , int argc
 	                , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "String:$ does not accept arguments");
+		Runtime_throwString(runtime, context, "String:$ does not accept arguments");
 	}
 
 	Object *r = Runtime_make(runtime, String);
@@ -226,11 +226,11 @@ static Object *duplicate_(Runtime *runtime
 	                    , int argc
 	                    , Object **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, "String:*= requires exactly 1 argument");
+		Runtime_throwString(runtime, context, "String:*= requires exactly 1 argument");
 	}
 
 	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, "String:*= requires numeric argument");
+		Runtime_throwString(runtime, context, "String:*= requires numeric argument");
 	}
 
 	int coef = ImpNumber_getRawRounded(argv[0]);

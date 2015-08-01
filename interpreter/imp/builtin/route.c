@@ -61,7 +61,7 @@ static Object *print_(Runtime *runtime
 	assert(ImpRoute_isValid(caller));
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "Route:print does not accept arguments");
+		Runtime_throwString(runtime, context, "Route:print does not accept arguments");
 	} else {
 		Runtime_print(runtime, context, ImpRoute_mapping(caller));
 	}
@@ -86,7 +86,7 @@ static Object *clone_(Runtime *runtime
 	assert(Object_isValid(caller));
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "Route:~ does not accept arguments");
+		Runtime_throwString(runtime, context, "Route:~ does not accept arguments");
 		return NULL;
 	}
 
@@ -108,7 +108,7 @@ static Object *mark_(Runtime *runtime
 	assert(Object_isValid(self));
 
 	if(argc != 0){
-		Runtime_throwString(runtime, "Route:_mark does not accept arguments");
+		Runtime_throwString(runtime, context, "Route:_mark does not accept arguments");
 		return NULL;
 	}
 
@@ -161,6 +161,7 @@ static Object *activate_(Runtime *runtime
 	}
 
 	Runtime_throwFormatted(runtime
+		                 , context
 		                 , "variable '%s' does not exist"
 		                 , ImpRoute_getRaw(caller));
 	return NULL;

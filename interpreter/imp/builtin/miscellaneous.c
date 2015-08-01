@@ -15,7 +15,7 @@ static Object *break_(Runtime *runtime
 	                , int argc
 	                , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "break does not accept arguments");
+		Runtime_throwString(runtime, context, "break does not accept arguments");
 	}
 	Object *sig = Runtime_rawObject(runtime);
 	BuiltIn_setId(sig, BUILTIN_BREAK);
@@ -30,7 +30,7 @@ static Object *continue_(Runtime *runtime
 	                   , int argc
 	                   , Object **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, "break does not accept arguments");
+		Runtime_throwString(runtime, context, "break does not accept arguments");
 	}
 	Object *sig = Runtime_rawObject(runtime);
 	BuiltIn_setId(sig, BUILTIN_CONTINUE);
@@ -48,7 +48,7 @@ static Object *return_(Runtime *runtime
 	assert(Object_isValid(context));
 
 	if(argc > 1){
-		Runtime_throwString(runtime, "return accepts only one parameter.");
+		Runtime_throwString(runtime, context, "return accepts only one parameter.");
 	} else if(argc == 1){
 		Runtime_setReturnValue(runtime, argv[0]);
 		return argv[0];
@@ -67,9 +67,9 @@ static Object *throw_(Runtime *runtime
 	assert(Object_isValid(context));
 
 	if(argc != 1){
-		Runtime_throwString(runtime, "throw accepts exactly one parameter.");
+		Runtime_throwString(runtime, context, "throw accepts exactly one parameter.");
 	}
-	Runtime_throw(runtime, argv[0]);
+	Runtime_throw(runtime, context, argv[0]);
 	return NULL;
 }
 

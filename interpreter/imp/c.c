@@ -24,7 +24,7 @@ void Runtime_registerCMethod_(Runtime *runtime
 	assert(Object_isValid(object));
 
 	if(Object_hasKeyShallow(object, methodName)){
-		Runtime_throwFormatted(runtime, "registerCMethod failed: slot '%s' already exists (would overwrite)", methodName);
+		Runtime_throwFormatted(runtime, object, "registerCMethod failed: slot '%s' already exists (would overwrite)", methodName);
 	}
 
 	Object *methodObject = Runtime_make(runtime, Object);

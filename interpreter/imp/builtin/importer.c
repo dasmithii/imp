@@ -75,7 +75,7 @@ unsigned long hash(unsigned char *str) {
 }
 
 
-static void *fileToDL(Runtime *runtime, char *path){
+static void *fileToDL(Runtime *runtime, char *path, Object *context){
 
 	// TODO: if cache is loaded, dump it
 	assert(runtime);
@@ -83,7 +83,7 @@ static void *fileToDL(Runtime *runtime, char *path){
 
 	char *code = readFile(path);
 	if(!code){
-		Runtime_throwFormatted(runtime, "failed to read file: '%s'", path);
+		Runtime_throwFormatted(runtime, context, "failed to read file: '%s'", path);
 	}
 	unsigned long checksum = hash((unsigned char*) code);
 	free(code);
@@ -97,13 +97,13 @@ static void *fileToDL(Runtime *runtime, char *path){
 		// ensure that cache directory is set up
 		sprintf(buf, "mkdir -p %s/cache", runtime->root);
 		if(system(buf)){
-			Runtime_throwString(runtime, "failed to make .so cache dir");
+			Runtime_throwString(runtime, context, "failed to make .so cache dir");
 		}
 
 		// compile .so file
 		sprintf(buf, "gcc -std=c99 -Wall -Wextra -g -I /usr/local/imp/headers -shared -o %s -fPIC %s /usr/local/imp/imp.so", dest, path);
 		if(system(buf)){
-			Runtime_throwFormatted(runtime, "failed to build '%s'", dest);
+			Runtime_throwFormatted(runtime, context, "failed to build '%s'", dest);
 		}
 	}
 	return dlopen(dest, RTLD_LAZY);
@@ -162,13 +162,13 @@ static void importInternalModuleTo(Runtime *runtime
 	// read source file
 	char *code = readFile(path);
 	if(!code){
-		Runtime_throwFormatted(runtime, "failed to read file: %s", path);
+		Runtime_throwFormatted(runtime, context, "failed to read file: %s", path);
 	}
 
 	// load dynamic library
-	void *so = fileToDL(runtime, path);
+	void *so = fileToDL(runtime, path, context);
 	if(!so){
-		Runtime_throwString(runtime, "failed to dlopen");
+		Runtime_throwString(runtime, context, "failed to dlopen");
 	}
 
 	// where module will be imported to within <context>
@@ -210,7 +210,7 @@ static void importInternalModuleTo(Runtime *runtime
 		// load module-level function
 		void *sym = dlsym(so, full);
 		if(!sym){
-			Runtime_throwFormatted(runtime, "failed to find symbol '%s'", full);
+			Runtime_throwFormatted(runtime, context, "failed to find symbol '%s'", full);
 		}
 
 		if((*wopre >= 'a' && *wopre <= 'z') || *wopre == '_'){
@@ -264,7 +264,7 @@ static void importInternalModuleTo(Runtime *runtime
 				Runtime_callMethod(runtime, context, baseObj, "onImport", 0, NULL);
 			}
 		} else {
-			Runtime_throwString(runtime, "BAD SYMBOL");
+			Runtime_throwString(runtime, context, "importer: BAD SYMBOL");
 		}
 	}
 
@@ -284,7 +284,7 @@ static void importRegularModuleTo(Runtime *runtime
 
 	char *code = readFile(path);
 	if(!code){
-		Runtime_throwFormatted(runtime, "failed to read file '%s'", path);
+		Runtime_throwFormatted(runtime, context, "failed to read file '%s'", path);
 	}
 
 	Runtime_executeSourceInContext(runtime, code, context);
@@ -307,7 +307,7 @@ static void importPackageTo(Runtime *runtime
 				getNameOfImport(submoduleName, dir->d_name);
 				sprintf(submodulePath, "%s/%s", path, dir->d_name);
 				removeModuleFileExtention(submodulePath);
-				Object_putShallow(context, submoduleName, Imp_import(runtime, submodulePath));
+				Object_putShallow(context, submoduleName, Imp_import(runtime, submodulePath, context));
 			}
 		}
 		closedir(d);
@@ -315,12 +315,12 @@ static void importPackageTo(Runtime *runtime
 }
 
 
-static Object *importWithoutUsingCache(Runtime *runtime, char *modulePath){ // module should not have file extention
+static Object *importWithoutUsingCache(Runtime *runtime, char *modulePath, Object *context){ // module should not have file extention
 	assert(runtime);
 	assert(modulePath);
 
 	if(*modulePath == 0){
-		Runtime_throwString(runtime, "cannot import empty string.");
+		Runtime_throwString(runtime, context, "cannot import empty string.");
 	}
 
 	// Create import context.
@@ -370,12 +370,12 @@ static Object *importWithoutUsingCache(Runtime *runtime, char *modulePath){ // m
 		return r;
 	}
 
-	Runtime_throwFormatted(runtime, "failed to import '%s' (path does not exist)", modulePath);
+	Runtime_throwFormatted(runtime, context, "failed to import '%s' (path does not exist)", modulePath);
 	return NULL;
 }
 
 
-Object *Imp_import(Runtime *runtime, char *modulePath){
+Object *Imp_import(Runtime *runtime, char *modulePath, Object *context){
 	if(runtime->imports){
 		Object *cached = Object_getShallow(runtime->imports, modulePath);
 		if(cached){
@@ -385,7 +385,7 @@ Object *Imp_import(Runtime *runtime, char *modulePath){
 		runtime->imports = Runtime_rawObject(runtime);
 		Object_reference(runtime->imports);
 	}
-	Object *r = importWithoutUsingCache(runtime, modulePath);
+	Object *r = importWithoutUsingCache(runtime, modulePath, context);
 	Object_putShallow(runtime->imports, modulePath, r);
 	return r;
 }
@@ -400,13 +400,13 @@ static Object *activate_(Runtime *runtime
 	assert(Object_isValid(context));
 
 	if(argc != 1 && argc != 2){
-		Runtime_throwString(runtime, "import requires one or two arguments.");
+		Runtime_throwString(runtime, context, "import requires one or two arguments.");
 	} else if(!ImpString_isValid(argv[0])){
-		Runtime_throwString(runtime, "import requires a string as its first argument.");
+		Runtime_throwString(runtime, context, "import requires a string as its first argument.");
 	}
 
 	char *modulePath = ImpString_getRaw(argv[0]);
-	Object *module = Imp_import(runtime, modulePath);
+	Object *module = Imp_import(runtime, modulePath, context);
 
 	if(argc == 1){ //
 		char importName[32];
@@ -422,11 +422,11 @@ static Object *activate_(Runtime *runtime
 			if(Slot_isPrimitive(slot)){
 				if(strcmp(slot->key, "__onImport") != 0  &&     
 			       strcmp(slot->key, "__referenceCount") != 0){
-			       	Runtime_throwFormatted(runtime, "failed to import '%s' into context (has internal method)", modulePath);
+			       	Runtime_throwFormatted(runtime, context, "failed to import '%s' into context (has internal method)", modulePath);
 				}
 			} else if(Object_hasKeyShallow(dest, slot->key) &&
 				      slot->data != Object_getShallow(module, slot->key)){
-				Runtime_throwFormatted(runtime, "failed to import '%s' into context because of conflict '%s'", modulePath, slot->key);
+				Runtime_throwFormatted(runtime, context, "failed to import '%s' into context because of conflict '%s'", modulePath, slot->key);
 			}
 		}
 
