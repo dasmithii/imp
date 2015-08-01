@@ -7,7 +7,6 @@ BIG:
      - Remove built-in throw.
  + REPL.
      - Print command output if not null.
-     - Catch exceptions.
      - Cleanup after CTRL-C. As of now, every interupt leaks memory.
  + Errors.
  + Generational GC
@@ -68,7 +67,7 @@ MISCELANEOUS:
 
 
 PARSER:
- + Make prefix operators work.
+ ? Make prefix operators work.
 
 
 
