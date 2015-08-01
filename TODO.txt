@@ -75,6 +75,7 @@ OPTIMIZATION:
  + Make libraries compile w/o debug symbols.
  + Make loops to re-use scopes
  + Use standardized hash algo for importer.
+ + Use perfect hashes or something in place of flat BST of object fields.
 
 
 
