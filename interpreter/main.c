@@ -9,7 +9,7 @@
 
 
 
-void iargs(char *message){
+static void iargs(char *message){
 	fprintf(stderr, "Invalid arguments: %s\n", message);
 	fprintf(stderr, "   - use 'imp help' for more info.");
 	exit(1);

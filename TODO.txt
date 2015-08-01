@@ -10,6 +10,7 @@ BIG:
      - Catch exceptions.
      - Cleanup after CTRL-C. As of now, every interupt leaks memory.
  + Errors.
+ + Generational GC
 
 
 
