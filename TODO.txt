@@ -11,6 +11,8 @@ BIG:
  + Errors.
  + Generational GC
 
+ + In parser, set _file to file name at beginning
+
 
 
 SMALL:
@@ -76,7 +78,7 @@ OPTIMIZATION:
  + Make loops to re-use scopes
  + Use standardized hash algo for importer.
  + Use perfect hashes or something in place of flat BST of object fields.
-
+ + Make it so not all object fields are individual memory blocks.
 
 
 PROTOTYPAL PROGRAMMING:
