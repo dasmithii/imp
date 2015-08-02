@@ -1,5 +1,5 @@
-#ifndef IMP_CODE_POSITION_H_
-#define IMP_CODE_POSITION_H_
+#ifndef iPOSITION
+#define iPOSITION
 
 
 
@@ -7,12 +7,12 @@
 typedef struct {
 	size_t line;
 	size_t column;
-} Position;
+} iPosition;
 
 
-void Position_print(Position *self);
-void Position_shift(Position *self, int n);
-void Position_newLine(Position *self);
+void iPosition_print(iPosition *self);
+void iPosition_shift(iPosition *self, int n);
+void iPosition_newLine(iPosition *self);
 
 
 

@@ -8,11 +8,11 @@
 
 
 
-void ImpClosure_init(Object *self, Runtime *runtime);
-void ImpClosure_compile(Runtime *runtime, Object *self, ParseNode *code, Object *context);
+void iClosure_init(iObject *self, iRuntime *runtime);
+void iClosure_compile(iRuntime *runtime, iObject *self, iParseNode *code, iObject *context);
 
 
-void ImpClosure_print(Object *self);
+void iClosure_print(iObject *self);
 
 
 

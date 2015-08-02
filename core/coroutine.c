@@ -7,18 +7,18 @@
 
 
 
-Object *coroutine_sleep(Runtime *runtime
-	                  , Object *context
-	                  , Object *module
-	                  , int argc
-	                  , Object **argv){
+iObject *coroutine_sleep(iRuntime *runtime
+	                   , iObject *context
+	                   , iObject *module
+	                   , int argc
+	                   , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "coroutine:sleep requires an argument");
+		iRuntime_throwString(runtime, context, "coroutine:sleep requires an argument");
 	}
-	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, context, "coroutine:sleep requires numeric argument");
+	if(iBuiltin_id(argv[0]) != iBUILTIN_NUMBER){
+		iRuntime_throwString(runtime, context, "coroutine:sleep requires numeric argument");
 	}
-	double raw = ImpNumber_getRaw(argv[0]);
+	double raw = iNumber_getRaw(argv[0]);
 	usleep((unsigned int) raw);
 	return NULL;
 }

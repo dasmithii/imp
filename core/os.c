@@ -10,49 +10,49 @@
 
 
 
-Object *os_onImport(Runtime *runtime
-	              , Object *context
-	              , Object *module
-	              , int argc
-	              , Object **argv){
-	Object *obj = Runtime_make(runtime, Vector);
-	Object_reference(obj);
+iObject *os_onImport(iRuntime *runtime
+	               , iObject *context
+	               , iObject *module
+	               , int argc
+	               , iObject **argv){
+	iObject *obj = iRuntime_MAKE(runtime, Vector);
+	iObject_reference(obj);
 
-	Vector *vec = ImpVector_getRaw(obj);
+	Vector *vec = iVector_getRaw(obj);
 	for(int i = 0; i < runtime->argc; i++){
-		Object *arg = Runtime_make(runtime, String);
-		ImpString_setRaw(arg, runtime->argv[i]);
+		iObject *arg = iRuntime_MAKE(runtime, String);
+		iString_setRaw(arg, runtime->argv[i]);
 		Vector_append(vec, &arg);
 	}
-	Object_putShallow(module, "@", obj);
-	Object_unreference(obj);
+	iObject_putShallow(module, "@", obj);
+	iObject_unreference(obj);
 	return NULL;
 }
 
 // lists only files (i.e. not symlinks or directories)
-Object *os_eachItemIn(Runtime *runtime
-	                , Object *context
-	                , Object *module
-	                , int argc
-                    , Object **argv){
+iObject *os_eachItemIn(iRuntime *runtime
+	                 , iObject *context
+	                 , iObject *module
+	                 , int argc
+                     , iObject **argv){
 	if(argc != 2){
-		Runtime_throwString(runtime, context, "os:eachFileNameIn requires exactly one argument");
+		iRuntime_throwString(runtime, context, "os:eachFileNameIn requires exactly one argument");
 	}
-	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, context, "os:eachFileNameIn requires String as first argument");
+	if(iBuiltin_id(argv[0]) != iBUILTIN_STRING){
+		iRuntime_throwString(runtime, context, "os:eachFileNameIn requires String as first argument");
 	}
-	if(!Object_canBeActivated(argv[1])){
-		Runtime_throwString(runtime, context, "os:eachFileNameIn requires activate-able object as second argument");
+	if(!iObject_canBeActivated(argv[1])){
+		iRuntime_throwString(runtime, context, "os:eachFileNameIn requires activate-able object as second argument");
 	}
 
 	DIR           *d;
 	struct dirent *dir;
-	d = opendir(ImpString_getRaw(argv[0]));
+	d = opendir(iString_getRaw(argv[0]));
 	if(d){
 		while((dir = readdir(d)) != NULL){
-			Object *item = Runtime_make(runtime, String);
-			ImpString_setRaw(item, dir->d_name);
-			Runtime_activate(runtime
+			iObject *item = iRuntime_MAKE(runtime, String);
+			iString_setRaw(item, dir->d_name);
+			iRuntime_activate(runtime
 				           , context
 				           , argv[1]
 				           , 1
@@ -66,30 +66,30 @@ Object *os_eachItemIn(Runtime *runtime
 
 
 // lists only files (i.e. not symlinks or directories)
-Object *os_filesIn(Runtime *runtime
-	             , Object *context
-	             , Object *module
-	             , int argc
-	             , Object **argv){
+iObject *os_filesIn(iRuntime *runtime
+	              , iObject *context
+	              , iObject *module
+	              , int argc
+	              , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "os:filesIn requires exactly one argument");
+		iRuntime_throwString(runtime, context, "os:filesIn requires exactly one argument");
 	}
-	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, context, "os:filesIn requires stringified argument");
+	if(iBuiltin_id(argv[0]) != iBUILTIN_STRING){
+		iRuntime_throwString(runtime, context, "os:filesIn requires stringified argument");
 	}
 
-	Object *r = Runtime_make(runtime, Vector);
-	Object_reference(r);
+	iObject *r = iRuntime_MAKE(runtime, Vector);
+	iObject_reference(r);
 
 	DIR           *d;
 	struct dirent *dir;
-	d = opendir(ImpString_getRaw(argv[0]));
+	d = opendir(iString_getRaw(argv[0]));
 	if(d){
 		while((dir = readdir(d)) != NULL){
 			if(dir->d_type == DT_REG){
-				Object *item = Runtime_make(runtime, String);
-				ImpString_setRaw(item, dir->d_name);
-				Runtime_callMethod(runtime
+				iObject *item = iRuntime_MAKE(runtime, String);
+				iString_setRaw(item, dir->d_name);
+				iRuntime_callMethod(runtime
 					             , context
 					             , r
 					             , "append"
@@ -100,7 +100,7 @@ Object *os_filesIn(Runtime *runtime
 		closedir(d);
 	}
 
-	Object_unreference(r);
+	iObject_unreference(r);
 	return r;
 }
 

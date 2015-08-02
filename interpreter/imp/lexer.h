@@ -8,22 +8,22 @@
 
 typedef struct {
 	char file[256];
-	Token *buffer;
+	iToken *buffer;
 	size_t size;
 	char *error;
-} Tokenization;
+} iTokenization;
 
 
 // interface
-Tokenization lex(char *code);
-void Tokenization_clean(Tokenization *self);
+iTokenization lex(char *code);
+void iTokenization_clean(iTokenization *self);
 
 
 // miscellaneous
-void Tokenization_print(Tokenization *tokenization);
-bool isValidRouteChar(char c);
-bool isValidRouteBegin(char c);
-bool isValidRouteText(char *text);
+void iTokenization_print(iTokenization *tokenization);
+bool iIsValidRouteChar(char c);
+bool iIsValidRouteBegin(char c);
+bool iIsValidRouteText(char *text);
 
 
 

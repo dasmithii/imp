@@ -6,7 +6,7 @@
 
 
 
-void ImpBase_init(Object *self, Runtime *runtime);
+void iBase_init(iObject *self, iRuntime *runtime);
 
 
 

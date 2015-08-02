@@ -7,7 +7,7 @@
 
 
 
-void ImpMisc_init(Object *self, Runtime *runtime);
+void iMisc_init(iObject *self, iRuntime *runtime);
 
 
 

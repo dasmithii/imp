@@ -6,25 +6,25 @@
 
 
 
-bool ImpRoute_isValid(Object *self);
-void ImpRoute_init(Object *self, Runtime *runtime);
-void ImpRoute_print(Object *self);
+bool iRoute_isValid(iObject *self);
+void iRoute_init(iObject *self, iRuntime *runtime);
+void iRoute_print(iObject *self);
 
-char *ImpRoute_getRaw(Object *self);
-void ImpRoute_setRaw(Object *self, char *text);
-void ImpRoute_set(Object *self, Object *other);
+char *iRoute_getRaw(iObject *self);
+void iRoute_setRaw(iObject *self, char *text);
+void iRoute_set(iObject *self, iObject *other);
 
-void ImpRoute_setContext(Object *self, Object *context);
+void iRoute_setContext(iObject *self, iObject *context);
 
-Object *ImpRoute_submapping(Object *self);
-Object *ImpRoute_submapping_(char *self, Object *context);
-Object *ImpRoute_mapping(Object *self);
-Object *ImpRoute_mapping_(char *self, Object *context);
+iObject *iRoute_submapping(iObject *self);
+iObject *iRoute_submapping_(char *self, iObject *context);
+iObject *iRoute_mapping(iObject *self);
+iObject *iRoute_mapping_(char *self, iObject *context);
 
-int ImpRoute_argc(Object *self);
-void ImpRoute_argv(Object *self, int i, char *dest);
+int iRoute_argc(iObject *self);
+void iRoute_argv(iObject *self, int i, char *dest);
 
-Object *unroute(Object *obj);
+iObject *unroute(iObject *obj);
 
 
 

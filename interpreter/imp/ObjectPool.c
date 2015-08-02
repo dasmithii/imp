@@ -10,7 +10,7 @@
 
 
 typedef struct FreeList {
-	Object *block;
+	iObject *block;
 	size_t blockSize;
 	struct FreeList *nextNode;
 } FreeList;
@@ -37,9 +37,9 @@ static inline void FreeList_clean(FreeList *self){
 }
 
 
-static inline Object *FreeList_allocateObject(FreeList *self){
+static inline iObject *FreeList_allocateObject(FreeList *self){
 	assert(FreeList_hasSpace(self));
-	Object *r = self->block;
+	iObject *r = self->block;
 	self->block++;
 	self->blockSize--;
 	FreeList *nextNode = self->nextNode;
@@ -66,7 +66,7 @@ static inline Object *FreeList_allocateObject(FreeList *self){
 // can be handled by keeping an array of open sections
 // within the crate, which are filled sequentially.
 typedef struct Crate {
-	Object *slots;
+	iObject *slots;
 	FreeList freeSlots;
 	struct Crate *successor;
 	size_t capacity;
@@ -77,7 +77,7 @@ typedef struct Crate {
 static inline Crate Crate_withCapacity(size_t n){
 	assert(n > 0);
 	Crate r;
-	r.slots = malloc(n * sizeof(Object));
+	r.slots = malloc(n * sizeof(iObject));
 	if(!r.slots){
 		abort();
 	}
@@ -111,7 +111,7 @@ static inline bool Crate_isEmpty(Crate *self){
 }
 
 
-static inline Object *Crate_allocateObject(Crate *self){
+static inline iObject *Crate_allocateObject(Crate *self){
 	assert(Crate_hasSpace(self));
 	self->usage++;
 	return FreeList_allocateObject(&self->freeSlots);
@@ -120,21 +120,21 @@ static inline Object *Crate_allocateObject(Crate *self){
 
 static inline void Crate_unmarkObjects(Crate *self){
 	for(size_t i = 0; i < self->capacity; i++){
-		Object_unmark(self->slots + i);
+		iObject_unmark(self->slots + i);
 	}
 }
 
 
-static inline void Crate_markReferencedObjects(Crate *self, Runtime *runtime){
+static inline void Crate_markReferencedObjects(Crate *self, iRuntime *runtime){
 	FreeList *frees = &self->freeSlots;
-	Object *object = self->slots;
+	iObject *object = self->slots;
 	while(object < self->slots + self->capacity){
 		if(frees && frees->block == object){
 			object += frees->blockSize;
 			frees = frees->nextNode;
 		} else {
-			if(Object_referenceCount(object) > 0){
-				Runtime_callMethod(runtime, NULL, object, "_markRecursively", 0, NULL);
+			if(iObject_referenceCount(object) > 0){
+				iRuntime_callMethod(runtime, NULL, object, "_markRecursively", 0, NULL);
 			}
 			object++;
 		}
@@ -154,17 +154,17 @@ static inline void Crate_free(Crate *self){
 }
 
 
-static void Crate_callUnmarkedObjectCleanupFunctions(Crate *self, Runtime *runtime){
+static void Crate_callUnmarkedObjectCleanupFunctions(Crate *self, iRuntime *runtime){
 	FreeList *frees = &self->freeSlots;
-	Object *object = self->slots;
+	iObject *object = self->slots;
 	while(object < self->slots + self->capacity){
 		if(frees && frees->block == object){
 			object += frees->blockSize;
 			frees = frees->nextNode;
 		} else {
 			if(!object->gc_mark){
-				if(Object_hasMethod(object, "_clean")){
-					Runtime_callMethod(runtime, NULL, object, "_clean", 0, NULL);
+				if(iObject_hasMethod(object, "_clean")){
+					iRuntime_callMethod(runtime, NULL, object, "_clean", 0, NULL);
 				}
 			}
 			object++;
@@ -175,18 +175,18 @@ static void Crate_callUnmarkedObjectCleanupFunctions(Crate *self, Runtime *runti
 
 
 // returns # of objects cleaned
-static int Crate_freeUnmarkedObjects(Crate *self, Runtime *runtime){
+static int Crate_freeUnmarkedObjects(Crate *self, iRuntime *runtime){
 	int n = 0;
 
 	FreeList *frees = &self->freeSlots;
-	Object *object = self->slots;
+	iObject *object = self->slots;
 	while(object < self->slots + self->capacity){
 		if(frees && frees->block == object){
 			object += frees->blockSize;
 			frees = frees->nextNode;
 		} else {
 			if(!object->gc_mark){
-				Object_clean(object);
+				iObject_clean(object);
 				n++;
 			}
 			object++;
@@ -198,7 +198,7 @@ static int Crate_freeUnmarkedObjects(Crate *self, Runtime *runtime){
 	FreeList_clean(frees);
 
 	// setup free lists.
-	Object *beg = NULL;
+	iObject *beg = NULL;
 	size_t size = 0;
 	for(size_t i = 0; i < self->capacity; i++){
 		if(!self->slots[i].gc_mark){
@@ -253,19 +253,19 @@ static int Crate_freeUnmarkedObjects(Crate *self, Runtime *runtime){
 // on malloc calls, which aren't especially bad or 
 // frequent (because of exponentially large crates). Thus
 // the system is pretty good
-typedef struct ImpObjectPool_ {
+typedef struct iObjectPool_ {
 	Crate *first;  // first node in forward-linked list of memory blocks
 	Crate *next;  // first node with unused space in its block; null if none exist
 	Crate *last;
 	bool gcRunning;
 	size_t gcLocks;
 	size_t objectCount;
-	Runtime *runtime;
-} ImpObjectPool_;
+	iRuntime *runtime;
+} iObjectPool_;
 
 
-ImpObjectPool ImpObjectPool_forRuntime(void *runtime){
-	ImpObjectPool_ *r = malloc(sizeof(ImpObjectPool_));
+iObjectPool iObjectPool_forRuntime(void *runtime){
+	iObjectPool_ *r = malloc(sizeof(iObjectPool_));
 	if(!r){
 		abort();
 	}
@@ -275,12 +275,12 @@ ImpObjectPool ImpObjectPool_forRuntime(void *runtime){
 	r->gcRunning = false;
 	r->gcLocks = 0;
 	r->objectCount = 0;
-	r->runtime = (Runtime*) runtime;
+	r->runtime = (iRuntime*) runtime;
 	return r;
 }
 
 
-static void ImpObjectPool_diagnose(ImpObjectPool self){
+static void iObjectPool_diagnose(iObjectPool self){
 	printf("Object Pool\n");
 	printf(" - objects: %zu\n", self->objectCount);
 	int n = 0;
@@ -303,7 +303,7 @@ static void ImpObjectPool_diagnose(ImpObjectPool self){
 // free lists for each crate, and arranges crates into a 
 // linked list headed by full crates and absent of empty
 // crates.
-static void ImpObjectPool_markAndSweep(ImpObjectPool self){
+static void iObjectPool_markAndSweep(iObjectPool self){
 	// printf("MARK AND SWEEEP  !!!!  OC: %d\n", self->objectCount);
 	assert(self);
 	assert(self->gcLocks == 0);
@@ -326,7 +326,7 @@ static void ImpObjectPool_markAndSweep(ImpObjectPool self){
 
 	// mark other accessible allocations
 	if(self->runtime->lastReturnValue){
-		Runtime_callMethod(self->runtime
+		iRuntime_callMethod(self->runtime
 			             , NULL
 			             , self->runtime->lastReturnValue
 			             , "_markRecursively"
@@ -397,17 +397,17 @@ static void ImpObjectPool_markAndSweep(ImpObjectPool self){
 }
 
 
-Object *ImpObjectPool_allocate(ImpObjectPool self){
+iObject *iObjectPool_allocate(iObjectPool self){
 	if(self->gcRunning == false         &&
 	   self->gcLocks == 0               &&
 	   self->objectCount >= 500         &&
 	   self->objectCount %  250  == 0){
-		ImpObjectPool_markAndSweep(self);
+		iObjectPool_markAndSweep(self);
 	}
 
 	if(!self->next){
 		if(!self->gcRunning && !self->gcLocks){
-			ImpObjectPool_markAndSweep(self);
+			iObjectPool_markAndSweep(self);
 			if(self->next){
 				goto PRALLO;
 			} 
@@ -418,30 +418,30 @@ Object *ImpObjectPool_allocate(ImpObjectPool self){
 	}
 	PRALLO:
 	self->objectCount++;
-	Object *r = Crate_allocateObject(self->next);
+	iObject *r = Crate_allocateObject(self->next);
 	if(!Crate_hasSpace(self->next)){
 		self->next = self->next->successor;
 	}
-	Object_init(r);
+	iObject_init(r);
 	return r;
 }
 
 
-void ImpObjectPool_lockGC(ImpObjectPool self){
+void iObjectPool_lockGC(iObjectPool self){
 	assert(self);
 	assert(self->gcRunning == false);
 	self->gcLocks++;
 }
 
 
-void ImpObjectPool_unlockGC(ImpObjectPool self){
+void iObjectPool_unlockGC(iObjectPool self){
 	assert(self);
 	assert(self->gcLocks > 0);
 	self->gcLocks--;
 }
 
 
-void ImpObjectPool_free(ImpObjectPool pool){
+void iObjectPool_free(iObjectPool pool){
 	Crate_clean(pool->first);
 	Crate *node = pool->first->successor;
 	while(node){

@@ -7,17 +7,17 @@
 
 
 
-typedef Object *(*CFunction)(Runtime *runtime
-	                       , Object *context
-	                       , Object *caller
-	                       , int argc
-	                       , Object **argv);
+typedef iObject *(*CFunction)(iRuntime *runtime
+	                        , iObject *context
+	                        , iObject *caller
+	                        , int argc
+	                        , iObject **argv);
 
 
-void Runtime_registerCMethod(Runtime *runtime
-	                       , Object *object
-                           , char *methodName
-                           , CFunction method);
+void iRuntime_registerCMethod(iRuntime *runtime
+	                        , iObject *object
+                            , char *methodName
+                            , CFunction method);
  
 
 // Privileged methods, when called, are passed raw argument
@@ -25,11 +25,15 @@ void Runtime_registerCMethod(Runtime *runtime
 // dereferencing. In contrast, regular (non-priveleged)
 // methods do not have such access. Instead, they are passed
 // values only (not variables/slots).
-void Runtime_registerPrivelegedCMethod(Runtime *runtime
-	                                 , Object *object
-                                     , char *methodName
-                                     , CFunction method);
+void iRuntime_registerPrivelegedCMethod(iRuntime *runtime
+	                                  , iObject *object
+                                      , char *methodName
+                                      , CFunction method);
 
-void Object_registerCActivator(Object *object, CFunction method);
+
+void iObject_registerCActivator(iObject *object, CFunction method);
+
+
+
 
 #endif

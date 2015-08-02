@@ -12,7 +12,7 @@
 
 
 static bool validKey(char *key){
-	return isValidRouteText(key);
+	return iIsValidRouteText(key);
 }
 
 
@@ -34,7 +34,7 @@ static bool keyForRegular(char *key){
 }
 
 
-void Object_init(Object *self){
+void iObject_init(iObject *self){
 	assert(self);
 	self->slotCount = 0;
 	self->slots = NULL;
@@ -43,29 +43,29 @@ void Object_init(Object *self){
 }
 
 
-void *Slot_data(Slot *self){
+void *iSlot_data(iSlot *self){
 	assert(self);
-	assert(Slot_isPrimitive(self));
+	assert(iSlot_isPrimitive(self));
 	return self->data;
 }
 
 
-Object *Slot_object(Slot *self){
+iObject *iSlot_object(iSlot *self){
 	assert(self);
-	assert(!Slot_isPrimitive(self));
-	return (Object*) self->data;
+	assert(!iSlot_isPrimitive(self));
+	return (iObject*) self->data;
 }
 
 
-bool Slot_isPrimitive(Slot *self){
+bool iSlot_isPrimitive(iSlot *self){
 	assert(self);
 	return self->key[0] == '_' && self->key[1] == '_';
 }
 
 
-void Slot_clean(Slot *self){
+void iSlot_clean(iSlot *self){
 	assert(self);
-	if(Slot_isPrimitive(self) && self->data){
+	if(iSlot_isPrimitive(self) && self->data){
 		free(self->data);
 		self->data = NULL;
 	}
@@ -75,7 +75,7 @@ void Slot_clean(Slot *self){
 }
 
 
-static int Slot_compare(Slot *self, Slot *other){
+static int iSlot_compare(iSlot *self, iSlot *other){
 	assert(self);
 	assert(other);
 	assert(validKey(self->key));
@@ -84,82 +84,82 @@ static int Slot_compare(Slot *self, Slot *other){
 }
 
 
-static int Slot_compare_generic(const void *self, const void *other){
+static int iSlot_compare_generic(const void *self, const void *other){
 	assert(self);
 	assert(other);
-	return Slot_compare((Slot*) self, (Slot*) other);
+	return iSlot_compare((iSlot*) self, (iSlot*) other);
 }
 
 
-Slot *Object_getSlotShallow(Object *self, char *key){
-	assert(Object_isValid(self));
+iSlot *iObject_getSlotShallow(iObject *self, char *key){
+	assert(iObject_isValid(self));
 	assert(validKey(key));
 	if(self->slotCount == 0){
 		return NULL;
 	}
-	Slot skey = {.key = key};
+	iSlot skey = {.key = key};
 	return bsearch(&skey
 		         , (void*) self->slots
 		         , self->slotCount
-		         , sizeof(Slot)
-		         , Slot_compare_generic);
+		         , sizeof(iSlot)
+		         , iSlot_compare_generic);
 }
 
 
-Slot *Object_getSlotDeep(Object *self, char *key){
-	assert(Object_isValid(self));
+iSlot *iObject_getSlotDeep(iObject *self, char *key){
+	assert(iObject_isValid(self));
 	assert(validKey(key));
 
-	Slot *shallow = Object_getSlotShallow(self, key);
+	iSlot *shallow = iObject_getSlotShallow(self, key);
 	if(shallow){
 		return shallow;
 	}
-	Object *prototype = Object_getShallow(self, "#");
+	iObject *prototype = iObject_getShallow(self, "#");
 	if(!prototype){
 		return NULL;
 	}
-	return Object_getSlotDeep(prototype, key);
+	return iObject_getSlotDeep(prototype, key);
 }
 
 
-Object *Object_getShallow(Object *self, char *key){
-	assert(Object_isValid(self));
+iObject *iObject_getShallow(iObject *self, char *key){
+	assert(iObject_isValid(self));
 	assert(!keyForInternal(key));
 
 
-	Slot *slot = Object_getSlotShallow(self, key);
+	iSlot *slot = iObject_getSlotShallow(self, key);
 	if(slot){
-		return Slot_object(slot);
+		return iSlot_object(slot);
 	}
 	return NULL;
 }
 
 
-Object *Object_getDeep(Object *self, char *key){
-	assert(Object_isValid(self));
+iObject *iObject_getDeep(iObject *self, char *key){
+	assert(iObject_isValid(self));
 	assert(!keyForInternal(key));
 
-	Slot *slot = Object_getSlotDeep(self, key);
+	iSlot *slot = iObject_getSlotDeep(self, key);
 	if(!slot){
 		return NULL;
 	}
-	return Slot_object(slot);
+	return iSlot_object(slot);
 }
 
 
-bool Object_hasKeyShallow(Object *self, char *key){
-	assert(Object_isValid(self));
+bool iObject_hasKeyShallow(iObject *self, char *key){
+	assert(iObject_isValid(self));
 	assert(validKey(key));
 
-	return Object_getSlotShallow(self, key) != NULL;
+	return iObject_getSlotShallow(self, key) != NULL;
 }
 
 
-void *Object_getDataShallow(Object *self, char *key){
-	assert(Object_isValid(self));
+void *iObject_getDataShallow(iObject *self, char *key){
+	assert(iObject_isValid(self));
 	assert(keyForInternal(key));
 
-	Slot *slot = Object_getSlotShallow(self, key);
+	iSlot *slot = iObject_getSlotShallow(self, key);
 	if(!slot){
 		return NULL;
 	}
@@ -167,11 +167,11 @@ void *Object_getDataShallow(Object *self, char *key){
 }
 
 
-void *Object_getDataDeep(Object *self, char *key){
-	assert(Object_isValid(self));
+void *iObject_getDataDeep(iObject *self, char *key){
+	assert(iObject_isValid(self));
 	assert(keyForInternal(key));
 
-	Slot *slot = Object_getSlotDeep(self, key);
+	iSlot *slot = iObject_getSlotDeep(self, key);
 	if(!slot){
 		return NULL;
 	}
@@ -179,106 +179,106 @@ void *Object_getDataDeep(Object *self, char *key){
 }
 
 
-bool Object_hasKeyDeep(Object *self, char *key){
-	assert(Object_isValid(self));
+bool iObject_hasKeyDeep(iObject *self, char *key){
+	assert(iObject_isValid(self));
 	assert(validKey(key));
 
-	return Object_getSlotDeep(self, key) != NULL;
+	return iObject_getSlotDeep(self, key) != NULL;
 }
 
 
-static void Object_insertShallow(Object *self, char *key, void *data){
-	assert(Object_isValid(self));
+static void iObject_insertShallow(iObject *self, char *key, void *data){
+	assert(iObject_isValid(self));
 	assert(validKey(key));
 
-	Slot *existing = Object_getSlotShallow(self, key);
+	iSlot *existing = iObject_getSlotShallow(self, key);
 	if(existing){
-		if(Slot_isPrimitive(existing) && existing->data){
+		if(iSlot_isPrimitive(existing) && existing->data){
 			free(existing->data);
 		}
 		existing->data = data;
 		return;
 	}
 
-	self->slots = realloc(self->slots, (self->slotCount + 1) * sizeof(Slot)); // TODO: check return
+	self->slots = realloc(self->slots, (self->slotCount + 1) * sizeof(iSlot)); // TODO: check return
 	self->slots[self->slotCount].key = strdup(key);
 	self->slots[self->slotCount].data = data;
 	self->slotCount += 1;
 	qsort(self->slots
 		, self->slotCount
-		, sizeof(Slot)
-		, Slot_compare_generic);
+		, sizeof(iSlot)
+		, iSlot_compare_generic);
 }
 
 
-static void Object_insertDeep(Object *self, char *key, void *data){
-	assert(Object_isValid(self));
+static void iObject_insertDeep(iObject *self, char *key, void *data){
+	assert(iObject_isValid(self));
 	assert(validKey(key));
 
-	Object *object = self;
+	iObject *object = self;
 	while(object){
-		if(Object_hasKeyShallow(object, key)){
-			Object_insertShallow(object, key, data);
+		if(iObject_hasKeyShallow(object, key)){
+			iObject_insertShallow(object, key, data);
 			return;
 		}
-		object = Object_getShallow(object, "#");
+		object = iObject_getShallow(object, "#");
 	} 
 
-	Object_insertShallow(self, key, data);
+	iObject_insertShallow(self, key, data);
 }
 
 
-void Object_putDataShallow(Object *self, char *key, void *data){
-	assert(Object_isValid(self));
+void iObject_putDataShallow(iObject *self, char *key, void *data){
+	assert(iObject_isValid(self));
 	assert(keyForInternal(key));
 
-	Object_insertShallow(self, key, data);
+	iObject_insertShallow(self, key, data);
 
-	assert(Object_isValid(self));
+	assert(iObject_isValid(self));
 }
 
 
-void Object_putDataDeep(Object *self, char *key, void *data){
-	assert(Object_isValid(self));
+void iObject_putDataDeep(iObject *self, char *key, void *data){
+	assert(iObject_isValid(self));
 	assert(keyForInternal(key));
 
-	Object_insertDeep(self, key, data);
+	iObject_insertDeep(self, key, data);
 
-	assert(Object_isValid(self));
+	assert(iObject_isValid(self));
 }
 
 
-void Object_putShallow(Object *self, char *key, Object *value){
-	assert(Object_isValid(self));
-	assert(Object_isValid(value));
+void iObject_putShallow(iObject *self, char *key, iObject *value){
+	assert(iObject_isValid(self));
+	assert(iObject_isValid(value));
 	assert(!keyForInternal(key));
 	assert(key[0] != '#' || key[1] != 0 || self != value);
-	Object_insertShallow(self, key, value);
+	iObject_insertShallow(self, key, value);
 }
 
 
-void Object_putDeep(Object *self, char *key, Object *value){
-	assert(Object_isValid(self));
-	assert(Object_isValid(value));
+void iObject_putDeep(iObject *self, char *key, iObject *value){
+	assert(iObject_isValid(self));
+	assert(iObject_isValid(value));
 	assert(!keyForInternal(key));
 
-	Object_insertDeep(self, key, value);
+	iObject_insertDeep(self, key, value);
 
-	assert(Object_isValid(self));
+	assert(iObject_isValid(self));
 }
 
 
-void Object_remShallow(Object *self, char *key){
-	assert(Object_isValid(self));
+void iObject_remShallow(iObject *self, char *key){
+	assert(iObject_isValid(self));
 	assert(validKey(key));
 
-	Slot *slot = Object_getSlotShallow(self, key);
+	iSlot *slot = iObject_getSlotShallow(self, key);
 	if(!slot){
 		printf("FUCK\n");
 		abort();
 		return;
 	}
-	Slot_clean(slot);
+	iSlot_clean(slot);
 	int index = slot - self->slots;
 	for(int i = index; i < self->slotCount - 1; i++){
 		self->slots[i] = self->slots[i+1];
@@ -289,30 +289,30 @@ void Object_remShallow(Object *self, char *key){
 		free(self->slots);
 		self->slots = NULL;
 	} else {
-		self->slots = realloc(self->slots, self->slotCount * sizeof(Slot));
+		self->slots = realloc(self->slots, self->slotCount * sizeof(iSlot));
 	}
 
-	assert(Object_isValid(self));
+	assert(iObject_isValid(self));
 }
 
 
-void Object_mark(Object *self){
-	assert(Object_isValid(self));
+void iObject_mark(iObject *self){
+	assert(iObject_isValid(self));
 	self->gc_mark = true;
 }
 
 
-void Object_unmark(Object *self){
+void iObject_unmark(iObject *self){
 	self->gc_mark = false;
 }
 
 
-void Object_clean(Object *self){
-	assert(Object_isValid(self));
+void iObject_clean(iObject *self){
+	assert(iObject_isValid(self));
 
 	if(self->slotCount > 0){
 		for(int i = 0; i < self->slotCount; i++){
-			Slot_clean(self->slots + i);
+			iSlot_clean(self->slots + i);
 		}
 
 		free(self->slots);
@@ -322,57 +322,57 @@ void Object_clean(Object *self){
 }
 
 
-void Object_free(Object *self){
-	assert(Object_isValid(self));
+void iObject_free(iObject *self){
+	assert(iObject_isValid(self));
 
-	Object_clean(self);
+	iObject_clean(self);
 	free(self);
 }
 
 
-Object *Object_prototype(Object *self){
-	return Object_getShallow(self, "#");
+iObject *iObject_prototype(iObject *self){
+	return iObject_getShallow(self, "#");
 }
 
 
-Object *Object_rootPrototype(Object *self){
-	assert(Object_isValid(self));
+iObject *iObject_rootPrototype(iObject *self){
+	assert(iObject_isValid(self));
 
-	Object *proto = Object_getShallow(self, "#");
+	iObject *proto = iObject_getShallow(self, "#");
 	if(!proto){
 		return self;
 	}
-	return Object_rootPrototype(proto);
+	return iObject_rootPrototype(proto);
 }
 
 
-void Object_putKeyShallow(Object *self, char *key){
-	assert(Object_isValid(self));
+void iObject_putKeyShallow(iObject *self, char *key){
+	assert(iObject_isValid(self));
 	assert(validKey(key));
-	Object_insertShallow(self, key, NULL);
+	iObject_insertShallow(self, key, NULL);
 }
 
 
-bool Slot_isValid(Slot *self){
+bool iSlot_isValid(iSlot *self){
 	if(!self){
 		return false;
 	}
 	if(!validKey(self->key)){
 		return false;
 	}
-	// if(!Slot_isPrimitive(self) && !self->data){  //TODO?: make recursive?
+	// if(!iSlot_isPrimitive(self) && !self->data){  //TODO?: make recursive?
 	// 	return false;
 	// }
 	return true;
 }
 
 
-bool Object_isValid(Object *self){
+bool iObject_isValid(iObject *self){
 	if(!self){
 		return true;
 	}
 	for(int i = 0; i < self->slotCount; i++){
-		if(!Slot_isValid(self->slots + i)){
+		if(!iSlot_isValid(self->slots + i)){
 			return false;
 		}
 	}
@@ -380,34 +380,34 @@ bool Object_isValid(Object *self){
 }
 
 
-void Object_reference(Object *self){
+void iObject_reference(iObject *self){
 	if(!self){
 		return;
 	}
-	assert(Object_isValid(self));
+	assert(iObject_isValid(self));
 	self->refcount++;
 }
 
 
-void Object_unreference(Object *self){
+void iObject_unreference(iObject *self){
 	if(!self){
 		return;
 	}
-	assert(Object_isValid(self));
+	assert(iObject_isValid(self));
 	assert(self->refcount >= 1);
 	self->refcount--;
 }
 
 
-int Object_referenceCount(Object *self){
-	assert(Object_isValid(self));
+int iObject_referenceCount(iObject *self){
+	assert(iObject_isValid(self));
 	return (int) self->refcount;
 }
 
 
-void Object_print(Object *self){
-	assert(Object_isValid(self));
-	printf("Object %p\n", self);
+void iObject_print(iObject *self){
+	assert(iObject_isValid(self));
+	printf("iObject %p\n", self);
 	for(int i = 0; i < self->slotCount; i++){
 		printf(" - %s: %p", self->slots[i].key, self->slots[i].data);
 		if(i < self->slotCount - 1){
@@ -417,24 +417,24 @@ void Object_print(Object *self){
 }
 
 
-bool Object_canBeActivated(Object *self){
-	assert(Object_isValid(self));
-	return Object_hasKeyDeep(self, "_activate") ||
-	       Object_hasKeyDeep(self, "__activate");
+bool iObject_canBeActivated(iObject *self){
+	assert(iObject_isValid(self));
+	return iObject_hasKeyDeep(self, "_activate") ||
+	       iObject_hasKeyDeep(self, "__activate");
 }
 
-bool Object_hasSpecialMethod(Object *self, char *name){
+bool iObject_hasSpecialMethod(iObject *self, char *name){
 	char _prefixed[64];
 	sprintf(_prefixed, "_%s", name);
-	return Object_hasMethod(self, _prefixed);
+	return iObject_hasMethod(self, _prefixed);
 }
 
-bool Object_hasMethod(Object *self, char *name){
-	Object *deep = Object_getDeep(self, name);
+bool iObject_hasMethod(iObject *self, char *name){
+	iObject *deep = iObject_getDeep(self, name);
 	if(deep){
-		return Object_canBeActivated(deep);
+		return iObject_canBeActivated(deep);
 	} else if(*name != '_'){
-		return Object_hasSpecialMethod(self, name);
+		return iObject_hasSpecialMethod(self, name);
 	}
 	return false;
 }

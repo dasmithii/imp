@@ -7,19 +7,19 @@
 
 
 // for injected returns in short-hand closures
-static const Token RETURN_TOKEN = {.type = TOKEN_ROUTE, .data.text = "return"};
+static const iToken iRETURN_TOKEN = {.type = iTOKEN_ROUTE, .data.text = "return"};
 
 
 // TODO replace this.
-static bool Token_isUnary(Token *t){
+static bool iToken_isUnary(iToken *t){
 	return false;
 }
 
 
-static int ParseNode_init(ParseTree *parent
-	                    , ParseNode *node
-	                    , Token *begin
-	                    , Token *end){
+static int iParseNode_init(iParseTree *parent
+	                     , iParseNode *node
+	                     , iToken *begin
+	                     , iToken *end){
 	assert(node);
 	assert(begin);
 	assert(end);
@@ -28,51 +28,51 @@ static int ParseNode_init(ParseTree *parent
 
 	// check if leaf node
 	if(end == begin + 1){
-		if(!Token_isUnary(begin) && !Token_isLiteral(begin)){
+		if(!iToken_isUnary(begin) && !iToken_isLiteral(begin)){
 			parent->error = strdup("mismatched grouping operators (invalid leaf).");
 			return 1;
 		}
-		node->type = LEAF_NODE;
+		node->type = iNODE_LEAF;
 		node->token = begin;
 		return 0;
 	}
 
 
-	TokenType beginType = begin[0].type;
+	iTokenType beginType = begin[0].type;
 
 
 	switch(begin[0].type){
-	case TOKEN_HARD_OPEN:
-		node->type = OBJECT_NODE;
-		if((end - 1)->type != TOKEN_HARD_CLOSE){
+	case iTOKEN_HARD_OPEN:
+		node->type = iNODE_OBJECT;
+		if((end - 1)->type != iTOKEN_HARD_CLOSE){
 			parent->error = strdup("unmatched hard bracket.");
 			return -1;
 		}
 		break;
-	case TOKEN_SOFT_OPEN:
-		node->type = CALL_NODE;
-		if((end - 1)->type != TOKEN_SOFT_CLOSE){
+	case iTOKEN_SOFT_OPEN:
+		node->type = iNODE_CALL;
+		if((end - 1)->type != iTOKEN_SOFT_CLOSE){
 			parent->error = strdup("unmatched soft bracket.");
 			return -1;
 		}
 		break;
-	case TOKEN_CURLY_OPEN:
-		node->type = CLOSURE_NODE;
-		if((end - 1)->type != TOKEN_CURLY_CLOSE){
+	case iTOKEN_CURLY_OPEN:
+		node->type = iNODE_CLOSURE;
+		if((end - 1)->type != iTOKEN_CURLY_CLOSE){
 			parent->error = strdup("unmatched curly brace.");
 			return -1;
 		}
 		break;
 	default:
-		if(Token_isClosed(begin)){
+		if(iToken_isClosed(begin)){
 			parent->error = strdup("misplaced closing.");
 			return 1;
 		}
-		node->type = CALL_NODE;
+		node->type = iNODE_CALL;
 		node->argc = 2;
-		node->argv = malloc(2 * sizeof(ParseNode));
-		return ParseNode_init(parent, node->argv, begin, begin + 1)     ||
-		       ParseNode_init(parent, node->argv + 1, begin + 1, end);
+		node->argv = malloc(2 * sizeof(iParseNode));
+		return iParseNode_init(parent, node->argv, begin, begin + 1)     ||
+		       iParseNode_init(parent, node->argv + 1, begin + 1, end);
 	}
 
 	// remove beginning and trailing grouping operators
@@ -87,22 +87,22 @@ static int ParseNode_init(ParseTree *parent
 
 
 	// The following subCount, subCapacity, and subArray combine
-	// to form a dynamic array of ParseNodes. IMP_REGISTER_PARSED
+	// to form a dynamic array of iParseNodes. IMP_REGISTER_PARSED
 	// appends to this dynamic array.
 	size_t subCount = 0;
 	size_t subCapacity = 4;
-	ParseNode *subArray = malloc(subCapacity * sizeof(ParseNode));
+	iParseNode *subArray = malloc(subCapacity * sizeof(iParseNode));
 	if(!subArray){
 		abort();
 	}
 	#define IMP_REGISTER_PARSED(node)                  \
-		if(ParseNode_isContextualRoute(&node)){        \
+		if(iParseNode_isContextualRoute(&node)){        \
 			if(subCount == 0){                         \
 				printf("ERROR ERROR: invalid :route"); \
 				exit(1);                               \
 			} else {                                   \
 				node.argc = 1;                         \
-				node.argv = malloc(sizeof(ParseNode)); \
+				node.argv = malloc(sizeof(iParseNode)); \
 				if(!node.argv){                             \
 					abort();                           \
 				}                                      \
@@ -112,7 +112,7 @@ static int ParseNode_init(ParseTree *parent
 		} else {                                       \
 			if(subCount == subCapacity){               \
 				subCapacity *= 2;                      \
-				subArray = realloc(subArray, subCapacity * sizeof(ParseNode)); \
+				subArray = realloc(subArray, subCapacity * sizeof(iParseNode)); \
 				if(!subArray){                         \
 					abort();                           \
 				}                                      \
@@ -124,8 +124,8 @@ static int ParseNode_init(ParseTree *parent
 
 
 	int depth = 0;
-	Token *it = begin;
-	Token *prev = NULL;
+	iToken *it = begin;
+	iToken *prev = NULL;
 
 	// Iterate through tokens, tracking grouping level depth. The 
 	// goal here is to separate independent groupings and 
@@ -135,9 +135,9 @@ static int ParseNode_init(ParseTree *parent
 		if(depth == 0){
 			if(prev){
 				// We have found an independent sub-grouping. 
-				// Parse and register it recursively.
-				ParseNode node;
-				if(ParseNode_init(parent, &node, prev, it)){
+				// iParse and register it recursively.
+				iParseNode node;
+				if(iParseNode_init(parent, &node, prev, it)){
 					return 1;
 				}
 				IMP_REGISTER_PARSED(node)
@@ -145,17 +145,17 @@ static int ParseNode_init(ParseTree *parent
 
 			// Mark beginning of next sub grouping.
 			prev = it;
-			if(Token_isUnary(prev)){
-				while(Token_isUnary(it)){
+			if(iToken_isUnary(prev)){
+				while(iToken_isUnary(it)){
 					++it;
 				}
-				if(Token_isOpen(it)){
+				if(iToken_isOpen(it)){
 					int d = 1;
 					while(d){
 						++it;
-						if(Token_isOpen(it)){
+						if(iToken_isOpen(it)){
 							++d;
-						} else if(Token_isClosed(it)){
+						} else if(iToken_isClosed(it)){
 							--d;
 						}
 					}
@@ -164,45 +164,45 @@ static int ParseNode_init(ParseTree *parent
 		}
 
 		// check groupings and iterate
-		if(Token_isOpen(it)){
+		if(iToken_isOpen(it)){
 			++depth;
-		} else if(Token_isClosed(it)){
+		} else if(iToken_isClosed(it)){
 			--depth;
 		}
 		++it;
 	}
-	ParseNode final;
-	if(ParseNode_init(parent, &final, prev, it)){
+	iParseNode final;
+	if(iParseNode_init(parent, &final, prev, it)){
 		return 1;
 	}
 	IMP_REGISTER_PARSED(final)
 
 
-	if(beginType == TOKEN_CURLY_OPEN){
+	if(beginType == iTOKEN_CURLY_OPEN){
 		for(size_t i = 0; i < subCount; i++){
-			ParseNode *sub = subArray + i;
-			if(sub->type != CALL_NODE){
+			iParseNode *sub = subArray + i;
+			if(sub->type != iNODE_CALL){
 				// translate from {<code>} to {(return (<code>))}
 
 
 				node->argc = 1;
-				node->argv = malloc(sizeof(ParseNode));
+				node->argv = malloc(sizeof(iParseNode));
 				// TODO: check return.
 		
-				ParseNode *rn = node->argv;
+				iParseNode *rn = node->argv;
 				rn->argc = 2;
-				rn->argv = malloc(2 * sizeof(ParseNode));
+				rn->argv = malloc(2 * sizeof(iParseNode));
 				// TODO: check return.
-				rn->type = CALL_NODE;
+				rn->type = iNODE_CALL;
 
-				ParseNode *rnav = rn->argv;
+				iParseNode *rnav = rn->argv;
 
 
-				rnav[0].type = LEAF_NODE;
-				rnav[0].token = &RETURN_TOKEN;
+				rnav[0].type = iNODE_LEAF;
+				rnav[0].token = &iRETURN_TOKEN;
 				rnav[0].argc = 0;
 
-				rnav[1].type = CALL_NODE;
+				rnav[1].type = iNODE_CALL;
 				rnav[1].argc = subCount;
 				rnav[1].argv = subArray;
 	
@@ -218,7 +218,7 @@ static int ParseNode_init(ParseTree *parent
 }
 
 
-int ParseTree_init(ParseTree *tree, char *code){
+int iParseTree_init(iParseTree *tree, char *code){
 	assert(tree);
 	assert(code);
 	tree->error = NULL;
@@ -229,107 +229,107 @@ int ParseTree_init(ParseTree *tree, char *code){
 		return 1;
 	}
 
-	if(ParseNode_init(tree
+	if(iParseNode_init(tree
      , &tree->root
      , tree->tokenization.buffer
      , tree->tokenization.buffer + tree->tokenization.size)){
 		return 1;
 	}
-	tree->root.type = BLOCK_NODE;
+	tree->root.type = iNODE_BLOCK;
 	return 0;
 }
 
 
-static void ParseNode_clean(ParseNode *self){
+static void iParseNode_clean(iParseNode *self){
 	assert(self);
 
 	if(self->argc){
 		for(size_t i = 0; i < self->argc; ++i){
-			ParseNode_clean(self->argv + i);
+			iParseNode_clean(self->argv + i);
 		}
 		free(self->argv);
 	}
 }
 
 
-void ParseTree_clean(ParseTree *tree){
+void iParseTree_clean(iParseTree *tree){
 	assert(tree);
 
 	if(tree->error){
 		free(tree->error);
 		tree->error = NULL;
 	}
-	ParseNode_clean(&tree->root);
-	Tokenization_clean(&tree->tokenization);
+	iParseNode_clean(&tree->root);
+	iTokenization_clean(&tree->tokenization);
 }
 
 
-void ParseNode_print(ParseNode *self){
+void iParseNode_print(iParseNode *self){
 	assert(self);
 
 	switch(self->type){
-	case CALL_NODE:
+	case iNODE_CALL:
 		printf("(");
 		break;
-	case OBJECT_NODE:
+	case iNODE_OBJECT:
 		printf("[");
 		break;
-	case CLOSURE_NODE:
+	case iNODE_CLOSURE:
 		printf("{");
 		break;
 	}
 
-	if(self->type == LEAF_NODE){
-		Token_print(self->token);
+	if(self->type == iNODE_LEAF){
+		iToken_print(self->token);
 	} else {
 		if(self->argc > 0){
-			ParseNode_print(self->argv);
+			iParseNode_print(self->argv);
 			for(size_t i = 1; i < self->argc; i++){
 				printf(" ");
-				ParseNode_print(self->argv + i);
+				iParseNode_print(self->argv + i);
 			}
 		}
 	}
 
 
 	switch(self->type){
-	case CALL_NODE:
+	case iNODE_CALL:
 		printf(")");
 		break;
-	case OBJECT_NODE:
+	case iNODE_OBJECT:
 		printf("]");
 		break;
-	case CLOSURE_NODE:
+	case iNODE_CLOSURE:
 		printf("}");
 		break;
 	}
 }
 
 
-void ParseTree_print(ParseTree *self){
+void iParseTree_print(iParseTree *self){
 	assert(self);
 
-	ParseNode_print(&self->root);
+	iParseNode_print(&self->root);
 }
 
 
-ParseNode ParseNode_deepCopy(ParseNode *self){
+iParseNode iParseNode_deepCopy(iParseNode *self){
 	assert(self);
 
-	ParseNode r;
+	iParseNode r;
 	r.type = self->type;
-	if(r.type == LEAF_NODE){
-		r.token = Token_copy(self->token);
+	if(r.type == iNODE_LEAF){
+		r.token = iToken_copy(self->token);
 	}
 
 	r.argc = self->argc;
 	if(r.argc){
-		r.argv = malloc(r.argc * sizeof(ParseNode));
+		r.argv = malloc(r.argc * sizeof(iParseNode));
 		if(!r.argv){
 			abort();
 		}
 		for(size_t i = 0; i < r.argc; i++){
-			r.argv[i] = ParseNode_deepCopy(self->argv + i);
+			r.argv[i] = iParseNode_deepCopy(self->argv + i);
 		}
 	} else {
 		r.argv = NULL;
@@ -338,27 +338,27 @@ ParseNode ParseNode_deepCopy(ParseNode *self){
 }
 
 
-// like ParseNode_clean but accounting for tokens, which are
-// stored in ParseTree->tokenization regularly, but not in
+// like iParseNode_clean but accounting for tokens, which are
+// stored in iParseTree->tokenization regularly, but not in
 // this case (for use in closures). Bad code.
-void ParseNode_deepClean(ParseNode *self){
+void iParseNode_deepClean(iParseNode *self){
 	assert(self);
 
-	if(self->type == LEAF_NODE){
-		Token_free(self->token);
+	if(self->type == iNODE_LEAF){
+		iToken_free(self->token);
 	}
 
 	if(self->argc > 0){
 		for(size_t i = 0; i < self->argc; i++){
-			ParseNode_deepClean(self->argv + i);
+			iParseNode_deepClean(self->argv + i);
 		}
 		free(self->argv);
 	}
 }
 
 
-bool ParseNode_isContextualRoute(ParseNode *self){
-	return self->type == LEAF_NODE 
-	    && Token_isContextualRoute(self->token);
+bool iParseNode_isContextualRoute(iParseNode *self){
+	return self->type == iNODE_LEAF 
+	    && iToken_isContextualRoute(self->token);
 }
 

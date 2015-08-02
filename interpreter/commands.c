@@ -109,11 +109,11 @@ void Imp_launchREPL(){
 	const size_t postfixLen = strlen(postfix);
 
 
-	volatile Runtime runtime;
-	Runtime_init((Runtime*) &runtime, root, 0, NULL);
+	volatile iRuntime runtime;
+	iRuntime_init((iRuntime*) &runtime, root, 0, NULL);
 
-	Runtime_executeSource((Runtime*) &runtime, "(import 'core/exceptions')");
-	Runtime_executeSource((Runtime*) &runtime, "(import 'core/io')");
+	iRuntime_executeSource((iRuntime*) &runtime, "(import 'core/exceptions')");
+	iRuntime_executeSource((iRuntime*) &runtime, "(import 'core/io')");
 
 	volatile char *volatile command = NULL;
 
@@ -143,7 +143,7 @@ void Imp_launchREPL(){
 				abort();
 			}
 			sprintf(inTry, "%s%s%s", prefix, command, postfix);
-			Runtime_executeSource((Runtime*)&runtime, inTry);
+			iRuntime_executeSource((iRuntime*)&runtime, inTry);
 		}
  
 		// TODO: check for exceptions
@@ -159,9 +159,9 @@ void Imp_launchREPL(){
 
 
 void Imp_executeFile(char *path, int argc, char **argv){
-	Runtime runtime;
-	Runtime_init(&runtime, root, argc, argv);
-	Runtime_executeFile(&runtime, path);
+	iRuntime runtime;
+	iRuntime_init(&runtime, root, argc, argv);
+	iRuntime_executeFile(&runtime, path);
 	// TODO: check for exceptions
 }
 

@@ -9,57 +9,57 @@
 
 
 
-static Object **getBuffer(Object *array){
-	return (Object**) Object_getDataDeep(array, "__data");
+static iObject **getBuffer(iObject *array){
+	return (iObject**) iObject_getDataDeep(array, "__data");
 }
 
-static int getSize(Object *array){
-	return ImpNumber_getRawRounded(Object_getDeep(array, "size"));
+static int getSize(iObject *array){
+	return iNumber_getRawRounded(iObject_getDeep(array, "size"));
 }
 
 
-Object *Array_at(Runtime *runtime
-	           , Object *context
-	           , Object *self
-	           , int argc
-	           , Object **argv){
+iObject *Array_at(iRuntime *runtime
+	            , iObject *context
+	            , iObject *self
+	            , int argc
+	            , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "Array:at requires exactly 1 argument");
+		iRuntime_throwString(runtime, context, "Array:at requires exactly 1 argument");
 	}
 
-	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, context, "Array:at requires numeric index");
+	if(iBuiltin_id(argv[0]) != iBUILTIN_NUMBER){
+		iRuntime_throwString(runtime, context, "Array:at requires numeric index");
 	}
 
 	int size = getSize(self);
-	int i = ImpNumber_getRawRounded(argv[0]);
+	int i = iNumber_getRawRounded(argv[0]);
 
 	if(i < 0 || i >= size){
-		Runtime_throwFormatted(runtime, context, "Array:at index out of bounds %d/%d", i, size);
+		iRuntime_throwFormatted(runtime, context, "Array:at index out of bounds %d/%d", i, size);
 	}
 
 	return getBuffer(self)[i];
 }
 
 
-static Object *atEq_(Runtime *runtime
-	            , Object *context
-	            , Object *self
-	            , int argc
-	            , Object **argv){
+static iObject *atEq_(iRuntime *runtime
+	                , iObject *context
+	                , iObject *self
+	                , int argc
+	                , iObject **argv){
 	if(argc != 2){
-		Runtime_throwString(runtime, context, "Array:at= requires exactly 2 arguments");
+		iRuntime_throwString(runtime, context, "Array:at= requires exactly 2 arguments");
 	}
 
-	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, context, "Array:at= requires numeric index");
+	if(iBuiltin_id(argv[0]) != iBUILTIN_NUMBER){
+		iRuntime_throwString(runtime, context, "Array:at= requires numeric index");
 	}
 
 	int size = getSize(self);
-	int i = ImpNumber_getRawRounded(argv[0]);
+	int i = iNumber_getRawRounded(argv[0]);
 
 	if(i < 0 || i >= size){
-		Runtime_throwFormatted(runtime, context, "Array:at= index out of bounds %d/%d", i, size);
+		iRuntime_throwFormatted(runtime, context, "Array:at= index out of bounds %d/%d", i, size);
 	}
 
 	getBuffer(self)[i] = argv[1];
@@ -67,63 +67,63 @@ static Object *atEq_(Runtime *runtime
 }
 
 
-Object *Array_resizeTo(Runtime *runtime
-	               , Object *context
-	               , Object *self
-	               , int argc
-	               , Object **argv){
+iObject *Array_resizeTo(iRuntime *runtime
+	                                        , iObject *context
+	                                        , iObject *self
+	                                        , int argc
+	                                        , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "Array:resize requires exactly 1 arguments");
+		iRuntime_throwString(runtime, context, "Array:resize requires exactly 1 arguments");
 	}
 
-	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, context, "Array:resize requires a numeric index");
+	if(iBuiltin_id(argv[0]) != iBUILTIN_NUMBER){
+		iRuntime_throwString(runtime, context, "Array:resize requires a numeric index");
 	}
 
 	int oldSize = getSize(self);
-	int newSize = ImpNumber_getRawRounded(argv[0]);
+	int newSize = iNumber_getRawRounded(argv[0]);
 
 	if(newSize < 0){
-		Runtime_throwString(runtime, context, "Array:resize requires non-negative argument");
+		iRuntime_throwString(runtime, context, "Array:resize requires non-negative argument");
 	}
 
 	if(newSize == 0){
-		Object_putDataDeep(self, "__data", NULL);
+		iObject_putDataDeep(self, "__data", NULL);
 	} else {
-		Object **oldBuffer = getBuffer(self);
-		Object **newBuffer = malloc(newSize * sizeof(Object*));  // TODO: use realloc here
+		iObject **oldBuffer = getBuffer(self);
+		iObject **newBuffer = malloc(newSize * sizeof(iObject*));  // TODO: use realloc here
 		if(!newBuffer){
-			Runtime_throwFormatted(runtime, context, "Array:resize failed to allocate buffer of length %s", newSize);
+			iRuntime_throwFormatted(runtime, context, "Array:resize failed to allocate buffer of length %s", newSize);
 		}
 
-		memcpy(newBuffer, oldBuffer, oldSize * sizeof(Object*));
+		memcpy(newBuffer, oldBuffer, oldSize * sizeof(iObject*));
 		for(int i = oldSize; i < newSize; i++){
 			newBuffer[i] = runtime->nil;
 		}
-		Object_putDataDeep(self, "__data", newBuffer); // implicitly frees oldBuffer
+		iObject_putDataDeep(self, "__data", newBuffer); // implicitly frees oldBuffer
 	}
 
-	ImpNumber_setRaw(Object_getDeep(self, "size"), (double) newSize);
+	iNumber_setRaw(iObject_getDeep(self, "size"), (double) newSize);
 
 	return NULL;
 }
 
 
-Object *Array__markInternalsRecursively(Runtime *runtime
-	             , Object *context
-	             , Object *self
-	             , int argc
-	             , Object **argv){
+iObject *Array__markInternalsRecursively(iRuntime *runtime
+	                                   , iObject *context
+	                                   , iObject *self
+	                                   , int argc
+	                                   , iObject **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, context, "Array:mark does not accept arguments");
+		iRuntime_throwString(runtime, context, "Array:mark does not accept arguments");
 	}
 
-	Object **buffer = getBuffer(self);
+	iObject **buffer = getBuffer(self);
 	if(buffer){
 		const size_t size = getSize(self);
 		for(size_t i = 0; i < size; i++){
 			if(buffer[i]){
-				Runtime_callMethod(runtime, NULL, buffer[i], "_markRecursively", 0, NULL);
+				iRuntime_callMethod(runtime, NULL, buffer[i], "_markRecursively", 0, NULL);
 			}
 		}
 	}
@@ -132,80 +132,80 @@ Object *Array__markInternalsRecursively(Runtime *runtime
 
 
 
-Object *Array_withSize(Runtime *runtime
-	             , Object *context
-	             , Object *Array
-	             , int argc
-	             , Object **argv){
+iObject *Array_withSize(iRuntime *runtime
+	                   , iObject *context
+	                   , iObject *Array
+	                   , int argc
+	                   , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "Array:withSize requires exactly one argument");
+		iRuntime_throwString(runtime, context, "Array:withSize requires exactly one argument");
 	}
 
-	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, context, "Array:withSize requires numeric argument");
+	if(iBuiltin_id(argv[0]) != iBUILTIN_NUMBER){
+		iRuntime_throwString(runtime, context, "Array:withSize requires numeric argument");
 	}
-	const int size = ImpNumber_getRawRounded(argv[0]);
+	const int size = iNumber_getRawRounded(argv[0]);
 
 	if(size < 0){
-		Runtime_throwString(runtime, context, "Array:withSize requires non-negative argument");
+		iRuntime_throwString(runtime, context, "Array:withSize requires non-negative argument");
 	}
 
-	Object *r = Runtime_simpleClone(runtime, Array);
-	Object_reference(r);
+	iObject *r = iRuntime_simpleClone(runtime, Array);
+	iObject_reference(r);
 
 	{
-		Object *sizeObject = Runtime_make(runtime, Number);
-		ImpNumber_setRaw(sizeObject, (double) size);
-		Object_putShallow(r, "size", sizeObject);
+		iObject *sizeiObject = iRuntime_MAKE(runtime, Number);
+		iNumber_setRaw(sizeiObject, (double) size);
+		iObject_putShallow(r, "size", sizeiObject);
 	}
 
-	Object **data = NULL;
+	iObject **data = NULL;
 	if(size){
-		data = malloc(size * sizeof(Object*));
+		data = malloc(size * sizeof(iObject*));
 		if(!data){
-			Runtime_throwString(runtime, context, "Array:withSize ... malloc failed");
+			iRuntime_throwString(runtime, context, "Array:withSize ... malloc failed");
 		}
 		for(int i = 0; i < size; i++){
 			data[i] = runtime->nil;
 		}
 	}
-	Object_putDataShallow(r, "__data", data);
+	iObject_putDataShallow(r, "__data", data);
 
-	Object_unreference(r);
+	iObject_unreference(r);
 	return r;
 }
 
 
-Object *Array_withContents(Runtime *runtime
-	                     , Object *context
-	                     , Object *Array
-	                     , int argc
-	                     , Object **argv){
-	Object *r = Runtime_simpleClone(runtime, Array);
-	Object_reference(r);
+iObject *Array_withContents(iRuntime *runtime
+	                      , iObject *context
+	                      , iObject *Array
+	                      , int argc
+	                      , iObject **argv){
+	iObject *r = iRuntime_simpleClone(runtime, Array);
+	iObject_reference(r);
 
-	Object *size = Runtime_make(runtime, Number);
-	ImpNumber_setRaw(size, (double) argc);
-	Object_putShallow(r, "size", size);
+	iObject *size = iRuntime_MAKE(runtime, Number);
+	iNumber_setRaw(size, (double) argc);
+	iObject_putShallow(r, "size", size);
 
-	Object **data = calloc(argc, sizeof(Object*));
+	iObject **data = calloc(argc, sizeof(iObject*));
 	if(!data){
-		Runtime_throwString(runtime, context, "Array:withSize ... malloc failed");
+		iRuntime_throwString(runtime, context, "Array:withSize ... malloc failed");
 	}
-	memcpy(data, argv, argc * sizeof(Object*));
-	Object_putDataShallow(r, "__data", data);
+	memcpy(data, argv, argc * sizeof(iObject*));
+	iObject_putDataShallow(r, "__data", data);
 
-	Object_unreference(r);
+	iObject_unreference(r);
 	return r;
 }
 
 
-Object *Array_onImport(Runtime *runtime
-	                 , Object *context
-	                 , Object *Array
-	                 , int argc
-	                 , Object **argv){
-	Object_putShallow(Array, "#", Imp_import(runtime, "core/container/abstract/Sequence", context));
-	Runtime_registerCMethod(runtime, Array, "at=", atEq_);
+iObject *Array_onImport(iRuntime *runtime
+	                  , iObject *context
+	                  , iObject *Array
+	                  , int argc
+	                  , iObject **argv){
+	iObject_putShallow(Array, "#", i_import(runtime, "core/container/abstract/Sequence", context));
+	iRuntime_registerCMethod(runtime, Array, "at=", atEq_);
 	return NULL;
 }

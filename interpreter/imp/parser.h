@@ -10,45 +10,45 @@
 
 
 typedef enum {
-	BLOCK_NODE,
-	CALL_NODE,
-	OBJECT_NODE,
-	CLOSURE_NODE,
-	LEAF_NODE
-} ParseNodeType;
+	iNODE_BLOCK,
+	iNODE_CALL,
+	iNODE_OBJECT,
+	iNODE_CLOSURE,
+	iNODE_LEAF
+} iParseNodeType;
 
 
-typedef struct ParseNode {
-	ParseNodeType type;
-	Token *token;            // could use union here... fuck it though
+typedef struct iParseNode {
+	iParseNodeType type;
+	iToken *token;            // could use union here... fuck it though
 	size_t argc;             //   it's simpler this way
-	struct ParseNode *argv;
-} ParseNode;
+	struct iParseNode *argv;
+} iParseNode;
 
 
 typedef struct {
-	Tokenization tokenization;
-	ParseNode root;
+	iTokenization tokenization;
+	iParseNode root;
 	char *error;
-} ParseTree;
+} iParseTree;
 
 
 //// management
-int ParseTree_init(ParseTree *tree, char *code);
-void ParseTree_clean(ParseTree *tree);
+int iParseTree_init(iParseTree *tree, char *code);
+void iParseTree_clean(iParseTree *tree);
 
 
 //// miscellaneous
-void ParseTree_print(ParseTree *self);
-void ParseNode_print(ParseNode *self);
+void iParseTree_print(iParseTree *self);
+void iParseNode_print(iParseNode *self);
 
 // create node without parent tree
-ParseNode ParseNode_deepCopy(ParseNode *self);
+iParseNode iParseNode_deepCopy(iParseNode *self);
 
 // for parse nodes without a parent tree
-void ParseNode_deepClean(ParseNode *self);
+void iParseNode_deepClean(iParseNode *self);
 
-bool ParseNode_isContextualRoute(ParseNode *self);
+bool iParseNode_isContextualRoute(iParseNode *self);
 
 
 #endif

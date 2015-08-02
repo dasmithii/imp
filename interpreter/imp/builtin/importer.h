@@ -7,8 +7,8 @@
 
 
 
-void ImpImporter_init(Object *self, Runtime *runtime);
-Object *Imp_import(Runtime *runtime, char *module, Object *context);
+void iImporter_init(iObject *self, iRuntime *runtime);
+iObject *i_import(iRuntime *runtime, char *module, iObject *context);
 
 
 

@@ -37,8 +37,8 @@
 //    wrapping C functions or libraries. Also, always
 //    use utilities from builtin/general.h and c.h; 
 //    never interact with internal slots directly.
-#ifndef IMP_OBJECT_H_
-#define IMP_OBJECT_H_
+#ifndef IMP_OBJECT
+#define IMP_OBJECT
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -49,66 +49,66 @@
 typedef struct {
 	char *key;
 	void *data; 
-} Slot;
+} iSlot;
 
 
-typedef struct Object {
-	Slot *slots;
+typedef struct iObject {
+	iSlot *slots;
 	int slotCount;
 	bool gc_mark;
 	unsigned short refcount;
-} Object;
+} iObject;
 
 
 //// management
-void Object_init(Object *self);
-void Object_clean(Object *self);
-void Object_free(Object *self);
+void iObject_init(iObject *self);
+void iObject_clean(iObject *self);
+void iObject_free(iObject *self);
 
 
 //// slot methods
-Object *Slot_object(Slot *self);
-void *Slot_data(Slot *self);
-bool Slot_isPrimitive(Slot *self);
-void Slot_clean(Slot *self);
-void Slot_setFunction(Slot *self, Object*(*f)(int argc, Object *argv));
+iObject *iSlot_object(iSlot *self);
+void *iSlot_data(iSlot *self);
+bool iSlot_isPrimitive(iSlot *self);
+void iSlot_clean(iSlot *self);
+void iSlot_setFunction(iSlot *self, iObject*(*f)(int argc, iObject *argv));
 
 
 //// garbage collection
-void Object_mark(Object *self);
-void Object_unmark(Object *self);
-void Object_reference(Object *self);
-void Object_unreference(Object *self);
-int Object_referenceCount(Object *self);
+void iObject_mark(iObject *self);
+void iObject_unmark(iObject *self);
+void iObject_reference(iObject *self);
+void iObject_unreference(iObject *self);
+int iObject_referenceCount(iObject *self);
 
 
 //// slot access
-void Object_putKeyShallow(Object *self, char *key);
-void Object_putShallow(Object *self, char *key, Object *value);
-void Object_putDeep(Object *self, char *key, Object *value);
-void Object_putDataShallow(Object *self, char *key, void *value);
-void Object_putDataDeep(Object *self, char *key, void *value);
-void Object_remShallow(Object *self, char *key);
-Slot *Object_getSlotShallow(Object *self, char *key);
-Slot *Object_getSlotDeep(Object *self, char *key);
-Object *Object_getShallow(Object *self, char *key);
-Object *Object_getDeep(Object *self, char *key);
-void *Object_getDataShallow(Object *self, char *key);
-void *Object_getDataDeep(Object *self, char *key);
-bool Object_hasKeyShallow(Object *self, char *key);
-bool Object_hasKeyDeep(Object *self, char *key);
-Object *Object_rootPrototype(Object *self);
-Object *Object_prototype(Object *self);
+void iObject_putKeyShallow(iObject *self, char *key);
+void iObject_putShallow(iObject *self, char *key, iObject *value);
+void iObject_putDeep(iObject *self, char *key, iObject *value);
+void iObject_putDataShallow(iObject *self, char *key, void *value);
+void iObject_putDataDeep(iObject *self, char *key, void *value);
+void iObject_remShallow(iObject *self, char *key);
+iSlot *iObject_getSlotShallow(iObject *self, char *key);
+iSlot *iObject_getSlotDeep(iObject *self, char *key);
+iObject *iObject_getShallow(iObject *self, char *key);
+iObject *iObject_getDeep(iObject *self, char *key);
+void *iObject_getDataShallow(iObject *self, char *key);
+void *iObject_getDataDeep(iObject *self, char *key);
+bool iObject_hasKeyShallow(iObject *self, char *key);
+bool iObject_hasKeyDeep(iObject *self, char *key);
+iObject *iObject_rootPrototype(iObject *self);
+iObject *iObject_prototype(iObject *self);
 
 
 //// miscellaneous
-bool Object_isValid(Object *self);
-bool Slot_isValid(Slot *self);
-void Object_print(Object *self);
+bool iObject_isValid(iObject *self);
+bool iSlot_isValid(iSlot *self);
+void iObject_print(iObject *self);
 
-bool Object_canBeActivated(Object *self);
-bool Object_hasMethod(Object *self, char *name);
-bool Object_hasSpecialMethod(Object *self, char *name);
+bool iObject_canBeActivated(iObject *self);
+bool iObject_hasMethod(iObject *self, char *name);
+bool iObject_hasSpecialMethod(iObject *self, char *name);
 
 
 

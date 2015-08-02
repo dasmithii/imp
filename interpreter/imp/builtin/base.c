@@ -12,236 +12,236 @@
 
 
  
-static Object *hasKeyShallow_(Runtime *runtime
-	                                        , Object *context
-	                                        , Object *caller
-	                                        , int argc
-	                                        , Object **argv){
+static iObject *hasKeyShallow_(iRuntime *runtime
+	                         , iObject *context
+	                         , iObject *caller
+	                         , int argc
+	                         , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "#:hasKeyShallow requires exactly one argument" );
+		iRuntime_throwString(runtime, context, "#:hasKeyShallow requires exactly one argument" );
 	}
-	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, context, "#:hasKeyShallow requires a String as its argument" );
+	if(iBuiltin_id(argv[0]) != iBUILTIN_STRING){
+		iRuntime_throwString(runtime, context, "#:hasKeyShallow requires a String as its argument" );
 	}
-	bool rawr = Object_hasKeyShallow(caller, ImpString_getRaw(argv[0]));
-	Object *r = Runtime_cloneField(runtime, "Number");
+	bool rawr = iObject_hasKeyShallow(caller, iString_getRaw(argv[0]));
+	iObject *r = iRuntime_cloneField(runtime, "Number");
 	if(rawr){
-		ImpNumber_setRaw(r, 1);
+		iNumber_setRaw(r, 1);
 	} else {
-		ImpNumber_setRaw(r, 0);
+		iNumber_setRaw(r, 0);
 	}
 	return r;
 }
 
 
-static Object *hasKeyDeep_(Runtime *runtime
-	                                      , Object *context
-	                                      , Object *caller
-	                                      , int argc
-	                                      , Object **argv){
+static iObject *hasKeyDeep_(iRuntime *runtime
+	                      , iObject *context
+	                      , iObject *caller
+	                      , int argc
+	                      , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "#:hasKeyDeep requires exactly one argument" );
+		iRuntime_throwString(runtime, context, "#:hasKeyDeep requires exactly one argument" );
 	}
-	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, context, "#:hasKeyDeep requires a String as its argument" );
+	if(iBuiltin_id(argv[0]) != iBUILTIN_STRING){
+		iRuntime_throwString(runtime, context, "#:hasKeyDeep requires a String as its argument" );
 	}
-	bool rawr = Object_hasKeyDeep(caller, ImpString_getRaw(argv[0]));
-	Object *r = Runtime_cloneField(runtime, "Number");
+	bool rawr = iObject_hasKeyDeep(caller, iString_getRaw(argv[0]));
+	iObject *r = iRuntime_cloneField(runtime, "Number");
 	if(rawr){
-		ImpNumber_setRaw(r, 1);
+		iNumber_setRaw(r, 1);
 	} else {
-		ImpNumber_setRaw(r, 0);
+		iNumber_setRaw(r, 0);
 	}
 	return r;
 }
 
-static Object *removeKeyShallow_(Runtime *runtime
-	                                        , Object *context
-	                                        , Object *caller
-	                                        , int argc
-	                                        , Object **argv){
+static iObject *removeKeyShallow_(iRuntime *runtime
+	                            , iObject *context
+	                            , iObject *caller
+	                            , int argc
+	                            , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "#:removeKeyShallow requires exactly one argument" );
+		iRuntime_throwString(runtime, context, "#:removeKeyShallow requires exactly one argument" );
 	}
-	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, context, "#:removeKeyShallow requires a String as its argument" );
+	if(iBuiltin_id(argv[0]) != iBUILTIN_STRING){
+		iRuntime_throwString(runtime, context, "#:removeKeyShallow requires a String as its argument" );
 	}
-	Object_remShallow(caller, ImpString_getRaw(argv[0]));
+	iObject_remShallow(caller, iString_getRaw(argv[0]));
 	return NULL;
 }
 
 
-static Object *getDeep_(Runtime *runtime
-	                                  , Object *context
-	                                  , Object *caller
-	                                  , int argc
-	                                  , Object **argv){
+static iObject *getDeep_(iRuntime *runtime
+	                   , iObject *context
+	                   , iObject *caller
+	                   , int argc
+	                   , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "#:getDeep requires exactly one argument" );
+		iRuntime_throwString(runtime, context, "#:getDeep requires exactly one argument" );
 	}
-	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, context, "#:getDeep requires a String as its argument" );
+	if(iBuiltin_id(argv[0]) != iBUILTIN_STRING){
+		iRuntime_throwString(runtime, context, "#:getDeep requires a String as its argument" );
 	}
-	char *raw = ImpString_getRaw(argv[0]);
-	if(!Object_hasKeyDeep(caller, raw)){
-		Runtime_throwFormatted(runtime, context, "#:getDeep - field does not exist %s", raw);
+	char *raw = iString_getRaw(argv[0]);
+	if(!iObject_hasKeyDeep(caller, raw)){
+		iRuntime_throwFormatted(runtime, context, "#:getDeep - field does not exist %s", raw);
 	}
-	return Object_getDeep(caller, raw);
+	return iObject_getDeep(caller, raw);
 }
 
 
 
-static Object *getShallow_(Runtime *runtime
-	                                     , Object *context
-	                                     , Object *caller
-	                                     , int argc
-	                                     , Object **argv){
+static iObject *getShallow_(iRuntime *runtime
+	                      , iObject *context
+	                      , iObject *caller
+	                      , int argc
+	                      , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "#:getShallow requires exactly one argument" );
+		iRuntime_throwString(runtime, context, "#:getShallow requires exactly one argument" );
 	}
-	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, context, "#:getShallow requires a String as its argument" );
+	if(iBuiltin_id(argv[0]) != iBUILTIN_STRING){
+		iRuntime_throwString(runtime, context, "#:getShallow requires a String as its argument" );
 	}
-	char *raw = ImpString_getRaw(argv[0]);
-	if(!Object_hasKeyShallow(caller, raw)){
-		Runtime_throwFormatted(runtime, context, "#:getShallow - field does not exist %s", raw);
+	char *raw = iString_getRaw(argv[0]);
+	if(!iObject_hasKeyShallow(caller, raw)){
+		iRuntime_throwFormatted(runtime, context, "#:getShallow - field does not exist %s", raw);
 	}
-	return Object_getShallow(caller, raw);
+	return iObject_getShallow(caller, raw);
 }
 
 
 
-static Object *putDeep_(Runtime *runtime
-	                                  , Object *context
-	                                  , Object *caller
-	                                  , int argc
-	                                  , Object **argv){
+static iObject *putDeep_(iRuntime *runtime
+	                   , iObject *context
+	                   , iObject *caller
+	                   , int argc
+	                   , iObject **argv){
 	if(argc != 2){
-		Runtime_throwString(runtime, context, "#:putDeep requires exactly 2 arguments" );
+		iRuntime_throwString(runtime, context, "#:putDeep requires exactly 2 arguments" );
 	}
-	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, context, "#:putDeep requires a String as its first argument" );
+	if(iBuiltin_id(argv[0]) != iBUILTIN_STRING){
+		iRuntime_throwString(runtime, context, "#:putDeep requires a String as its first argument" );
 	}
-	Object_putDeep(caller, ImpString_getRaw(argv[0]), argv[1]);
+	iObject_putDeep(caller, iString_getRaw(argv[0]), argv[1]);
 	return NULL;
 }
 
 
 
-static Object *putShallow_(Runtime *runtime
-	                                     , Object *context
-	                                     , Object *caller
-	                                     , int argc
-	                                     , Object **argv){
+static iObject *putShallow_(iRuntime *runtime
+	                      , iObject *context
+	                      , iObject *caller
+	                      , int argc
+	                      , iObject **argv){
 	if(argc != 2){
-		Runtime_throwString(runtime, context, "#:putShallow requires exactly 2 arguments" );
+		iRuntime_throwString(runtime, context, "#:putShallow requires exactly 2 arguments" );
 	}
-	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, context, "#:putShallow requires a String as its first argument" );
+	if(iBuiltin_id(argv[0]) != iBUILTIN_STRING){
+		iRuntime_throwString(runtime, context, "#:putShallow requires a String as its first argument" );
 	}
-	Object_putShallow(caller, ImpString_getRaw(argv[0]), argv[1]);
+	iObject_putShallow(caller, iString_getRaw(argv[0]), argv[1]);
 	return NULL;
 }
 
 
-static Object *slotNames_(Runtime *runtime
-	                    , Object *context
-	                    , Object *caller
-	                    , int argc
-	                    , Object **argv){
+static iObject *slotNames_(iRuntime *runtime
+	                     , iObject *context
+	                     , iObject *caller
+	                     , int argc
+	                     , iObject **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, context, "#:slotNames does not accept arguments");
+		iRuntime_throwString(runtime, context, "#:slotNames does not accept arguments");
 	}
 
-	Object *size = Runtime_make(runtime, Number);
-	ImpNumber_setRaw(size, caller->slotCount);
+	iObject *size = iRuntime_MAKE(runtime, Number);
+	iNumber_setRaw(size, caller->slotCount);
 
-	Object *r = Runtime_callMethod(runtime
+	iObject *r = iRuntime_callMethod(runtime
 		                         , context
 		                         , runtime->Array
 		                         , "withSize"
 		                         , 1
 		                         , &size);
 
-	Object_reference(r);
+	iObject_reference(r);
 
-	Object *index = Runtime_make(runtime, Number);
-	ImpNumber_setRaw(index, 0);
-	Object_reference(index);
+	iObject *index = iRuntime_MAKE(runtime, Number);
+	iNumber_setRaw(index, 0);
+	iObject_reference(index);
 
 	for(int i = 0; i < caller->slotCount; i++){
-		Object *args[2];
+		iObject *args[2];
 		args[0] = index;
-		args[1] = Runtime_make(runtime, String);
-		ImpString_setRaw(args[1], caller->slots[i].key);
-		Runtime_callMethod(runtime
+		args[1] = iRuntime_MAKE(runtime, String);
+		iString_setRaw(args[1], caller->slots[i].key);
+		iRuntime_callMethod(runtime
 			             , context
 			             , r
 			             , "at="
 			             , 2
 			             , args);
-		ImpNumber_setRaw(index, 1 + ImpNumber_getRaw(index));
+		iNumber_setRaw(index, 1 + iNumber_getRaw(index));
 	}
 
-	Object_reference(index);
-	Object_unreference(r);
+	iObject_reference(index);
+	iObject_unreference(r);
 	return r;
 }
 
 
-static Object *asString_(Runtime *runtime
-	                           , Object *context
-	                           , Object *caller
-	                           , int argc
-	                           , Object **argv){
+static iObject *asString_(iRuntime *runtime
+	                    , iObject *context
+	                    , iObject *caller
+	                    , int argc
+	                    , iObject **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, context, "#:asString does not accept arguments");
+		iRuntime_throwString(runtime, context, "#:asString does not accept arguments");
 	}
 	char temp[128];
 	sprintf(temp, "#[%p]", caller);
-	Object *r = Runtime_cloneField(runtime, "String");	
-	ImpString_setRaw(r, temp);
+	iObject *r = iRuntime_cloneField(runtime, "String");	
+	iString_setRaw(r, temp);
 	return r;
 }
 
-static Object *hasMethod_(Runtime *runtime
-	                            , Object *context
-	                            , Object *caller
-	                            , int argc
-	                            , Object **argv){
+static iObject *hasMethod_(iRuntime *runtime
+	                     , iObject *context
+	                     , iObject *caller
+	                     , int argc
+	                     , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "#:hasMethod requires exactly one argument");
+		iRuntime_throwString(runtime, context, "#:hasMethod requires exactly one argument");
 	}
-	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, context, "#:hasMethod requires its argument to be a string");
+	if(iBuiltin_id(argv[0]) != iBUILTIN_STRING){
+		iRuntime_throwString(runtime, context, "#:hasMethod requires its argument to be a string");
 	}
-	bool rawr = Object_hasMethod(caller, ImpString_getRaw(argv[0]));
-	Object *r = Runtime_cloneField(runtime, "Number");
+	bool rawr = iObject_hasMethod(caller, iString_getRaw(argv[0]));
+	iObject *r = iRuntime_cloneField(runtime, "Number");
 	if(rawr){
-		ImpNumber_setRaw(r, 1);
+		iNumber_setRaw(r, 1);
 	} else {
-		ImpNumber_setRaw(r, 0);
+		iNumber_setRaw(r, 0);
 	}
 	return r;
 }
 
 
-static Object *callMethod_(Runtime *runtime
-	                                   , Object *context
-	                                   , Object *caller
-	                                   , int argc
-	                                   , Object **argv){
+static iObject *callMethod_(iRuntime *runtime
+	                      , iObject *context
+	                      , iObject *caller
+	                      , int argc
+	                      , iObject **argv){
 	if(argc == 0){
-		Runtime_throwString(runtime, context, "#:callMethod requires arguments");
+		iRuntime_throwString(runtime, context, "#:callMethod requires arguments");
 	}
-	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, context, "#:callMethod requires its argument to be a string");
+	if(iBuiltin_id(argv[0]) != iBUILTIN_STRING){
+		iRuntime_throwString(runtime, context, "#:callMethod requires its argument to be a string");
 	}
-	char *methodName = ImpString_getRaw(argv[0]);
-	if(!Object_hasMethod(caller, methodName)){
-		Runtime_throwFormatted(runtime, context, "#:callMethod could not find method: '%s'", methodName);
+	char *methodName = iString_getRaw(argv[0]);
+	if(!iObject_hasMethod(caller, methodName)){
+		iRuntime_throwFormatted(runtime, context, "#:callMethod could not find method: '%s'", methodName);
 	}
-	return Runtime_callMethod(runtime
+	return iRuntime_callMethod(runtime
 		                    , context
 		                    , caller
 		                    , methodName
@@ -250,248 +250,248 @@ static Object *callMethod_(Runtime *runtime
 }
 
 
-static Object *compare(Runtime *runtime
-	                 , Object *context
-	                 , Object *lo
-                     , Object *ro){
-	if(Object_hasMethod(lo, "<>")){
-		return Runtime_callMethod(runtime
+static iObject *compare(iRuntime *runtime
+	                  , iObject *context
+	                  , iObject *lo
+                      , iObject *ro){
+	if(iObject_hasMethod(lo, "<>")){
+		return iRuntime_callMethod(runtime
 			                    , context
 			                    , lo
 			                    , "<>"
 			                    , 1
 			                    , &ro);
-	} else if(Object_hasMethod(ro, "<>")){
-		Object *c = Runtime_callMethod(runtime
+	} else if(iObject_hasMethod(ro, "<>")){
+		iObject *c = iRuntime_callMethod(runtime
 			                         , context
 			                         , ro
 			                         , "<>"
 			                         , 1
 			                         , &lo);
-		ImpNumber_setRaw(c, -1 * ImpNumber_getRaw(c));
+		iNumber_setRaw(c, -1 * iNumber_getRaw(c));
 		return c;
 	} else {
-		Runtime_throwString(runtime, context, "<> method not found");
+		iRuntime_throwString(runtime, context, "<> method not found");
 	}
 	return NULL;
 }
 
 
-static Object *above_(Runtime *runtime
-	                , Object *context
-	                , Object *self
+static iObject *above_(iRuntime *runtime
+	                , iObject *context
+	                , iObject *self
 	                , int argc
-	                , Object **argv){
+	                , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "#:> requires exactly 1 argument");
+		iRuntime_throwString(runtime, context, "#:> requires exactly 1 argument");
 	}
-	Object *c = compare(runtime, context, self, argv[0]);
-	ImpNumber_setRaw(c, ImpNumber_getRaw(c) > 0? 1:0);
+	iObject *c = compare(runtime, context, self, argv[0]);
+	iNumber_setRaw(c, iNumber_getRaw(c) > 0? 1:0);
 	return c;
 } 
 
-static Object *aboveEq_(Runtime *runtime
-	                  , Object *context
-	                  , Object *self
-	                  , int argc
-	                  , Object **argv){
+static iObject *aboveEq_(iRuntime *runtime
+	                   , iObject *context
+	                   , iObject *self
+	                   , int argc
+	                   , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "#:>= requires exactly 1 argument");
+		iRuntime_throwString(runtime, context, "#:>= requires exactly 1 argument");
 	}
-	Object *c = compare(runtime, context, self, argv[0]);
-	ImpNumber_setRaw(c, ImpNumber_getRaw(c) >= 0? 1:0);
+	iObject *c = compare(runtime, context, self, argv[0]);
+	iNumber_setRaw(c, iNumber_getRaw(c) >= 0? 1:0);
 	return c;
 } 
 
-static Object *below_(Runtime *runtime
-	                        , Object *context
-	                        , Object *self
-	                        , int argc
-	                        , Object **argv){
+static iObject *below_(iRuntime *runtime
+	                 , iObject *context
+	                 , iObject *self
+	                 , int argc
+	                 , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "#:< requires exactly 1 argument");
+		iRuntime_throwString(runtime, context, "#:< requires exactly 1 argument");
 	}
-	Object *c = compare(runtime, context, self, argv[0]);
-	ImpNumber_setRaw(c, ImpNumber_getRaw(c) < 0? 1:0);
+	iObject *c = compare(runtime, context, self, argv[0]);
+	iNumber_setRaw(c, iNumber_getRaw(c) < 0? 1:0);
 	return c;
 } 
 
-static Object *belowEq_(Runtime *runtime
-	                          , Object *context
-	                          , Object *self
-	                          , int argc
-	                          , Object **argv){
+static iObject *belowEq_(iRuntime *runtime
+	                   , iObject *context
+	                   , iObject *self
+	                   , int argc
+	                   , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "#:<= requires exactly 1 argument");
+		iRuntime_throwString(runtime, context, "#:<= requires exactly 1 argument");
 	}
-	Object *c = compare(runtime, context, self, argv[0]);
-	ImpNumber_setRaw(c, ImpNumber_getRaw(c) <= 0? 1:0);
+	iObject *c = compare(runtime, context, self, argv[0]);
+	iNumber_setRaw(c, iNumber_getRaw(c) <= 0? 1:0);
 	return c;
 } 
 
-static Object *not_(Runtime *runtime
-	                      , Object *context
-	                      , Object *self
-	                      , int argc
-	                      , Object **argv){
+static iObject *not_(iRuntime *runtime
+	               , iObject *context
+	               , iObject *self
+	               , int argc
+	               , iObject **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, context, "#:! accepts no arguments");
+		iRuntime_throwString(runtime, context, "#:! accepts no arguments");
 	}
-	Object *b = Runtime_callMethod(runtime
-		                         , context
-		                         , self
-		                         , "?"
-		                         , 0
-		                         , NULL);
-	ImpNumber_setRaw(b, ImpNumber_getRaw(b)? 0:1);
+	iObject *b = iRuntime_callMethod(runtime
+		                          , context
+		                          , self
+		                          , "?"
+		                          , 0
+		                          , NULL);
+	iNumber_setRaw(b, iNumber_getRaw(b)? 0:1);
 	return b;
 } 
 
-static Object *clone_(Runtime *runtime
-	                        , Object *context
-	                        , Object *self
-	                        , int argc
-	                        , Object **argv){
+static iObject *clone_(iRuntime *runtime
+	                 , iObject *context
+	                 , iObject *self
+	                 , int argc
+	                 , iObject **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, context, "#:~ accepts no arguments");
+		iRuntime_throwString(runtime, context, "#:~ accepts no arguments");
 	}
 
-	return Runtime_simpleClone(runtime, self);
+	return iRuntime_simpleClone(runtime, self);
 } 
 
 
 
-static Object *copyAndDo(Runtime *runtime
-	                   , Object *context
-	                   , Object *lo
-	                   , char *op
-	                   , int argc
-	                   , Object **argv){
-	if(!Object_hasMethod(lo, op)){
-		Runtime_throwFormatted(runtime, context, "'%s' method not found", op);
+static iObject *copyAndDo(iRuntime *runtime
+	                    , iObject *context
+	                    , iObject *lo
+	                    , char *op
+	                    , int argc
+	                    , iObject **argv){
+	if(!iObject_hasMethod(lo, op)){
+		iRuntime_throwFormatted(runtime, context, "'%s' method not found", op);
 	}
 
-	Object *cp = Runtime_callMethod(runtime
-		                          , context
-		                          , lo
-		                          , "$"
-		                          , 0
-		                          , NULL);
+	iObject *cp = iRuntime_callMethod(runtime
+		                           , context
+		                           , lo
+		                           , "$"
+		                           , 0
+		                           , NULL);
 	if(!cp){
-		Runtime_throwString(runtime, context, "copy returned NULL");
+		iRuntime_throwString(runtime, context, "copy returned NULL");
 	}
-	Object_reference(cp);
-	Runtime_callMethod(runtime, context, cp, op, argc, argv);
-	Object_unreference(cp);
+	iObject_reference(cp);
+	iRuntime_callMethod(runtime, context, cp, op, argc, argv);
+	iObject_unreference(cp);
 	return cp;
 }
 
 
-static Object *plus_(Runtime *runtime
-	                       , Object *context
-	                       , Object *self
-	                       , int argc
-	                       , Object **argv){
+static iObject *plus_(iRuntime *runtime
+	                , iObject *context
+	                , iObject *self
+	                , int argc
+	                , iObject **argv){
 	return copyAndDo(runtime, context, self, "+=", argc, argv);
 } 
 
-static Object *minus_(Runtime *runtime
-	                        , Object *context
-	                        , Object *self
-	                        , int argc
-	                        , Object **argv){
+static iObject *minus_(iRuntime *runtime
+	                 , iObject *context
+	                 , iObject *self
+	                 , int argc
+	                 , iObject **argv){
 	return copyAndDo(runtime, context, self, "-=", argc, argv);
 } 
 
-static Object *div_(Runtime *runtime
-	                      , Object *context
-	                      , Object *self
-	                      , int argc
-	                      , Object **argv){
+static iObject *div_(iRuntime *runtime
+	               , iObject *context
+	               , iObject *self
+	               , int argc
+	               , iObject **argv){
 	return copyAndDo(runtime, context, self, "/=", argc, argv);
 } 
 
-static Object *times_(Runtime *runtime
-	                      , Object *context
-	                      , Object *self
-	                      , int argc
-	                      , Object **argv){
+static iObject *times_(iRuntime *runtime
+	                 , iObject *context
+	                 , iObject *self
+	                 , int argc
+	                 , iObject **argv){
 	return copyAndDo(runtime, context, self, "*=", argc, argv);
 } 
 
-static Object *mod_(Runtime *runtime
-	              , Object *context
-	              , Object *self
-	              , int argc
-	              , Object **argv){
+static iObject *mod_(iRuntime *runtime
+	               , iObject *context
+	               , iObject *self
+	               , int argc
+	               , iObject **argv){
 	return copyAndDo(runtime, context, self, "%=", argc, argv);
 } 
 
 
-static Object *exp_(Runtime *runtime
-	              , Object *context
-	              , Object *self
-	              , int argc
-	              , Object **argv){
+static iObject *exp_(iRuntime *runtime
+	               , iObject *context
+	               , iObject *self
+	               , int argc
+	               , iObject **argv){
 	return copyAndDo(runtime, context, self, "^=", argc, argv);
 } 
 
 
-static Object *value_(Runtime *runtime
-	                        , Object *context
-	                        , Object *self
-	                        , int argc
-	                        , Object **argv){
+static iObject *value_(iRuntime *runtime
+	                 , iObject *context
+	                 , iObject *self
+	                 , int argc
+	                 , iObject **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, context, "$ does not accept arguments");
+		iRuntime_throwString(runtime, context, "$ does not accept arguments");
 	}
 
 	// check if arg is able be copied using default methods
 	for(int i = 0; i < self->slotCount; i++){
-		Slot *s = self->slots + i;
-		if(Slot_isPrimitive(s) && strcmp(s->key, "__referenceCount") != 0){
-			Runtime_throwFormatted(runtime, context, "object not copy-able (contains primitive data at: '%s')", s->key);
+		iSlot *s = self->slots + i;
+		if(iSlot_isPrimitive(s) && strcmp(s->key, "__referenceCount") != 0){
+			iRuntime_throwFormatted(runtime, context, "object not copy-able (contains primitive data at: '%s')", s->key);
 		}
 	}
 
-	Object *r = Runtime_rawObject(runtime);
-	Object_reference(r);
+	iObject *r = iRuntime_rawObject(runtime);
+	iObject_reference(r);
 	for(int i = 0; i < self->slotCount; i++){
-		Slot *s = self->slots + i;
-		Object *o = Slot_object(s);
+		iSlot *s = self->slots + i;
+		iObject *o = iSlot_object(s);
 		if(strcmp(s->key, "_data") == 0){
-			Object_putShallow(r, "_data", Runtime_callMethod(runtime
+			iObject_putShallow(r, "_data", iRuntime_callMethod(runtime
 				                              , context
 				                              , o
 				                              , "$"
 				                              , 0
 				                              , NULL));
 		} else {
-			Object_putShallow(r, s->key, o);
+			iObject_putShallow(r, s->key, o);
 		}
 	}
-	Object_unreference(r);
+	iObject_unreference(r);
 	return r;
 } 
 
-static bool slotsAreEqual(Runtime *runtime
-	                    , Object *context
-	                    , Slot *s0
-	                    , Slot *s1){
+static bool slotsAreEqual(iRuntime *runtime
+	                    , iObject *context
+	                    , iSlot *s0
+	                    , iSlot *s1){
 	if(s0 == s1){
 		return true;
 	}
 
-	if(Slot_isPrimitive(s0)){
-		if(!Slot_isPrimitive(s1)){
+	if(iSlot_isPrimitive(s0)){
+		if(!iSlot_isPrimitive(s1)){
 			return false;
 		}
-		return Slot_data(s0) == Slot_data(s1);
+		return iSlot_data(s0) == iSlot_data(s1);
 	} else {
-		Object *arg = Slot_object(s1);
-		return Runtime_callMethod(runtime
+		iObject *arg = iSlot_object(s1);
+		return iRuntime_callMethod(runtime
 			                    , context
-			                    , Slot_object(s0)
+			                    , iSlot_object(s0)
 			                    , "=="
 			                    , 1
 			                    , &arg);
@@ -499,17 +499,17 @@ static bool slotsAreEqual(Runtime *runtime
 }
 
 
-static bool objectsAreEqual(Runtime *runtime
-	                      , Object *context
-	                      , Object *o0
-	                      , Object *o1){
+static bool objectsAreEqual(iRuntime *runtime
+	                      , iObject *context
+	                      , iObject *o0
+	                      , iObject *o1){
 	if(o0 == o1){
 		return true;
 	}
 
-	if(Object_hasMethod(o0, "<>")){
-		Object *n = Runtime_callMethod(runtime, context, o0, "<>", 1, &o1);
-		return ImpNumber_getRaw(n) == 0;
+	if(iObject_hasMethod(o0, "<>")){
+		iObject *n = iRuntime_callMethod(runtime, context, o0, "<>", 1, &o1);
+		return iNumber_getRaw(n) == 0;
 	}
 
 	if(!o0 || !o1){
@@ -529,43 +529,43 @@ static bool objectsAreEqual(Runtime *runtime
 	return true;
 }
 
-static Object *equals_(Runtime *runtime
-	                 , Object *context
-	                 , Object *self
-	                 , int argc
-	                 , Object **argv){
+static iObject *equals_(iRuntime *runtime
+	                  , iObject *context
+	                  , iObject *self
+	                  , int argc
+	                  , iObject **argv){
 	if(argc < 1){
-		Runtime_throwString(runtime, context, "#:== requires arguments");
+		iRuntime_throwString(runtime, context, "#:== requires arguments");
 	}
 
-	Object *r = Runtime_cloneField(runtime, "Number");
-	ImpNumber_setRaw(r, 1);
-	Object_reference(r);
+	iObject *r = iRuntime_cloneField(runtime, "Number");
+	iNumber_setRaw(r, 1);
+	iObject_reference(r);
 	for(int i = 0; i < argc; i++){
 		if(!objectsAreEqual(runtime
 			              , context
 			              , self
 			              , argv[i])){
-			ImpNumber_setRaw(r, 0);
+			iNumber_setRaw(r, 0);
 			break;
 		}
 	}
-	Object_unreference(r);
+	iObject_unreference(r);
 	return r;
 } 
 
-static Object *notEq_(Runtime *runtime
-	                , Object *context
-	                , Object *self
-	                , int argc
-	                , Object **argv){
-	Object *equals = Runtime_callMethod(runtime
+static iObject *notEq_(iRuntime *runtime
+	                 , iObject *context
+	                 , iObject *self
+	                 , int argc
+	                 , iObject **argv){
+	iObject *equals = iRuntime_callMethod(runtime
 		                              , context
 		                              , self
 		                              , "=="
 		                              , argc
 		                              , argv);
-	return Runtime_callMethod(runtime
+	return iRuntime_callMethod(runtime
 		                    , context
 		                    , equals
 		                    , "!"
@@ -574,44 +574,44 @@ static Object *notEq_(Runtime *runtime
 } 
 
 
-static Object *is_(Runtime *runtime
-	                     , Object *context
-	                     , Object *caller
-	                     , int argc
-	                     , Object **argv){
+static iObject *is_(iRuntime *runtime
+	              , iObject *context
+	              , iObject *caller
+	              , int argc
+	              , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "#:is requires exactly one argument");
+		iRuntime_throwString(runtime, context, "#:is requires exactly one argument");
 	}
-	Object *r = Runtime_cloneField(runtime, "Number");
-	ImpNumber_setRaw(r, caller == argv[0]? 1:0);
+	iObject *r = iRuntime_cloneField(runtime, "Number");
+	iNumber_setRaw(r, caller == argv[0]? 1:0);
 	return r;
 } 
 
-static Object *asBoolean_(Runtime *runtime
-	                    , Object *context
-	                    , Object *caller
-	                    , int argc
-	                    , Object **argv){
+static iObject *asBoolean_(iRuntime *runtime
+	                     , iObject *context
+	                     , iObject *caller
+	                     , int argc
+	                     , iObject **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, context, "#:? does not accept arguments");
+		iRuntime_throwString(runtime, context, "#:? does not accept arguments");
 	}
 
-	Object *r = Runtime_cloneField(runtime, "Number");
-	Object_reference(r);
+	iObject *r = iRuntime_cloneField(runtime, "Number");
+	iObject_reference(r);
 
-	if(Object_hasMethod(caller, "asNumber")){
-		Object *n = Runtime_callMethod(runtime
+	if(iObject_hasMethod(caller, "asNumber")){
+		iObject *n = iRuntime_callMethod(runtime
 			                         , context
 			                         , caller
 			                         , "asNumber"
 			                         , 0
 			                         , NULL);
-		ImpNumber_setRaw(r, ImpNumber_getRaw(n)? 1:0);
+		iNumber_setRaw(r, iNumber_getRaw(n)? 1:0);
 	} else {
-		ImpNumber_setRaw(r, 1); // default to 1 on non-NULL objects
+		iNumber_setRaw(r, 1); // default to 1 on non-NULL objects
 	}
 
-	Object_unreference(r);
+	iObject_unreference(r);
 	return r;
 } 
 
@@ -619,124 +619,124 @@ static Object *asBoolean_(Runtime *runtime
 
 // Default hashCode implementation: returns a non-zero
 // deterministic value based on address in memory.
-static Object *hashCode_(Runtime *runtime
-	                   , Object *context
-	                   , Object *self
-	                   , int argc
-	                   , Object **argv){
+static iObject *hashCode_(iRuntime *runtime
+	                    , iObject *context
+	                    , iObject *self
+	                    , int argc
+	                    , iObject **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, context, "#:hashCode does not accept arguments");
+		iRuntime_throwString(runtime, context, "#:hashCode does not accept arguments");
 	}
 
-	Object *r = Runtime_cloneField(runtime, "Number");
+	iObject *r = iRuntime_cloneField(runtime, "Number");
 	const unsigned long constant = 2147483647;
 	const unsigned long address  = (unsigned long) &self;
-	ImpNumber_setRaw(r, (double) (constant ^ address));
+	iNumber_setRaw(r, (double) (constant ^ address));
 	return r;
 } 
 
 
-static Object *def_(Runtime *runtime
-	              , Object *context
-	              , Object *caller
-	              , int argc
-	              , Object **argv){
+static iObject *def_(iRuntime *runtime
+	               , iObject *context
+	               , iObject *caller
+	               , int argc
+	               , iObject **argv){
 	assert(runtime);
-	assert(Object_isValid(context));
-	assert(Object_isValid(argv[0]));
-	assert(Object_isValid(argv[1]));
+	assert(iObject_isValid(context));
+	assert(iObject_isValid(argv[0]));
+	assert(iObject_isValid(argv[1]));
 
-	Object *route = argv[0];
-	Object *value = unroute(argv[1]);
+	iObject *route = argv[0];
+	iObject *value = unroute(argv[1]);
 	if(!value){
-		if(BuiltIn_id(argv[1]) == BUILTIN_ROUTE){
-			Runtime_throwFormatted(runtime, context, "variable does not exist '%s'", ImpRoute_getRaw(argv[1]));
+		if(iBuiltin_id(argv[1]) == iBUILTIN_ROUTE){
+			iRuntime_throwFormatted(runtime, context, "variable does not exist '%s'", iRoute_getRaw(argv[1]));
 		} else {
-			Runtime_throwFormatted(runtime, context, "cannot assign '%s' to NULL", ImpRoute_getRaw(argv[0]));
+			iRuntime_throwFormatted(runtime, context, "cannot assign '%s' to NULL", iRoute_getRaw(argv[0]));
 		}
 		return NULL;
 	}
-	Object_reference(value);
+	iObject_reference(value);
 
 	if(argc != 2){
-		Runtime_throwString(runtime, context, "def accepts exactly 2 arguments.");
-	} else if(!ImpRoute_isValid(route)){
-		Runtime_throwString(runtime, context, "def requires a route as first argument.");
+		iRuntime_throwString(runtime, context, "def accepts exactly 2 arguments.");
+	} else if(!iRoute_isValid(route)){
+		iRuntime_throwString(runtime, context, "def requires a route as first argument.");
 	}
 
-	// TODO: use ImpRoute_submapping here
+	// TODO: use iRoute_submapping here
 
-	Object *par = context;
-	int rargc = ImpRoute_argc(route);
+	iObject *par = context;
+	int rargc = iRoute_argc(route);
 
 	for(int i = 0; i < rargc - 1; i++){
 		char buf[64];
-		ImpRoute_argv(route, i, buf);
-		Object *ppar = par;
-		par = Object_getDeep(par, buf);
+		iRoute_argv(route, i, buf);
+		iObject *ppar = par;
+		par = iObject_getDeep(par, buf);
 		if(!par){
-			par = Runtime_make(runtime, Object);
-			Object_putShallow(ppar, buf, par);
+			par = iRuntime_MAKE(runtime, Object);
+			iObject_putShallow(ppar, buf, par);
 		}
 	}
 	char fbuf[64];
-	ImpRoute_argv(route, rargc - 1, fbuf);
-	if(strcmp(fbuf, "#") != 0 && Object_hasKeyShallow(par, fbuf)){
-		Runtime_throwFormatted(runtime, context, "def would overwrite value '%s'", fbuf);
+	iRoute_argv(route, rargc - 1, fbuf);
+	if(strcmp(fbuf, "#") != 0 && iObject_hasKeyShallow(par, fbuf)){
+		iRuntime_throwFormatted(runtime, context, "def would overwrite value '%s'", fbuf);
 	}
-	Object_putShallow(par, fbuf, value);
+	iObject_putShallow(par, fbuf, value);
 
-	Object_unreference(value);
+	iObject_unreference(value);
 	return NULL;
 }
 
 
-static Object *set_(Runtime *runtime
-	              , Object *context
-	              , Object *caller
-	              , int argc
-	              , Object **argv){
+static iObject *set_(iRuntime *runtime
+	               , iObject *context
+	               , iObject *caller
+	               , int argc
+	               , iObject **argv){
 	assert(runtime);
-	assert(Object_isValid(context));
+	assert(iObject_isValid(context));
 
 	if(argc != 2){
-		Runtime_throwString(runtime, context, "set requires exactly 2 arguments.");
+		iRuntime_throwString(runtime, context, "set requires exactly 2 arguments.");
 		return NULL;
-	} else if(!ImpRoute_isValid(argv[0])){
-		Runtime_throwString(runtime, context, "set requires a route for argument 1.");
+	} else if(!iRoute_isValid(argv[0])){
+		iRuntime_throwString(runtime, context, "set requires a route for argument 1.");
 		return NULL;
 	}
 
-	Object *route = argv[0];
-	Object *value = unroute(argv[1]);
+	iObject *route = argv[0];
+	iObject *value = unroute(argv[1]);
 	if(!value){
-		if(BuiltIn_id(argv[1]) == BUILTIN_ROUTE){
-			Runtime_throwFormatted(runtime, context, "variable does not exist '%s'", ImpRoute_getRaw(argv[1]));
+		if(iBuiltin_id(argv[1]) == iBUILTIN_ROUTE){
+			iRuntime_throwFormatted(runtime, context, "variable does not exist '%s'", iRoute_getRaw(argv[1]));
 		} else {
-			Runtime_throwFormatted(runtime, context, "cannot assign '%s' to NULL", ImpRoute_getRaw(argv[0]));
+			iRuntime_throwFormatted(runtime, context, "cannot assign '%s' to NULL", iRoute_getRaw(argv[0]));
 		}
 		return NULL;
 	}
 
-	Object *submapping = ImpRoute_submapping(route);
+	iObject *submapping = iRoute_submapping(route);
 	char field[32];
-	ImpRoute_argv(route, ImpRoute_argc(route) - 1, field);
+	iRoute_argv(route, iRoute_argc(route) - 1, field);
 	
-	if(submapping && Object_hasKeyDeep(submapping, field)){
-		Object_putDeep(submapping, field, value);
+	if(submapping && iObject_hasKeyDeep(submapping, field)){
+		iObject_putDeep(submapping, field, value);
 		return NULL;
 	}
 
-	Runtime_throwFormatted(runtime, context, "set failed on '%s'; try def.", ImpRoute_getRaw(route));
+	iRuntime_throwFormatted(runtime, context, "set failed on '%s'; try def.", iRoute_getRaw(route));
 	return NULL;
 }
 
 
-static Object *markRecursively_(Runtime *runtime
-	               , Object *context
-	               , Object *self
-	               , int argc
-	               , Object **argv){
+static iObject *markRecursively_(iRuntime *runtime
+	                           , iObject *context
+	                           , iObject *self
+	                           , int argc
+	                           , iObject **argv){
 	if(!self || self->gc_mark){
 		return NULL;
 	}
@@ -746,63 +746,63 @@ static Object *markRecursively_(Runtime *runtime
 
 	// mark all non-primitive fields recursively
 	for(int i = 0; i < self->slotCount; i++){
-		if(!Slot_isPrimitive(self->slots + i)){
+		if(!iSlot_isPrimitive(self->slots + i)){
 			markRecursively_(runtime
 				           , context
-				           , Slot_object(self->slots + i)
+				           , iSlot_object(self->slots + i)
 				           , 0
 				           , NULL);
 		}
 	}
 
 	// if object has special internals to mark
-	if(Object_hasMethod(self, "_markInternalsRecursively")){
-		Runtime_callMethod(runtime, context, self, "_markInternalsRecursively", 0, NULL);
+	if(iObject_hasMethod(self, "_markInternalsRecursively")){
+		iRuntime_callMethod(runtime, context, self, "_markInternalsRecursively", 0, NULL);
 	}
 	return NULL;
 }
 
 
-void ImpBase_init(Object *self, Runtime *runtime){
+void iBase_init(iObject *self, iRuntime *runtime){
 	assert(self);
-	BuiltIn_setId(self, BUILTIN_OBJECT);
-	Runtime_registerCMethod(runtime, self, "hasMethod", hasMethod_);
-	Runtime_registerCMethod(runtime, self, "callMethod", callMethod_);
-	Runtime_registerCMethod(runtime, self, "hasKeyShallow", hasKeyShallow_);
-	Runtime_registerCMethod(runtime, self, "hasKeyDeep", hasKeyDeep_);
-	Runtime_registerCMethod(runtime, self, "removeKeyShallow", removeKeyShallow_);
-	Runtime_registerCMethod(runtime, self, "getDeep", getDeep_);
-	Runtime_registerCMethod(runtime, self, "getShallow", getShallow_);
-	Runtime_registerCMethod(runtime, self, "putDeep", putDeep_);
-	Runtime_registerCMethod(runtime, self, "putShallow", putShallow_);
-	Runtime_registerCMethod(runtime, self, "slotNames", slotNames_);
-	Runtime_registerCMethod(runtime, self, "asString", asString_);
+	iBuiltin_setId(self, iBUILTIN_OBJECT);
+	iRuntime_registerCMethod(runtime, self, "hasMethod", hasMethod_);
+	iRuntime_registerCMethod(runtime, self, "callMethod", callMethod_);
+	iRuntime_registerCMethod(runtime, self, "hasKeyShallow", hasKeyShallow_);
+	iRuntime_registerCMethod(runtime, self, "hasKeyDeep", hasKeyDeep_);
+	iRuntime_registerCMethod(runtime, self, "removeKeyShallow", removeKeyShallow_);
+	iRuntime_registerCMethod(runtime, self, "getDeep", getDeep_);
+	iRuntime_registerCMethod(runtime, self, "getShallow", getShallow_);
+	iRuntime_registerCMethod(runtime, self, "putDeep", putDeep_);
+	iRuntime_registerCMethod(runtime, self, "putShallow", putShallow_);
+	iRuntime_registerCMethod(runtime, self, "slotNames", slotNames_);
+	iRuntime_registerCMethod(runtime, self, "asString", asString_);
 
-	Runtime_registerCMethod(runtime, self, "?", asBoolean_);
+	iRuntime_registerCMethod(runtime, self, "?", asBoolean_);
 
-	Runtime_registerCMethod(runtime, self, ">", above_);
-	Runtime_registerCMethod(runtime, self, ">=", aboveEq_);
-	Runtime_registerCMethod(runtime, self, "<", below_);
-	Runtime_registerCMethod(runtime, self, "<=", belowEq_);
-	Runtime_registerCMethod(runtime, self, "!", not_);
-	Runtime_registerCMethod(runtime, self, "~", clone_);
-	Runtime_registerCMethod(runtime, self, "+", plus_);
-	Runtime_registerCMethod(runtime, self, "-", minus_);
-	Runtime_registerCMethod(runtime, self, "*", times_);
-	Runtime_registerCMethod(runtime, self, "/", div_);
-	Runtime_registerCMethod(runtime, self, "%", mod_);
-	Runtime_registerCMethod(runtime, self, "^", exp_);
-	Runtime_registerCMethod(runtime, self, "$", value_);
-	Runtime_registerCMethod(runtime, self, "==", equals_);
-	Runtime_registerCMethod(runtime, self, "!=", notEq_);
-	Runtime_registerCMethod(runtime, self, "is", is_);
+	iRuntime_registerCMethod(runtime, self, ">", above_);
+	iRuntime_registerCMethod(runtime, self, ">=", aboveEq_);
+	iRuntime_registerCMethod(runtime, self, "<", below_);
+	iRuntime_registerCMethod(runtime, self, "<=", belowEq_);
+	iRuntime_registerCMethod(runtime, self, "!", not_);
+	iRuntime_registerCMethod(runtime, self, "~", clone_);
+	iRuntime_registerCMethod(runtime, self, "+", plus_);
+	iRuntime_registerCMethod(runtime, self, "-", minus_);
+	iRuntime_registerCMethod(runtime, self, "*", times_);
+	iRuntime_registerCMethod(runtime, self, "/", div_);
+	iRuntime_registerCMethod(runtime, self, "%", mod_);
+	iRuntime_registerCMethod(runtime, self, "^", exp_);
+	iRuntime_registerCMethod(runtime, self, "$", value_);
+	iRuntime_registerCMethod(runtime, self, "==", equals_);
+	iRuntime_registerCMethod(runtime, self, "!=", notEq_);
+	iRuntime_registerCMethod(runtime, self, "is", is_);
 
-	Runtime_registerPrivelegedCMethod(runtime, self, "def", def_);
-	Runtime_registerPrivelegedCMethod(runtime, self, "set", set_);
+	iRuntime_registerPrivelegedCMethod(runtime, self, "def", def_);
+	iRuntime_registerPrivelegedCMethod(runtime, self, "set", set_);
 
-	Runtime_registerCMethod(runtime, self, "hashCode", hashCode_);
+	iRuntime_registerCMethod(runtime, self, "hashCode", hashCode_);
 
-	Runtime_registerCMethod(runtime, self, "_markRecursively", markRecursively_);
+	iRuntime_registerCMethod(runtime, self, "_markRecursively", markRecursively_);
 }
 
 

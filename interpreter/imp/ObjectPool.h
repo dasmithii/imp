@@ -3,13 +3,13 @@
 #include "object.h"
 
 
-typedef struct ImpObjectPool_* ImpObjectPool;
+typedef struct iObjectPool_* iObjectPool;
 
-ImpObjectPool ImpObjectPool_forRuntime(void *runtime);
-Object *ImpObjectPool_allocate(ImpObjectPool self);
-void ImpObjectPool_lockGC(ImpObjectPool self);
-void ImpObjectPool_unlockGC(ImpObjectPool self);
-void ImpObjectPool_free(ImpObjectPool self);
+iObjectPool iObjectPool_forRuntime(void *runtime);
+iObject *iObjectPool_allocate(iObjectPool self);
+void iObjectPool_lockGC(iObjectPool self);
+void iObjectPool_unlockGC(iObjectPool self);
+void iObjectPool_free(iObjectPool self);
 
 
 

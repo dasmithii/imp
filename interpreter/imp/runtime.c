@@ -20,81 +20,81 @@
 // Activates <object> with given arguments on the <origin> 
 // object. This is particularly useful for method-type
 // objects.
-Object *Runtime_activateOn(Runtime *runtime
-	                     , Object *context
-	                     , Object *object
+iObject *iRuntime_activateOn(iRuntime *runtime
+	                     , iObject *context
+	                     , iObject *object
 	                     , int argc
-	                     , Object **argv
-	                     , Object *origin){
+	                     , iObject **argv
+	                     , iObject *origin){
 	assert(runtime);
-	assert(Object_isValid(object));
+	assert(iObject_isValid(object));
 
-	Object_reference(context);
-	Object_reference(object);
+	iObject_reference(context);
+	iObject_reference(object);
 	for(int i = 0; i < argc; i++){
-		Object_reference(argv[i]);
+		iObject_reference(argv[i]);
 	}
-	Object_reference(origin);
+	iObject_reference(origin);
 
-	Object *r = NULL;
+	iObject *r = NULL;
 
-	Object *special = Object_getDeep(object, "_activate");
-	Object *internal = NULL;
+	iObject *special = iObject_getDeep(object, "_activate");
+	iObject *internal = NULL;
 	if(special){
-		r = Runtime_activateOn(runtime, context, special, argc, argv, origin);
+		r = iRuntime_activateOn(runtime, context, special, argc, argv, origin);
 	} else {
-		internal = Object_getDataDeep(object, "__activate");
+		internal = iObject_getDataDeep(object, "__activate");
 		if(!internal){
-			Runtime_throwString(runtime, context, "object not activatable");
+			iRuntime_throwString(runtime, context, "object not activatable");
 			goto fuckit;
 		}
 
 		CFunction cf = *((CFunction*) internal);
 
-		if(Object_hasKeyDeep(object, "__privilege")){
+		if(iObject_hasKeyDeep(object, "__privilege")){
 
 			// execute with arguments that haven't yet been 
 			// dereferenced
 			r = cf(runtime, context, origin, argc, argv);
 			
-		} else if(BuiltIn_id(object) == BUILTIN_CLOSURE){
+		} else if(iBuiltin_id(object) == iBUILTIN_CLOSURE){
 
 			// execute with dereferenced arguments prefixed
 			// with 'self' for use in closure
 			const int argc2 = argc + 1;
-			Object **argv2 = malloc(sizeof(Object*) * argc2);
+			iObject **argv2 = malloc(sizeof(iObject*) * argc2);
 			if(!argv2){
 				abort();
 			}
 			argv2[0] = origin;
 			for(int i = 1; i < argc2; i++){
 				argv2[i] = unroute(argv[i - 1]);
-				Object_reference(argv2[i]);
+				iObject_reference(argv2[i]);
 			}
 
 			r = cf(runtime, context, object, argc2, argv2);  // TODO: deal with this
 
 			for(int i = 1; i < argc2; i++){
-				Object_unreference(argv2[i]);
+				iObject_unreference(argv2[i]);
 			}
 			free(argv2);
 
 		} else {
 
 			// execute with dereferenced arguments
-			Object **argv2 = malloc(sizeof(Object*) * argc);
+			iObject **argv2 = malloc(sizeof(iObject*) * argc);
 			if(!argv2){
 				abort();
 			}
 			for(int i = 0; i < argc; i++){
 				argv2[i] = unroute(argv[i]);
-				Object_reference(argv2[i]);
+				iObject_reference(argv2[i]);
 			}
 
 			r = cf(runtime, context, origin, argc, argv2);  // TODO: deal with this
 			
 			for(int i = 0; i < argc; i++){
-				Object_unreference(argv2[i]);
+				iObject_unreference(argv2[i]);
 			}
 			free(argv2);
 		}
@@ -103,29 +103,29 @@ Object *Runtime_activateOn(Runtime *runtime
 
 	fuckit:
 
-	Object_unreference(context);
-	Object_unreference(object);
+	iObject_unreference(context);
+	iObject_unreference(object);
 	for(int i = 0; i < argc; i++){
-		Object_unreference(argv[i]);
+		iObject_unreference(argv[i]);
 	}
-	Object_unreference(origin);
+	iObject_unreference(origin);
 
 	if(special || internal){
 		return r;
 	}
-	Runtime_throwString(runtime, context, "Object not callable.");
+	iRuntime_throwString(runtime, context, "iObject not callable.");
 	return NULL;
 }
 
 
-Object *Runtime_activate(Runtime *runtime
-	                   , Object *context
-	                   , Object *object
+iObject *iRuntime_activate(iRuntime *runtime
+	                   , iObject *context
+	                   , iObject *object
 	                   , int argc
-	                   , Object **argv){
-	assert(Object_isValid(object));
+	                   , iObject **argv){
+	assert(iObject_isValid(object));
 	assert(runtime);
-	return Runtime_activateOn(runtime 
+	return iRuntime_activateOn(runtime 
 			                , context
 			                , object
 			                , argc
@@ -134,13 +134,13 @@ Object *Runtime_activate(Runtime *runtime
 }
 
 
-Object *Runtime_rawObject(Runtime *self){
+iObject *iRuntime_rawObject(iRuntime *self){
 	assert(self);
-	return ImpObjectPool_allocate(self->objectPool);
+	return iObjectPool_allocate(self->objectPool);
 }
 
 
-void Runtime_init(Runtime *self, char *root, int argc, char **argv){
+void iRuntime_init(iRuntime *self, char *root, int argc, char **argv){
 	assert(self);
 
 	self->root = root;
@@ -148,26 +148,26 @@ void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 	self->argv = argv;
 
 	self->error = NULL;
-	self->objectPool = ImpObjectPool_forRuntime(self);
-	ImpObjectPool_lockGC(self->objectPool);
+	self->objectPool = iObjectPool_forRuntime(self);
+	iObjectPool_lockGC(self->objectPool);
 
 
 	// IMPORTANT: be careful while messing with the order of 
 	// builtin initializations (!).
 
-	self->Object = Runtime_rawObject(self);
-	Object_reference(self->Object);
-	ImpBase_init(self->Object, self);
+	self->Object = iRuntime_rawObject(self);
+	iObject_reference(self->Object);
+	iBase_init(self->Object, self);
 
-	self->root_scope = Runtime_make(self, Object);
-	Object_reference(self->root_scope);
-	Object_putShallow(self->root_scope, "self", self->root_scope);
+	self->root_scope = iRuntime_MAKE(self, Object);
+	iObject_reference(self->root_scope);
+	iObject_putShallow(self->root_scope, "self", self->root_scope);
 
-	#define IMP_INIT_IN_SLOT(OBJECT, NAME)                       \
-		self->OBJECT = Runtime_make(self, Object);               \
-		Object_reference(self->OBJECT);                          \
-		Object_putShallow(self->Object, NAME, self->OBJECT); \
-		Imp##OBJECT##_init(self->OBJECT, self)
+	#define IMP_INIT_IN_SLOT(OBJECT, NAME)                     \
+		self->OBJECT = iRuntime_MAKE(self, Object);             \
+		iObject_reference(self->OBJECT);                       \
+		iObject_putShallow(self->Object, NAME, self->OBJECT);  \
+		i##OBJECT##_init(self->OBJECT, self)
 	#define IMP_INIT(NAME) IMP_INIT_IN_SLOT(NAME, #NAME)
 
 	IMP_INIT(String);
@@ -176,78 +176,78 @@ void Runtime_init(Runtime *self, char *root, int argc, char **argv){
 	IMP_INIT(Closure);
 	IMP_INIT_IN_SLOT(Importer, "import");
 
-	self->Array = Imp_import(self, "core/container/Array", self->root_scope);
-	Object_reference(self->Array);
+	self->Array = i_import(self, "core/container/Array", self->root_scope);
+	iObject_reference(self->Array);
 
-	ImpMisc_init(self->Object, self);
+	iMisc_init(self->Object, self);
 
-	ImpObjectPool_unlockGC(self->objectPool);
+	iObjectPool_unlockGC(self->objectPool);
 }
 
 
-Object *Runtime_simpleClone(Runtime *runtime, Object *base){
-	Object_reference(base);
-	Object *r = Runtime_rawObject(runtime);
-	Object_unreference(base);
+iObject *iRuntime_simpleClone(iRuntime *runtime, iObject *base){
+	iObject_reference(base);
+	iObject *r = iRuntime_rawObject(runtime);
+	iObject_unreference(base);
 
-	Object_putShallow(r, "#", base);
+	iObject_putShallow(r, "#", base);
 	return r;
 }
 
 
-Object *Runtime_clone(Runtime *runtime, Object *base){
+iObject *iRuntime_clone(iRuntime *runtime, iObject *base){
 	assert(runtime);
-	assert(Object_isValid(base));
+	assert(iObject_isValid(base));
 
-	if(Object_hasMethod(base, "~")){
-		return Runtime_callMethod(runtime
+	if(iObject_hasMethod(base, "~")){
+		return iRuntime_callMethod(runtime
 			                    , NULL
 			                    , base
 			                    , "~"
 			                    , 0
 			                    , NULL);
 	} else {
-		return Runtime_simpleClone(runtime, base);
+		return iRuntime_simpleClone(runtime, base);
 	}
 }
 
 
-Object *Runtime_cloneField(Runtime *runtime, char *field){
+iObject *iRuntime_cloneField(iRuntime *runtime, char *field){
 	assert(runtime);
 	assert(field);
-	return Runtime_clone(runtime, Object_getDeep(runtime->root_scope, field));
+	return iRuntime_clone(runtime, iObject_getDeep(runtime->root_scope, field));
 }
 
 
-static Object *Runtime_tokenToObject(Runtime *self, Object *scope, Token *token){
+static iObject *iRuntime_tokenToObject(iRuntime *self, iObject *scope, iToken *token){
 	assert(self);
-	assert(Object_isValid(scope));
+	assert(iObject_isValid(scope));
 	assert(token);
 
-	Object *r = NULL;
-	Object_reference(scope);
+	iObject *r = NULL;
+	iObject_reference(scope);
 
 	switch(token->type){
-	case TOKEN_ROUTE:
+	case iTOKEN_ROUTE:
 		{
-			Object *route = Runtime_clone(self, self->Route);
+			iObject *route = iRuntime_clone(self, self->Route);
 			assert(token->data.text);
-			ImpRoute_setRaw(route, token->data.text);
-			ImpRoute_setContext(route, scope);
+			iRoute_setRaw(route, token->data.text);
+			iRoute_setContext(route, scope);
 			r = route;
 			break;
 		}
-	case TOKEN_NUMBER:
+	case iTOKEN_NUMBER:
 		{
-			Object *number = Runtime_cloneField(self, "Number");
-			ImpNumber_setRaw(number, token->data.number);
+			iObject *number = iRuntime_cloneField(self, "Number");
+			iNumber_setRaw(number, token->data.number);
 			r = number;
 			break;
 		}
-	case TOKEN_STRING:
+	case iTOKEN_STRING:
 		{
-			Object *str = Runtime_cloneField(self, "String");
-			ImpString_setRaw(str, token->data.text);
+			iObject *str = iRuntime_cloneField(self, "String");
+			iString_setRaw(str, token->data.text);
 			r = str;
 			break;
 		}
@@ -255,12 +255,12 @@ static Object *Runtime_tokenToObject(Runtime *self, Object *scope, Token *token)
 		break;
 	}
 
-	Object_unreference(scope);
+	iObject_unreference(scope);
 	return r;
 }
 
 
-void Runtime_setReturnValue(Runtime *self, Object *value){
+void iRuntime_setReturnValue(iRuntime *self, iObject *value){
 	assert(self);
 	// value == null is allowed
 	self->lastReturnValue = value;
@@ -268,41 +268,41 @@ void Runtime_setReturnValue(Runtime *self, Object *value){
 }
 
 
-void Runtime_clearReturnValue(Runtime *self){
+void iRuntime_clearReturnValue(iRuntime *self){
 	assert(self);
 	self->lastReturnValue = NULL;
 	self->returnWasCalled = false;
 }
 
 
-Object *Runtime_executeInContext(Runtime *runtime
-	                           , Object *scope
-	                           , ParseNode node){
+iObject *iRuntime_executeInContext(iRuntime *runtime
+	                             , iObject *scope
+	                             , iParseNode node){
 	assert(runtime);
-	assert(Object_isValid(scope));
-	Object *r = NULL;
+	assert(iObject_isValid(scope));
+	iObject *r = NULL;
 
-	Object_reference(scope);
+	iObject_reference(scope);
 
 
 	switch(node.type){
-	case LEAF_NODE:
+	case iNODE_LEAF:
 		{
-			r = Runtime_tokenToObject(runtime, scope, node.token);
-			if(Token_isContextualRoute(node.token)){
-				Object_reference(r);
-				ImpRoute_setContext(r, Runtime_executeInContext(runtime, scope, node.argv[0]));
-				Object_unreference(r);
+			r = iRuntime_tokenToObject(runtime, scope, node.token);
+			if(iToken_isContextualRoute(node.token)){
+				iObject_reference(r);
+				iRoute_setContext(r, iRuntime_executeInContext(runtime, scope, node.argv[0]));
+				iObject_unreference(r);
 			}
 			break;
 		}
-	case BLOCK_NODE:
+	case iNODE_BLOCK:
 		{
-			Runtime_clearReturnValue(runtime);
+			iRuntime_clearReturnValue(runtime);
 
 
 			for(size_t i = 0; i < node.argc; i++){
-				Runtime_executeInContext(runtime
+				iRuntime_executeInContext(runtime
 					                   , scope
 					                   , node.argv[i]);
 				if(runtime->returnWasCalled){
@@ -310,30 +310,30 @@ Object *Runtime_executeInContext(Runtime *runtime
 				}
 			}
 			r = runtime->lastReturnValue;
-			Runtime_clearReturnValue(runtime);
+			iRuntime_clearReturnValue(runtime);
 		}
 		break;
-	case CALL_NODE:
+	case iNODE_CALL:
 		{
 			// iterate through parse node... TODO: mark these in collection
-			Object **subs = malloc(node.argc * sizeof(Object*));
+			iObject **subs = malloc(node.argc * sizeof(iObject*));
 			if(!subs){
 				abort();
 			}
 			for(size_t i = 0; i < node.argc; i++){
-				subs[i] = Runtime_executeInContext(runtime
+				subs[i] = iRuntime_executeInContext(runtime
 					                             , scope
 					                             , node.argv[i]);
 
 				if(subs[i]){
-					Object_reference(subs[i]);
+					iObject_reference(subs[i]);
 				}
 			}
 
 			const int argc = node.argc - 1;
-			Object **argv =  subs + 1;
+			iObject **argv =  subs + 1;
 
-			r = Runtime_activate(runtime
+			r = iRuntime_activate(runtime
 	               , scope
 	               , subs[0]
 	               , argc
@@ -341,82 +341,82 @@ Object *Runtime_executeInContext(Runtime *runtime
 
 			for(size_t i = 0; i < node.argc; i++){
 				if(subs[i]){
-					Object_unreference(subs[i]);
+					iObject_unreference(subs[i]);
 				}
 			}
 
 			free(subs);
 		}
 		break;
-	case OBJECT_NODE:
+	case iNODE_OBJECT:
 		{
-			r = Runtime_make(runtime, Object);
-			Object_reference(r);
+			r = iRuntime_MAKE(runtime, Object);
+			iObject_reference(r);
 			if(node.argc % 2 != 0){
 				printf("%zu\n", node.argc);
-				Runtime_throwString(runtime, scope, "object literal requires pairs of inputs");
+				iRuntime_throwString(runtime, scope, "object literal requires pairs of inputs");
 			}
 			for(size_t i = 0; i < node.argc; i += 2){
-				Object *args[2];
-				args[0] = Runtime_executeInContext(runtime, scope, node.argv[i]);
-				if(BuiltIn_id(args[0]) != BUILTIN_ROUTE){
-					Runtime_throwString(runtime, scope, "object literals require atom-value pairs");
+				iObject *args[2];
+				args[0] = iRuntime_executeInContext(runtime, scope, node.argv[i]);
+				if(iBuiltin_id(args[0]) != iBUILTIN_ROUTE){
+					iRuntime_throwString(runtime, scope, "object literals require atom-value pairs");
 				}
-				Object_reference(args[0]);
-				args[1] = Runtime_executeInContext(runtime, scope, node.argv[i+1]);
-				Object_unreference(args[0]);
-				Runtime_callMethod(runtime
+				iObject_reference(args[0]);
+				args[1] = iRuntime_executeInContext(runtime, scope, node.argv[i+1]);
+				iObject_unreference(args[0]);
+				iRuntime_callMethod(runtime
 					             , r   
 					             , r
 					             , "def"
 					             , 2
 					             , args);
 			}
-			Object_unreference(r);
+			iObject_unreference(r);
 		}
 		break;
-	case CLOSURE_NODE:
+	case iNODE_CLOSURE:
 		{
-			r = Runtime_make(runtime, Closure);
-			Object_reference(r);
-			ImpClosure_compile(runtime, r, &node, scope);
-			Object_unreference(r);
+			r = iRuntime_MAKE(runtime, Closure);
+			iObject_reference(r);
+			iClosure_compile(runtime, r, &node, scope);
+			iObject_unreference(r);
 		}
 		break;
 	}
 
-	Object_unreference(scope);
+	iObject_unreference(scope);
 
 	return r;
 }
 
 
-Object *Runtime_executeSourceInContext(Runtime *self
-	                                 , char *code
-	                                 , Object *context){
+iObject *iRuntime_executeSourceInContext(iRuntime *self
+	                                   , char *code
+	                                   , iObject *context){
 	assert(self);
 	assert(code); // todo ebnf check code
 
-	ParseTree tree;
-	Object *r = NULL;
+	iParseTree tree;
+	iObject *r = NULL;
 
-	int rc = ParseTree_init(&tree, code);
+	int rc = iParseTree_init(&tree, code);
 	if(rc){
-		Runtime_throwString(self, context, tree.error);
+		iRuntime_throwString(self, context, tree.error);
 	} else {
-		if(!Object_hasKeyDeep(context, "self")){
-			Object_putShallow(context, "self", context);
+		if(!iObject_hasKeyDeep(context, "self")){
+			iObject_putShallow(context, "self", context);
 		}
-		r = Runtime_executeInContext(self, context, tree.root);
+		r = iRuntime_executeInContext(self, context, tree.root);
 	}
 
-	ParseTree_clean(&tree);
+	iParseTree_clean(&tree);
 	return r;
 }
 
 
-Object *Runtime_executeFile(Runtime *self, char *path){
-	return Runtime_executeFileInContext(self, path, self->root_scope);
+iObject *iRuntime_executeFile(iRuntime *self, char *path){
+	return iRuntime_executeFileInContext(self, path, self->root_scope);
 }
 
 
@@ -440,32 +440,32 @@ static char *readFile(char *path){
 }
 
 
-Object *Runtime_executeFileInContext(Runtime *self, char *path, Object *context){
+iObject *iRuntime_executeFileInContext(iRuntime *self, char *path, iObject *context){
 	char *code = readFile(path);
 	if(!code){
-		Runtime_throwFormatted(self, context, "failed to read file: '%s'", path);
+		iRuntime_throwFormatted(self, context, "failed to read file: '%s'", path);
 	}
 	char fileSetCom[256];
 	// TODO: check path length.
 	sprintf(fileSetCom, "(def _FILE '%s')", path);
-	Runtime_executeSourceInContext(self, fileSetCom, context);
-	return Runtime_executeSourceInContext(self, code, context);
+	iRuntime_executeSourceInContext(self, fileSetCom, context);
+	return iRuntime_executeSourceInContext(self, code, context);
 }
 
 
-Object *Runtime_executeSource(Runtime *self, char *code){
-	return Runtime_executeSourceInContext(self, code, self->root_scope);
+iObject *iRuntime_executeSource(iRuntime *self, char *code){
+	return iRuntime_executeSourceInContext(self, code, self->root_scope);
 }
 
 
-void Runtime_throw(Runtime *runtime, Object *context, Object *exception){
-	Object_reference(context);
-	Object_reference(exception);
-	Object *lib = Imp_import(runtime, "core/exceptions", context);
-	Object_unreference(context);
-	Object_unreference(exception);
+void iRuntime_throw(iRuntime *runtime, iObject *context, iObject *exception){
+	iObject_reference(context);
+	iObject_reference(exception);
+	iObject *lib = i_import(runtime, "core/exceptions", context);
+	iObject_unreference(context);
+	iObject_unreference(exception);
 
-	Runtime_callMethod(runtime
+	iRuntime_callMethod(runtime
 		             , context
 		             , lib
 		             , "throw"
@@ -474,44 +474,44 @@ void Runtime_throw(Runtime *runtime, Object *context, Object *exception){
 }
 
 
-void Runtime_throwString(Runtime *runtime, Object *context, char *exception){
+void iRuntime_throwString(iRuntime *runtime, iObject *context, char *exception){
 	assert(runtime);
 	assert(exception);
 
-	Object_reference(context);
-	Object *obj = Runtime_make(runtime, String);
-	ImpString_setRaw(obj, exception);
-	Object_unreference(context);
+	iObject_reference(context);
+	iObject *obj = iRuntime_MAKE(runtime, String);
+	iString_setRaw(obj, exception);
+	iObject_unreference(context);
 
-	Runtime_throw(runtime, context, obj);
+	iRuntime_throw(runtime, context, obj);
 }
 
 
-void Runtime_throwFormatted(Runtime *runtime, Object *context, const char *format, ...){
+void iRuntime_throwFormatted(iRuntime *runtime, iObject *context, const char *format, ...){
     va_list args;
     va_start(args, format);
 
     char str[256];
     vsprintf(str, format, args);
-    Runtime_throwString(runtime, context, str);
+    iRuntime_throwString(runtime, context, str);
 
     fprintf(stderr, ".\n");
     va_end(args);
 }
 
 
-void Runtime_print(Runtime *runtime, Object *context, Object *object){
+void iRuntime_print(iRuntime *runtime, iObject *context, iObject *object){
 	assert(runtime);
-	assert(Object_isValid(context));
-	assert(Object_isValid(object));
+	assert(iObject_isValid(context));
+	assert(iObject_isValid(object));
 
-	Object_reference(context);
-	Object_reference(object);
+	iObject_reference(context);
+	iObject_reference(object);
 
-	Object *special = Object_getDeep(object, "_print");
-	void *internal = Object_getDataDeep(object, "__print");
+	iObject *special = iObject_getDeep(object, "_print");
+	void *internal = iObject_getDataDeep(object, "__print");
 	if(special){
-		Runtime_activateOn(runtime 
+		iRuntime_activateOn(runtime 
 			             , context
 			             , special
 			             , 0
@@ -521,44 +521,44 @@ void Runtime_print(Runtime *runtime, Object *context, Object *object){
 		CFunction cf = *((CFunction*) internal);
 		cf(runtime, context, object, 0, NULL);
 	} else {
-		Object_print(object);
+		iObject_print(object);
 	}
 
-	Object_unreference(context);
-	Object_unreference(object);
+	iObject_unreference(context);
+	iObject_unreference(object);
 }
 
 
-Object *Runtime_callSpecialMethod(Runtime *runtime
-	                     , Object *context
-	                     , Object *object
-	                     , char *methodName
-	                     , int argc
-	                     , Object **argv){
+iObject *iRuntime_callSpecialMethod(iRuntime *runtime
+	                              , iObject *context
+	                              , iObject *object
+	                              , char *methodName
+	                              , int argc
+	                              , iObject **argv){
 	// try <object>:_<methodName>
 	char buf[64];
 	sprintf(buf, "_%s", methodName);
-	Object *method = Object_getDeep(object, buf);
+	iObject *method = iObject_getDeep(object, buf);
 	if(method){
-		return Runtime_activateOn(runtime, context, method, argc, argv, object);
+		return iRuntime_activateOn(runtime, context, method, argc, argv, object);
 	}
-	Runtime_throwFormatted(runtime, context, "method '%s' does not exist", buf);
+	iRuntime_throwFormatted(runtime, context, "method '%s' does not exist", buf);
 	return NULL;
 }
 
 
-Object *Runtime_callMethod(Runtime *runtime
-	                     , Object *context
-	                     , Object *object
-	                     , char *methodName
-	                     , int argc
-	                     , Object **argv){
+iObject *iRuntime_callMethod(iRuntime *runtime
+	                       , iObject *context
+	                       , iObject *object
+	                       , char *methodName
+	                       , int argc
+	                       , iObject **argv){
 	// try <object>:<methodName>
-	Object *method = Object_getDeep(object, methodName);
+	iObject *method = iObject_getDeep(object, methodName);
 	if(method){
-		return Runtime_activateOn(runtime, context, method, argc, argv, object);
+		return iRuntime_activateOn(runtime, context, method, argc, argv, object);
 	}
-	Runtime_throwFormatted(runtime, context, "method '%s' does not exist", methodName);
+	iRuntime_throwFormatted(runtime, context, "method '%s' does not exist", methodName);
 	return NULL;
 }
 

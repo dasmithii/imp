@@ -5,48 +5,48 @@
 
 
 
-void BuiltIn_setId(Object *self, BuiltinId id){
+void iBuiltin_setId(iObject *self, iBuiltinId id){
 	assert(self);
 
-	BuiltinId *data = malloc(sizeof(BuiltinId));
+	iBuiltinId *data = malloc(sizeof(iBuiltinId));
 	if(!data){
 		abort();
 	}
 	*data = id; 
-	Object_putDataShallow(self, "__id", data);
+	iObject_putDataShallow(self, "__id", data);
 }
 
 
-BuiltinId BuiltIn_id(Object *self){
+iBuiltinId iBuiltin_id(iObject *self){
 	if(!self){
-		return BUILTIN_NULL;
+		return iBUILTIN_NULL;
 	}
 
-	BuiltinId *id = Object_getDataDeep(self, "__id");
+	iBuiltinId *id = iObject_getDataDeep(self, "__id");
 	if(!id){
-		return NOT_BUILTIN;
+		return iBUILTIN_NOT;
 	}
 	return *id;
 }
 
 
-bool BuiltIn_hasId(Object *self, BuiltinId id){
+bool iBuiltin_hasId(iObject *self, iBuiltinId id){
 	assert(self);
-	return BuiltIn_id(self) == id;
+	return iBuiltin_id(self) == id;
 }
 
 
-BuiltinId BuiltIn_protoId(Object *self){
+iBuiltinId iBuiltin_protoId(iObject *self){
 	assert(self);
-	Object *prototype = Object_getShallow(self, "#");
+	iObject *prototype = iObject_getShallow(self, "#");
 	if(!prototype){
-		return NOT_BUILTIN;
+		return iBUILTIN_NOT;
 	}
-	return BuiltIn_id(prototype);
+	return iBuiltin_id(prototype);
 }
 
 
-bool BuiltIn_protoHadId(Object *self, BuiltinId id){
+bool iBuiltin_protoHadId(iObject *self, iBuiltinId id){
 	assert(self);
-	return BuiltIn_protoId(self) == id;
+	return iBuiltin_protoId(self) == id;
 }

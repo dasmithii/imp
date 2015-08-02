@@ -8,48 +8,48 @@
 
 
 
-void Token_clean(Token *token) {
+void iToken_clean(iToken *token) {
 	assert(token);
-	if(token->type == TOKEN_ROUTE   ||
-	   token->type == TOKEN_COMMENT || 
-	   token->type == TOKEN_STRING){
+	if(token->type == iTOKEN_ROUTE   ||
+	   token->type == iTOKEN_COMMENT || 
+	   token->type == iTOKEN_STRING){
 		free(token->data.text);
 		token->data.text = NULL;
 	}
 }
 
 
-void Token_print(Token *token){
+void iToken_print(iToken *token){
 	assert(token);
 	switch(token->type){
-	case TOKEN_ROUTE:
+	case iTOKEN_ROUTE:
 		printf("%s", token->data.text);
 		break;
-	case TOKEN_STRING:
+	case iTOKEN_STRING:
 		printf("\"%s\"", token->data.text);
 		break;
-	case TOKEN_NUMBER:
+	case iTOKEN_NUMBER:
 		printf("%f", token->data.number);
 		break;
-	case TOKEN_HARD_OPEN:
+	case iTOKEN_HARD_OPEN:
 		printf("[");
 		break;
-	case TOKEN_HARD_CLOSE:
+	case iTOKEN_HARD_CLOSE:
 		printf("]");
 		break;
-	case TOKEN_SOFT_OPEN:
+	case iTOKEN_SOFT_OPEN:
 		printf("(");
 		break;
-	case TOKEN_SOFT_CLOSE:
+	case iTOKEN_SOFT_CLOSE:
 		printf(")");
 		break;
-	case TOKEN_CURLY_OPEN:
+	case iTOKEN_CURLY_OPEN:
 		printf("{");
 		break;
-	case TOKEN_CURLY_CLOSE:
+	case iTOKEN_CURLY_CLOSE:
 		printf("}");
 		break;
-	case TOKEN_COMMENT:
+	case iTOKEN_COMMENT:
 		// TODO: support comments
 		break;
 	default:
@@ -59,85 +59,85 @@ void Token_print(Token *token){
 }
 
 
-void Token_printType(Token *token){
+void iToken_printType(iToken *token){
 	assert(token);
 	switch(token->type){
-	case TOKEN_ROUTE:
+	case iTOKEN_ROUTE:
 		printf("route");
 		break;
-	case TOKEN_NUMBER:
+	case iTOKEN_NUMBER:
 		printf("number");
 		break;
-	case TOKEN_STRING:
+	case iTOKEN_STRING:
 		printf("string");
 		break;
-	case TOKEN_COMMENT:
+	case iTOKEN_COMMENT:
 		printf("comment");
 		break;
 	default:
-		Token_print(token);
+		iToken_print(token);
 		break;
 	}
 }
 
 
-void Token_printVerbose(Token *token){
+void iToken_printVerbose(iToken *token){
 	assert(token);
-	Token_printType(token);
-	if(token->type == TOKEN_ROUTE    ||
-	   token->type == TOKEN_NUMBER   ||
-	   token->type == TOKEN_STRING   ||
-	   token->type == TOKEN_COMMENT){
+	iToken_printType(token);
+	if(token->type == iTOKEN_ROUTE    ||
+	   token->type == iTOKEN_NUMBER   ||
+	   token->type == iTOKEN_STRING   ||
+	   token->type == iTOKEN_COMMENT){
 	   printf(";");
-	   Token_print(token);
+	   iToken_print(token);
 	}
 }
 
 
-bool Token_isOpen(Token *self){
+bool iToken_isOpen(iToken *self){
 	assert(self);
 	if(!self){
 		return false;
 	}
-	return self->type == TOKEN_SOFT_OPEN  || 
-	       self->type == TOKEN_HARD_OPEN  ||
-	       self->type == TOKEN_CURLY_OPEN;
+	return self->type == iTOKEN_SOFT_OPEN  || 
+	       self->type == iTOKEN_HARD_OPEN  ||
+	       self->type == iTOKEN_CURLY_OPEN;
 }
 
 
-bool Token_isClosed(Token *self){
+bool iToken_isClosed(iToken *self){
 	assert(self);
 	if(!self){
 		return false;
 	}
-	return self->type == TOKEN_SOFT_CLOSE  || 
-	       self->type == TOKEN_HARD_CLOSE  ||
-	       self->type == TOKEN_CURLY_CLOSE;
+	return self->type == iTOKEN_SOFT_CLOSE  || 
+	       self->type == iTOKEN_HARD_CLOSE  ||
+	       self->type == iTOKEN_CURLY_CLOSE;
 }
 
 
-bool Token_isGrouping(Token *self){
+bool iToken_isGrouping(iToken *self){
 	assert(self);
-	return Token_isOpen(self) || Token_isClosed(self);
+	return iToken_isOpen(self) || iToken_isClosed(self);
 }
 
 
-bool Token_isTextual(Token *self){
+bool iToken_isTextual(iToken *self){
 	assert(self);
-	return self->type == TOKEN_ROUTE    ||
-	       self->type == TOKEN_COMMENT  ||
-	       self->type == TOKEN_STRING;
+	return self->type == iTOKEN_ROUTE    ||
+	       self->type == iTOKEN_COMMENT  ||
+	       self->type == iTOKEN_STRING;
 }
 
 
-Token *Token_copy(Token *self){
+iToken *iToken_copy(iToken *self){
 	assert(self);
-	Token *r = malloc(sizeof(Token));
+	iToken *r = malloc(sizeof(iToken));
 	if(!r){
 		abort();
 	}
 	*r = *self;
-	if(Token_isTextual(self) && self->data.text){
+	if(iToken_isTextual(self) && self->data.text){
 		r->data.text = strdup(self->data.text);
 		if(!r->data.text){
 			abort();
@@ -147,22 +147,22 @@ Token *Token_copy(Token *self){
 }
 
 
-void Token_free(Token *self){
+void iToken_free(iToken *self){
 	assert(self);
-	Token_clean(self);
+	iToken_clean(self);
 	free(self);
 }
 
 
-bool Token_isLiteral(Token *self){
+bool iToken_isLiteral(iToken *self){
 	assert(self);
-	return self->type == TOKEN_STRING   ||
-	       self->type == TOKEN_ROUTE    ||
-	       self->type == TOKEN_NUMBER;
+	return self->type == iTOKEN_STRING   ||
+	       self->type == iTOKEN_ROUTE    ||
+	       self->type == iTOKEN_NUMBER;
 }
 
 
-bool Token_isContextualRoute(Token *self){
-	return self->type == TOKEN_ROUTE
+bool iToken_isContextualRoute(iToken *self){
+	return self->type == iTOKEN_ROUTE
 	    && self->data.text[0] == ':';
 }

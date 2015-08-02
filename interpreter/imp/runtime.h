@@ -10,11 +10,11 @@
 
 typedef struct {
 	char *error;
-	Object *root_scope;
+	iObject *root_scope;
 
-	ImpObjectPool objectPool;
+	iObjectPool objectPool;
 
-	Object *lastReturnValue; // TODO: track return values for each coroutine
+	iObject *lastReturnValue; // TODO: track return values for each coroutine
 	bool    returnWasCalled; 
 
 	// configuration
@@ -23,86 +23,87 @@ typedef struct {
 	char **argv;
 
 	// built-ins
-	Object *Object;
-	Object *Number;
-	Object *String;
-	Object *Array;
-	Object *Closure;
-	Object *Route;
-	Object *nil;
+	iObject *Object;
+	iObject *Number;
+	iObject *String;
+	iObject *Array;
+	iObject *Closure;
+	iObject *Route;
+	iObject *nil;
 
-	Object *Importer; // activate-able import object
-	Object *imports; // cache of dlls
-} Runtime;
+	iObject *Importer; // activate-able import object
+	iObject *imports; // cache of dlls
+} iRuntime;
 
 
 //// management
-void Runtime_init(Runtime *self, char *root, int argc, char **argv);
-void Runtime_clean(Runtime *self);
+void iRuntime_init(iRuntime *self, char *root, int argc, char **argv);
+void iRuntime_clean(iRuntime *self);
 
 
 //// object creation
-Object *Runtime_rawObject(Runtime *self); // TODO: replace with make(Empty)
-Object *Runtime_clone(Runtime *self, Object *base);
-Object *Runtime_simpleClone(Runtime *self, Object *base);
-Object *Runtime_cloneField(Runtime *self, char *name);
+iObject *iRuntime_rawObject(iRuntime *self); // TODO: replace with make(Empty)
+iObject *iRuntime_clone(iRuntime *self, iObject *base);
+iObject *iRuntime_simpleClone(iRuntime *self, iObject *base);
+iObject *iRuntime_cloneField(iRuntime *self, char *name);
 
 // T should be Object/Number/String/Vector/Closure/Route
-#define Runtime_make(R, T) Runtime_clone(R, R->T)
+#define iRuntime_MAKE(R, T) iRuntime_clone(R, R->T)
 
 
 //// code execution
-Object *Runtime_executeSource(Runtime *self, char *code);
-Object *Runtime_executeSourceInContext(Runtime *self, char *code, Object *context);
-Object *Runtime_executeFile(Runtime *self, char *path);
-Object *Runtime_executeFileInContext(Runtime *self, char *path, Object *context);
-Object *Runtime_activateOn(Runtime *runtime
-	                     , Object *context
-	                     , Object *caller
+iObject *iRuntime_executeSource(iRuntime *self, char *code);
+iObject *iRuntime_executeSourceInContext(iRuntime *self, char *code, iObject *context);
+iObject *iRuntime_executeFile(iRuntime *self, char *path);
+iObject *iRuntime_executeFileInContext(iRuntime *self, char *path, iObject *context);
+iObject *iRuntime_activateOn(iRuntime *runtime
+	                       , iObject *context
+	                       , iObject *caller
+	                       , int argc
+	                       , iObject **argv
+	                       , iObject *origin);
+iObject *iRuntime_activate(iRuntime *runtime
+	                     , iObject *context
+	                     , iObject *caller
 	                     , int argc
-	                     , Object **argv
-	                     , Object *origin);
-Object *Runtime_activate(Runtime *runtime
-	                   , Object *context
-	                   , Object *caller
-	                   , int argc
-	                   , Object **argv);
-Object *Runtime_executeInContext(Runtime *runtime
-	                           , Object *context
-	                           , ParseNode node);
+	                     , iObject **argv);
+iObject *iRuntime_executeInContext(iRuntime *runtime
+	                             , iObject *context
+	                             , iParseNode node);
 
 
 
 //// return value 'register'
-void Runtime_setReturnValue(Runtime *self, Object *value);
-void Runtime_clearReturnValue(Runtime *self);
+void iRuntime_setReturnValue(iRuntime *self, iObject *value);
+void iRuntime_clearReturnValue(iRuntime *self);
 
 
 //// exception handling
-void Runtime_throw(Runtime *runtime, Object *context, Object *exception);
-void Runtime_throwString(Runtime *runtime, Object *context, char *exception);
-void Runtime_throwFormatted(Runtime *runtime, Object *context, const char *format, ...);
+void iRuntime_throw(iRuntime *runtime, iObject *context, iObject *exception);
+void iRuntime_throwString(iRuntime *runtime, iObject *context, char *exception);
+void iRuntime_throwFormatted(iRuntime *runtime, iObject *context, const char *format, ...);
 
 
 //// garbage collection
-bool Runtime_isManaged(Runtime *self, Object *object);
-int Runtime_objectCount(Runtime *self);
+bool iRuntime_isManaged(iRuntime *self, iObject *object);
+int iRuntime_objectCount(iRuntime *self);
 
 
 //// miscellaneous
-void Runtime_print(Runtime *self, Object *context, Object *object);
-Object *Runtime_callMethod(Runtime *self
-	                     , Object *context
-	                     , Object *object
-	                     , char *methodName
-	                     , int argc
-	                     , Object **argv);
-Object *Runtime_callSpecialMethod(Runtime *self
-	                     , Object *context
-	                     , Object *object
-	                     , char *methodName
-	                     , int argc
-	                     , Object **argv);
+void iRuntime_print(iRuntime *self, iObject *context, iObject *object);
+
+iObject *iRuntime_callMethod(iRuntime *self
+	                       , iObject *context
+	                       , iObject *object
+	                       , char *methodName
+	                       , int argc
+	                       , iObject **argv);
+iObject *iRuntime_callSpecialMethod(iRuntime *self
+	                              , iObject *context
+	                              , iObject *object
+	                              , char *methodName
+	                              , int argc
+	                              , iObject **argv);
 
 
 #endif

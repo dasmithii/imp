@@ -1,5 +1,5 @@
-#ifndef IMP_TOKEN_H_
-#define IMP_TOKEN_H_
+#ifndef iTOKEN
+#define iTOKEN
 
 #include <stdbool.h>
 
@@ -9,50 +9,50 @@
 
 
 typedef enum {
-	TOKEN_ROUTE,
-	TOKEN_NUMBER,
-	TOKEN_STRING,
+	iTOKEN_ROUTE,
+	iTOKEN_NUMBER,
+	iTOKEN_STRING,
 
-	TOKEN_HARD_OPEN,
-	TOKEN_HARD_CLOSE,
-	TOKEN_SOFT_OPEN,
-	TOKEN_SOFT_CLOSE,
-	TOKEN_CURLY_OPEN,
-	TOKEN_CURLY_CLOSE,
-	TOKEN_COMMENT
-} TokenType;
+	iTOKEN_HARD_OPEN,
+	iTOKEN_HARD_CLOSE,
+	iTOKEN_SOFT_OPEN,
+	iTOKEN_SOFT_CLOSE,
+	iTOKEN_CURLY_OPEN,
+	iTOKEN_CURLY_CLOSE,
+	iTOKEN_COMMENT
+} iTokenType;
 
 
 typedef struct {
-	Position position;
-	TokenType type;
+	iPosition position;
+	iTokenType type;
 	union {
 		char *text;
 		double number;
 	} data;
-} Token;
+} iToken;
 
 
 //// management
-void Token_clean(Token *token);
-void Token_free(Token *token);
-Token *Token_copy(Token *self);
+void iToken_clean(iToken *token);
+void iToken_free(iToken *token);
+iToken *iToken_copy(iToken *self);
 
 
 //// miscellaneous
-void Token_print(Token *token);
-void Token_printType(Token *token);
-void Token_printVerbose(Token *token);
+void iToken_print(iToken *token);
+void iToken_printType(iToken *token);
+void iToken_printVerbose(iToken *token);
 
 
 //// helpers
-bool Token_isOpen(Token *self);
-bool Token_isClosed(Token *self);
-bool Token_isGrouping(Token *self);
-bool Token_isTextual(Token *self);
-bool Token_isLiteral(Token *self);
+bool iToken_isOpen(iToken *self);
+bool iToken_isClosed(iToken *self);
+bool iToken_isGrouping(iToken *self);
+bool iToken_isTextual(iToken *self);
+bool iToken_isLiteral(iToken *self);
 
-bool Token_isContextualRoute(Token *self);
+bool iToken_isContextualRoute(iToken *self);
 
 
 

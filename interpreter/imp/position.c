@@ -5,17 +5,17 @@
 
 
 
-void Position_print(Position *self){
+void iPosition_print(iPosition *self){
 	printf("[%zu:%zu]", self->line, self->column);
 }
 
 
-void Position_shift(Position *self, int n){
+void iPosition_shift(iPosition *self, int n){
 	self->column += n;
 }
 
 
-void Position_newLine(Position *self){
+void iPosition_newLine(iPosition *self){
 	self->column = 0;
 	self->line++;
 }

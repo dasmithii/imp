@@ -11,13 +11,6 @@ BIG:
  + Errors.
  + Generational GC
 
- + In parser, set _file to file name at beginning
-
-
-
-SMALL:
-
- + Refactor Runtime_make to Runtime_MAKE.
 
 
 OBJECT LITERALS:

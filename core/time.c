@@ -10,69 +10,69 @@
 #define MINUTE_PER_HOUR 60
 
 
-Object *time_seconds(Runtime *runtime
-	               , Object *context
-	               , Object *module
-	               , int argc
-	               , Object **argv){
+iObject *time_seconds(iRuntime *runtime
+	                , iObject *context
+	                , iObject *module
+	                , int argc
+	                , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "time:seconds requires exactly one argument");
+		iRuntime_throwString(runtime, context, "time:seconds requires exactly one argument");
 	}
-	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, context, "time:seconds requires numeric argument");
+	if(iBuiltin_id(argv[0]) != iBUILTIN_NUMBER){
+		iRuntime_throwString(runtime, context, "time:seconds requires numeric argument");
 	}
-	Object *r = Runtime_make(runtime, Number);
-	ImpNumber_setRaw(r, MICROSECONDS_PER_SECOND * ImpNumber_getRaw(argv[0]));
+	iObject *r = iRuntime_MAKE(runtime, Number);
+	iNumber_setRaw(r, MICROSECONDS_PER_SECOND * iNumber_getRaw(argv[0]));
 	return r;
 }
 
 
-Object *time_milliseconds(Runtime *runtime
-	                    , Object *context
-	                    , Object *module
-	                    , int argc
-	                    , Object **argv){
+iObject *time_milliseconds(iRuntime *runtime
+	                     , iObject *context
+	                     , iObject *module
+	                     , int argc
+	                     , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "time:milliseconds requires exactly one argument");
+		iRuntime_throwString(runtime, context, "time:milliseconds requires exactly one argument");
 	}
-	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, context, "time:milliseconds requires numeric argument");
+	if(iBuiltin_id(argv[0]) != iBUILTIN_NUMBER){
+		iRuntime_throwString(runtime, context, "time:milliseconds requires numeric argument");
 	}
-	Object *r = Runtime_make(runtime, Number);
-	ImpNumber_setRaw(r, MICROSECONDS_PER_MILLISECOND * ImpNumber_getRaw(argv[0]));
+	iObject *r = iRuntime_MAKE(runtime, Number);
+	iNumber_setRaw(r, MICROSECONDS_PER_MILLISECOND * iNumber_getRaw(argv[0]));
 	return r;
 }
 
 
-Object *time_minutes(Runtime *runtime
-	               , Object *context
-	               , Object *module
-	               , int argc
-	               , Object **argv){
+iObject *time_minutes(iRuntime *runtime
+	                , iObject *context
+	                , iObject *module
+	                , int argc
+	                , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "time:minutes requires exactly one argument");
+		iRuntime_throwString(runtime, context, "time:minutes requires exactly one argument");
 	}
-	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, context, "time:minutes requires numeric argument");
+	if(iBuiltin_id(argv[0]) != iBUILTIN_NUMBER){
+		iRuntime_throwString(runtime, context, "time:minutes requires numeric argument");
 	}
-	Object *r = Runtime_make(runtime, Number);
-	ImpNumber_setRaw(r, SECONDS_PER_MINUTE * MICROSECONDS_PER_SECOND * ImpNumber_getRaw(argv[0]));
+	iObject *r = iRuntime_MAKE(runtime, Number);
+	iNumber_setRaw(r, SECONDS_PER_MINUTE * MICROSECONDS_PER_SECOND * iNumber_getRaw(argv[0]));
 	return r;
 }
 
 
-Object *time_hours(Runtime *runtime
-	             , Object *context
-	             , Object *module
-	             , int argc
-	             , Object **argv){
+iObject *time_hours(iRuntime *runtime
+	              , iObject *context
+	              , iObject *module
+	              , int argc
+	              , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "time:hours requires exactly one argument");
+		iRuntime_throwString(runtime, context, "time:hours requires exactly one argument");
 	}
-	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, context, "time:hours requires numeric argument");
+	if(iBuiltin_id(argv[0]) != iBUILTIN_NUMBER){
+		iRuntime_throwString(runtime, context, "time:hours requires numeric argument");
 	}
-	Object *r = Runtime_make(runtime, Number);
-	ImpNumber_setRaw(r, MINUTE_PER_HOUR * SECONDS_PER_MINUTE * MICROSECONDS_PER_SECOND * ImpNumber_getRaw(argv[0]));
+	iObject *r = iRuntime_MAKE(runtime, Number);
+	iNumber_setRaw(r, MINUTE_PER_HOUR * SECONDS_PER_MINUTE * MICROSECONDS_PER_SECOND * iNumber_getRaw(argv[0]));
 	return r;
 }

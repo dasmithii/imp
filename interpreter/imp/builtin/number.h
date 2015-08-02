@@ -6,19 +6,19 @@
 
 
 
-void ImpNumber_init(Object *self, Runtime *runtime);
-bool ImpNumber_isValid(Object *self);
-void ImpNumber_print(Object *self);
+void iNumber_init(iObject *self, iRuntime *runtime);
+bool iNumber_isValid(iObject *self);
+void iNumber_print(iObject *self);
 
-void ImpNumber_add(Object *self, Object *other);
-void ImpNumber_sub(Object *self, Object *other);
-void ImpNumber_mult(Object *self, Object *other);
-void ImpNumber_div(Object *self, Object *other);
+void iNumber_add(iObject *self, iObject *other);
+void iNumber_sub(iObject *self, iObject *other);
+void iNumber_mult(iObject *self, iObject *other);
+void iNumber_div(iObject *self, iObject *other);
 
-void ImpNumber_set(Object *self, Object *value);
-void ImpNumber_setRaw(Object *self, double value);
-double ImpNumber_getRaw(Object *self);
-int ImpNumber_getRawRounded(Object *self);
+void iNumber_set(iObject *self, iObject *value);
+void iNumber_setRaw(iObject *self, double value);
+double iNumber_getRaw(iObject *self);
+int iNumber_getRawRounded(iObject *self);
 
 
 

@@ -1,6 +1,6 @@
 // The lexer API consists of the 'lex' function, which
-// returns a Tokenization, and Tokenization_clean,
-// which frees Tokenization internals.
+// returns a iTokenization, and iTokenization_clean,
+// which frees iTokenization internals.
 //
 // Implementation wise, we use the Lexer struct to 
 // simplify things. It maintains state while decomposed
@@ -27,11 +27,11 @@
 typedef struct {
 	char *code;
 	char *ptr;
-	Position position;
+	iPosition position;
 
 	size_t tokenCount;
 	size_t tokenCapacity;
-	Token *tokenBuffer;
+	iToken *tokenBuffer;
 
 	char *error;
 } Lexer;
@@ -48,7 +48,7 @@ static inline Lexer Lexer_of(char *code){
 		.tokenCapacity = 5
 	};
 
-	r.tokenBuffer = malloc(r.tokenCapacity * sizeof(Token));
+	r.tokenBuffer = malloc(r.tokenCapacity * sizeof(iToken));
 	if(r.tokenBuffer){
 		r.error = NULL;
 	} else{
@@ -58,13 +58,13 @@ static inline Lexer Lexer_of(char *code){
 }
 
 
-static inline void Lexer_register(Lexer *self, Token token){
+static inline void Lexer_register(Lexer *self, iToken token){
 	token.position = self->position;
 	// expand token buffer if necessary
 	if(self->tokenCount == self->tokenCapacity){
 		self->tokenCapacity *= 2;
 		self->tokenBuffer = realloc(self->tokenBuffer
-			                       , self->tokenCapacity * sizeof(Token));
+			                       , self->tokenCapacity * sizeof(iToken));
 		if(!self->tokenBuffer){
 			self->error = "failed to register token; failed malloc";
 			return;
@@ -78,7 +78,7 @@ static inline void Lexer_register(Lexer *self, Token token){
 
 static inline void Lexer_shiftRightBy(Lexer *self, int n){
 	self->ptr += n;
-	Position_shift(&self->position, n);
+	iPosition_shift(&self->position, n);
 }
 
 
@@ -93,7 +93,7 @@ static inline bool Lexer_tryWhitespace(Lexer *self){
 
 static inline bool Lexer_tryNewLine(Lexer *self){
 	if(*self->ptr == '\n'){
-		Position_newLine(&self->position);
+		iPosition_newLine(&self->position);
 		self->ptr++;
 		return true;
 	}
@@ -117,7 +117,7 @@ static inline bool Lexer_tryComment(Lexer *self){
 static inline bool Lexer_tryGrouping(Lexer *self){
 	#define PAIRING(c, t)                       \
 		case c: {                               \
-			Token token = {.type = TOKEN_##t};  \
+			iToken token = {.type = iTOKEN_##t};  \
 			Lexer_register(self, token);        \
 			Lexer_shiftRightBy(self, 1);               \
 			return true;                        \
@@ -142,7 +142,7 @@ static inline bool Lexer_tryNumber(Lexer *self){
 		++c;
 	}
 	if(isdigit(c[0]) || (c[0] == '.' && isdigit(c[1]))){
-		Token t = {.type = TOKEN_NUMBER};
+		iToken t = {.type = iTOKEN_NUMBER};
 		char *begin = self->ptr;
 		t.data.number = strtod(begin, &self->ptr);
 		Lexer_register(self, t);
@@ -152,11 +152,11 @@ static inline bool Lexer_tryNumber(Lexer *self){
 }
 
 
-bool isValidRouteChar(char c){
-	return isValidRouteBegin(c) || isdigit(c);
+bool iIsValidRouteChar(char c){
+	return iIsValidRouteBegin(c) || isdigit(c);
 }
 
-bool isValidRouteBegin(char c){
+bool iIsValidRouteBegin(char c){
 	return isalpha(c) ||
 	       c == '~'   ||
 	       c == '!'   ||
@@ -181,16 +181,16 @@ bool isValidRouteBegin(char c){
 }
 
 
-bool isValidRouteText(char *text){
+bool iIsValidRouteText(char *text){
 	if(!text || *text == 0){
 		return false;
 	}
 	int len = strlen(text);
-	if(len == 0 || !isValidRouteBegin(text[0])){
+	if(len == 0 || !iIsValidRouteBegin(text[0])){
 		return false;
 	}
 	for(int i = 1; i < len; i++){
-		if(!isValidRouteChar(text[i])){
+		if(!iIsValidRouteChar(text[i])){
 			return false;
 		}
 	}
@@ -199,10 +199,10 @@ bool isValidRouteText(char *text){
 
 
 static inline bool Lexer_tryRoute(Lexer *self){
-	if(isValidRouteBegin(self->ptr[0])){
-		Token token = {.type = TOKEN_ROUTE};
+	if(iIsValidRouteBegin(self->ptr[0])){
+		iToken token = {.type = iTOKEN_ROUTE};
 		char *begin = self->ptr;
-		while(isValidRouteChar(self->ptr[0])){
+		while(iIsValidRouteChar(self->ptr[0])){
 			Lexer_shiftRightBy(self, 1);
 		}
 		token.data.text = malloc(1 + self->ptr - begin);
@@ -224,7 +224,7 @@ static inline bool Lexer_tryString(Lexer *self){
 	if(d == '"' || d == '\'' || d == '`'){
 		Lexer_shiftRightBy(self, 1);
 
-		Token token = {.type = TOKEN_STRING};
+		iToken token = {.type = iTOKEN_STRING};
 		char *begin = self->ptr;
 
 		while(self->ptr[0] != d){
@@ -268,7 +268,7 @@ static inline void Lexer_step(Lexer *self){
 
 
 static inline void Lexer_run(Lexer *self){
-	Token t = {.type = TOKEN_SOFT_OPEN};
+	iToken t = {.type = iTOKEN_SOFT_OPEN};
 	Lexer_register(self, t);
 
 	while(*self->ptr){
@@ -278,19 +278,19 @@ static inline void Lexer_run(Lexer *self){
 		}
 	}
 
-	t.type = TOKEN_SOFT_CLOSE;
+	t.type = iTOKEN_SOFT_CLOSE;
 	Lexer_register(self, t);
 }
 
 
-Tokenization lex(char *code){
+iTokenization lex(char *code){
 	assert(code);
 	Lexer lexer = Lexer_of(code);
 	if(!lexer.error){
 		Lexer_run(&lexer);
 	}
 
-	Tokenization r = {
+	iTokenization r = {
 		.buffer = lexer.tokenBuffer,
 		.size = lexer.tokenCount,
 		.error = NULL
@@ -304,23 +304,23 @@ Tokenization lex(char *code){
 }
 
 
-void Tokenization_clean(Tokenization *self){
+void iTokenization_clean(iTokenization *self){
 	assert(self);
 	if(self->error){
 		free(self->error);
 	}
 	for(size_t i = 0; i < self->size; i++){
-		Token_clean(self->buffer + i);
+		iToken_clean(self->buffer + i);
 	}
 	free(self->buffer);
 }
 
 
-void Tokenization_print(Tokenization *self){
+void iTokenization_print(iTokenization *self){
 	assert(self);
 	assert(!self->error);
 	for(size_t i = 0; i < self->size; i++){
-		Token_printVerbose(self->buffer + i);
+		iToken_printVerbose(self->buffer + i);
 		printf(" ");
 	}
 	printf("\n");

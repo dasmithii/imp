@@ -10,13 +10,13 @@
 
 
 
-Object *exceptions_try(Runtime *runtime
-	                 , Object *context
-	                 , Object *module
-	                 , int argc
-	                 , Object **argv){
+iObject *exceptions_try(iRuntime *runtime
+	                  , iObject *context
+	                  , iObject *module
+	                  , int argc
+	                  , iObject **argv){
 	if(argc != 2){
-		Runtime_throwString(runtime, context,  "try requires exactly 2 inputs");
+		iRuntime_throwString(runtime, context,  "try requires exactly 2 inputs");
 	}
 
 	jmp_buf *jbptr = malloc(sizeof(jmp_buf));  
@@ -25,40 +25,40 @@ Object *exceptions_try(Runtime *runtime
 	}
 
 	if(!setjmp(*jbptr)){
-		Object_putDataShallow(context, "__try", jbptr);  // note: jbptr will be cleaned when tryctx is collected
-		Object_putShallow(context, "_catch", argv[1]);
-		Runtime_activate(runtime
+		iObject_putDataShallow(context, "__try", jbptr);  // note: jbptr will be cleaned when tryctx is collected
+		iObject_putShallow(context, "_catch", argv[1]);
+		iRuntime_activate(runtime
 			           , context
 			           , argv[0]
 			           , 0
 			           , NULL);
 	}
 
-	Object_remShallow(context, "__try");
-	Object_remShallow(context, "_catch");
+	iObject_remShallow(context, "__try");
+	iObject_remShallow(context, "_catch");
 
 	return NULL;
 }
 
 
-Object *exceptions_throw(Runtime *runtime
-	                   , Object *context
-	                   , Object *module
-	                   , int argc
-	                   , Object **argv){
+iObject *exceptions_throw(iRuntime *runtime
+	                    , iObject *context
+	                    , iObject *module
+	                    , int argc
+	                    , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "throw requires an argument");
+		iRuntime_throwString(runtime, context, "throw requires an argument");
 	}
 
 	// Check for __try field, which, if present, will contain
 	// a pointer to a jmp_buf. 
-	jmp_buf *jbuf = Object_getDataDeep(context, "__try");
+	jmp_buf *jbuf = iObject_getDataDeep(context, "__try");
 	if(jbuf){
-		Object *catchFunction = Object_getDeep(context, "_catch");
+		iObject *catchFunction = iObject_getDeep(context, "_catch");
 		if(!catchFunction){
 			perror("no catch function");
 		}
-		Runtime_activate(runtime
+		iRuntime_activate(runtime
 			           , context
 			           , catchFunction
 			           , 1
@@ -68,20 +68,20 @@ Object *exceptions_throw(Runtime *runtime
 
 	// If said field isn't present, report the error and 
 	// exit.
-	Object *asString = Runtime_callMethod(runtime
-		                                , context
-		                                , argv[0]
-		                                , "asString"
-		                                , 0
+	iObject *asString = iRuntime_callMethod(runtime
+		                                 , context
+		                                 , argv[0]
+		                                 , "asString"
+		                                 , 0
 		                                , NULL);
-	Object *sfile = Object_getDeep(context, "_FILE");
+	iObject *sfile = iObject_getDeep(context, "_FILE");
 	if(sfile){
-		if(BuiltIn_id(sfile) != BUILTIN_STRING){
-			Runtime_throwString(runtime, context, "_FILE should be string");
+		if(iBuiltin_id(sfile) != iBUILTIN_STRING){
+			iRuntime_throwString(runtime, context, "_FILE should be string");
 		}
-		fprintf(stderr, "Uncaught exception in '%s': %s.\n", ImpString_getRaw(sfile), ImpString_getRaw(asString));
+		fprintf(stderr, "Uncaught exception in '%s': %s.\n", iString_getRaw(sfile), iString_getRaw(asString));
 	} else {
-		fprintf(stderr, "Uncaught exception: %s.\n", ImpString_getRaw(asString));
+		fprintf(stderr, "Uncaught exception: %s.\n", iString_getRaw(asString));
 	}
 	exit(1);
 }

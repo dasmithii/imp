@@ -5,13 +5,13 @@
 #include "../object.h"
 
 
-bool ImpString_isValid(Object *self);
-void ImpString_init(Object *self, Runtime *runtime);
-void ImpString_print(Object *self);
-char *ImpString_getRaw(Object *self);
-void ImpString_setRaw(Object *self, char *text);
-void ImpString_setRawPointer(Object *self, char *text);
-void ImpString_set(Object *self, Object *other);
-void ImpString_concatenateRaw(Object *self, char *text);
+bool iString_isValid(iObject *self);
+void iString_init(iObject *self, iRuntime *runtime);
+void iString_print(iObject *self);
+char *iString_getRaw(iObject *self);
+void iString_setRaw(iObject *self, char *text);
+void iString_setRawPointer(iObject *self, char *text);
+void iString_set(iObject *self, iObject *other);
+void iString_concatenateRaw(iObject *self, char *text);
 
 #endif

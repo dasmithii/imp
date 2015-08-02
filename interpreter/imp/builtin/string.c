@@ -9,163 +9,163 @@
 
 
 
-bool ImpString_isValid(Object *self){
-	return Object_isValid(self) &&
-	       BuiltIn_id(self) == BUILTIN_STRING;
+bool iString_isValid(iObject *self){
+	return iObject_isValid(self) &&
+	       iBuiltin_id(self) == iBUILTIN_STRING;
 }
 
 
-char *ImpString_getRaw(Object *self){
-	assert(ImpString_isValid(self));
-	return (char*) Object_getDataDeep(self, "__data");
+char *iString_getRaw(iObject *self){
+	assert(iString_isValid(self));
+	return (char*) iObject_getDataDeep(self, "__data");
 }
 
 
-void ImpString_setRawPointer(Object *self, char *text){
-	assert(ImpString_isValid(self));
+void iString_setRawPointer(iObject *self, char *text){
+	assert(iString_isValid(self));
 	assert(text);
-	Object_putDataDeep(self, "__data", text);
-	Object *size = Object_getDeep(self, "size");
-	ImpNumber_setRaw(size, (double) strlen(text));
+	iObject_putDataDeep(self, "__data", text);
+	iObject *size = iObject_getDeep(self, "size");
+	iNumber_setRaw(size, (double) strlen(text));
 }
 
-void ImpString_setRaw(Object *self, char *text){
-	ImpString_setRawPointer(self, strdup(text));
-}
-
-
-void ImpString_print(Object *self){
-	assert(ImpString_isValid(self));
-	printf("%s", ImpString_getRaw(self));
+void iString_setRaw(iObject *self, char *text){
+	iString_setRawPointer(self, strdup(text));
 }
 
 
-static Object *print_(Runtime *runtime
-	                , Object *context
-	                , Object *caller
-	                , int argc
-	                , Object **argv){
+void iString_print(iObject *self){
+	assert(iString_isValid(self));
+	printf("%s", iString_getRaw(self));
+}
+
+
+static iObject *print_(iRuntime *runtime
+	                 , iObject *context
+	                 , iObject *caller
+	                 , int argc
+	                 , iObject **argv){
 	assert(runtime);
-	assert(ImpString_isValid(caller));
+	assert(iString_isValid(caller));
 
 	if(argc > 0){
-		Runtime_throwString(runtime, context, "String:print does not accept arguments.");
+		iRuntime_throwString(runtime, context, "String:print does not accept arguments.");
 	} else {
-		ImpString_print(caller);
+		iString_print(caller);
 	}
 
 	return NULL;	
 }
 
 
-static Object *clone_(Runtime *runtime
-	                , Object *context
-	                , Object *caller
-	                , int argc
-	                , Object **argv){
+static iObject *clone_(iRuntime *runtime
+	                 , iObject *context
+	                 , iObject *caller
+	                 , int argc
+	                 , iObject **argv){
 	assert(runtime);
-	assert(ImpString_isValid(caller));
+	assert(iString_isValid(caller));
 
 	if(argc != 0){
-		Runtime_throwString(runtime, context, "String:~ does not accept arguments.");
+		iRuntime_throwString(runtime, context, "String:~ does not accept arguments.");
 		return NULL;
 	}
 
-	Object *r = Runtime_simpleClone(runtime, caller);
-	Object_reference(r);
-	char *callerRaw = ImpString_getRaw(caller);
+	iObject *r = iRuntime_simpleClone(runtime, caller);
+	iObject_reference(r);
+	char *callerRaw = iString_getRaw(caller);
 	if(!callerRaw){
 		callerRaw = "";
 	}
-	Object_putDataShallow(r, "__data", strdup(callerRaw)); // TODO: check pointer from strdup
-	Object *size = Runtime_make(runtime, Number);
-	ImpNumber_setRaw(size, 0);
-	Object_putShallow(r, "size", size);
-	Object_unreference(r);
+	iObject_putDataShallow(r, "__data", strdup(callerRaw)); // TODO: check pointer from strdup
+	iObject *size = iRuntime_MAKE(runtime, Number);
+	iNumber_setRaw(size, 0);
+	iObject_putShallow(r, "size", size);
+	iObject_unreference(r);
 	return r;	
 }
 
 
-void ImpString_concatenateRaw(Object *self, char *s2){
-	char *s1 = ImpString_getRaw(self);
+void iString_concatenateRaw(iObject *self, char *s2){
+	char *s1 = iString_getRaw(self);
 	char *s3 = malloc((1 + strlen(s1) + strlen(s2)) * sizeof(char));
 	if(!s3){
 		abort();
 	}
 	strcpy(s3, s1);
 	strcat(s3, s2);
-	ImpString_setRaw(self, s3);
+	iString_setRaw(self, s3);
 	free(s3);
 }
 
 
-Object *concatenate_(Runtime *runtime
-	               , Object *context
-	               , Object *caller
-	               , int argc
-	               , Object **argv){
+iObject *concatenate_(iRuntime *runtime
+	                , iObject *context
+	                , iObject *caller
+	                , int argc
+	                , iObject **argv){
 	assert(runtime);
-	assert(ImpString_isValid(caller));
+	assert(iString_isValid(caller));
 
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "String:concatenate requires exactly one argument");
+		iRuntime_throwString(runtime, context, "String:concatenate requires exactly one argument");
 		return NULL;
 	}
 
-	Object *ro = NULL;
-	if(BuiltIn_id(argv[0]) == BUILTIN_STRING){
+	iObject *ro = NULL;
+	if(iBuiltin_id(argv[0]) == iBUILTIN_STRING){
 		ro = argv[0];
-	} else if(Object_hasMethod(argv[0], "asString")){
-		ro = Runtime_callMethod(runtime
+	} else if(iObject_hasMethod(argv[0], "asString")){
+		ro = iRuntime_callMethod(runtime
 			                  , context
 			                  , argv[0]
 			                  , "asString"
 			                  , 0
 			                  , NULL);
-		if(BuiltIn_id(ro) != BUILTIN_STRING){
-			Runtime_throwString(runtime, context, ":asString did not return string");
+		if(iBuiltin_id(ro) != iBUILTIN_STRING){
+			iRuntime_throwString(runtime, context, ":asString did not return string");
 		}
 	} else {
-		Runtime_throwString(runtime, context, "String:concatenate requires stringifiable argument");
+		iRuntime_throwString(runtime, context, "String:concatenate requires stringifiable argument");
 	}
-	ImpString_concatenateRaw(caller, ImpString_getRaw(ro));
+	iString_concatenateRaw(caller, iString_getRaw(ro));
 	return NULL;
 }
 
 
-static Object *asBoolean_(Runtime *runtime
-	                    , Object *context
-	                    , Object *caller
-	                    , int argc
-	                    , Object **argv){
+static iObject *asBoolean_(iRuntime *runtime
+	                     , iObject *context
+	                     , iObject *caller
+	                     , int argc
+	                     , iObject **argv){
 	assert(runtime);
-	assert(ImpString_isValid(caller));
+	assert(iString_isValid(caller));
 
 	if(argc != 0){
-		Runtime_throwString(runtime, context, "String:? does not accept arguments.");
+		iRuntime_throwString(runtime, context, "String:? does not accept arguments.");
 		return NULL;
 	}
 
-	Object *r = Runtime_cloneField(runtime, "Number");
-	if(*ImpString_getRaw(caller) == 0){
-		ImpNumber_setRaw(r, 0);
+	iObject *r = iRuntime_cloneField(runtime, "Number");
+	if(*iString_getRaw(caller) == 0){
+		iNumber_setRaw(r, 0);
 	} else {
-		ImpNumber_setRaw(r, 1);
+		iNumber_setRaw(r, 1);
 	}
 	return r;	
 }
 
 
-static Object *hashCode_(Runtime *runtime
-	                   , Object *context
-	                   , Object *self
-	                   , int argc
-	                   , Object **argv){
+static iObject *hashCode_(iRuntime *runtime
+	                    , iObject *context
+	                    , iObject *self
+	                    , int argc
+	                    , iObject **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, context, "String:hashCode does not accept arguments");
+		iRuntime_throwString(runtime, context, "String:hashCode does not accept arguments");
 	}
 
-	Object *r = Runtime_cloneField(runtime, "Number");
+	iObject *r = iRuntime_cloneField(runtime, "Number");
 
 	// some prime numbers
 	const unsigned long p1 = 54059; //
@@ -174,71 +174,71 @@ static Object *hashCode_(Runtime *runtime
 	unsigned long hash = 86969;
 
 	// raw string
-	const char *str = ImpString_getRaw(self);
+	const char *str = iString_getRaw(self);
 
 	while (*str) {
 		hash = (hash * p1) ^ (str[0] * p2);
 		str++;
 	}
 
-	ImpNumber_setRaw(r, (double) (hash % p3));
+	iNumber_setRaw(r, (double) (hash % p3));
 	return r;
 } 
 
-static Object *compare_(Runtime *runtime
-	                  , Object *context
-	                  , Object *self
-	                  , int argc
-	                  , Object **argv){
+static iObject *compare_(iRuntime *runtime
+	                   , iObject *context
+	                   , iObject *self
+	                   , int argc
+	                   , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "String:<> requires one argument");
+		iRuntime_throwString(runtime, context, "String:<> requires one argument");
 	}
 
-	if(BuiltIn_id(argv[0]) != BUILTIN_STRING){
-		Runtime_throwString(runtime, context, "String:<> requires string argument");
+	if(iBuiltin_id(argv[0]) != iBUILTIN_STRING){
+		iRuntime_throwString(runtime, context, "String:<> requires string argument");
 	}
 
-	Object *r = Runtime_cloneField(runtime, "Number");
-	ImpNumber_setRaw(r, (double) strcmp(ImpString_getRaw(self),
-		                                ImpString_getRaw(argv[0])));
+	iObject *r = iRuntime_cloneField(runtime, "Number");
+	iNumber_setRaw(r, (double) strcmp(iString_getRaw(self),
+		                                iString_getRaw(argv[0])));
 	return r;
 } 
 
 
-static Object *value_(Runtime *runtime
-	                , Object *context
-	                , Object *self
-	                , int argc
-	                , Object **argv){
+static iObject *value_(iRuntime *runtime
+	                 , iObject *context
+	                 , iObject *self
+	                 , int argc
+	                 , iObject **argv){
 	if(argc != 0){
-		Runtime_throwString(runtime, context, "String:$ does not accept arguments");
+		iRuntime_throwString(runtime, context, "String:$ does not accept arguments");
 	}
 
-	Object *r = Runtime_make(runtime, String);
-	ImpString_setRaw(r, ImpString_getRaw(self));
+	iObject *r = iRuntime_MAKE(runtime, String);
+	iString_setRaw(r, iString_getRaw(self));
 	return r;
 } 
 
 
-static Object *duplicate_(Runtime *runtime
-	                    , Object *context
-	                    , Object *self
-	                    , int argc
-	                    , Object **argv){
+static iObject *duplicate_(iRuntime *runtime
+	                     , iObject *context
+	                     , iObject *self
+	                     , int argc
+	                     , iObject **argv){
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "String:*= requires exactly 1 argument");
+		iRuntime_throwString(runtime, context, "String:*= requires exactly 1 argument");
 	}
 
-	if(BuiltIn_id(argv[0]) != BUILTIN_NUMBER){
-		Runtime_throwString(runtime, context, "String:*= requires numeric argument");
+	if(iBuiltin_id(argv[0]) != iBUILTIN_NUMBER){
+		iRuntime_throwString(runtime, context, "String:*= requires numeric argument");
 	}
 
-	int coef = ImpNumber_getRawRounded(argv[0]);
-	char *raw = ImpString_getRaw(self);
+	int coef = iNumber_getRawRounded(argv[0]);
+	char *raw = iString_getRaw(self);
 	const size_t rawLen = strlen(raw);
 
 	if(coef == 0){
-		ImpString_setRaw(self, "");
+		iString_setRaw(self, "");
 		return NULL;
 	} else if(coef < 0){
 		for(size_t i = 0; i < rawLen/2; i++){
@@ -257,25 +257,25 @@ static Object *duplicate_(Runtime *runtime
 	for(int i = 0; i < coef; i++){
 		memcpy(newRaw + i * rawLen, raw, rawLen);
 	}
-	ImpString_setRawPointer(self, newRaw);
+	iString_setRawPointer(self, newRaw);
 
 	return NULL;
 }
 
 
-void ImpString_init(Object *self, Runtime *runtime){
+void iString_init(iObject *self, iRuntime *runtime){
 	assert(self);
-	BuiltIn_setId(self, BUILTIN_STRING);
+	iBuiltin_setId(self, iBUILTIN_STRING);
 
-	Runtime_registerCMethod(runtime, self, "print", print_);
-	Runtime_registerCMethod(runtime, self, "asString", value_);
-	Runtime_registerCMethod(runtime, self, "$", value_);
-	Runtime_registerCMethod(runtime, self, "~", clone_);
-	Runtime_registerCMethod(runtime, self, "+=", concatenate_);
-	Runtime_registerCMethod(runtime, self, "*=", duplicate_);
-	Runtime_registerCMethod(runtime, self, "?", asBoolean_);
+	iRuntime_registerCMethod(runtime, self, "print", print_);
+	iRuntime_registerCMethod(runtime, self, "asString", value_);
+	iRuntime_registerCMethod(runtime, self, "$", value_);
+	iRuntime_registerCMethod(runtime, self, "~", clone_);
+	iRuntime_registerCMethod(runtime, self, "+=", concatenate_);
+	iRuntime_registerCMethod(runtime, self, "*=", duplicate_);
+	iRuntime_registerCMethod(runtime, self, "?", asBoolean_);
 
-	Runtime_registerCMethod(runtime, self, "<>", compare_);
+	iRuntime_registerCMethod(runtime, self, "<>", compare_);
 
-	Runtime_registerCMethod(runtime, self, "_hashCode", hashCode_);
+	iRuntime_registerCMethod(runtime, self, "_hashCode", hashCode_);
 }

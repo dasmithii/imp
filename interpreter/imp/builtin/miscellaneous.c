@@ -9,82 +9,82 @@
 
 
    
-static Object *break_(Runtime *runtime
-	                , Object *context
-	                , Object *self
-	                , int argc
-	                , Object **argv){
-	if(argc != 0){
-		Runtime_throwString(runtime, context, "break does not accept arguments");
-	}
-	Object *sig = Runtime_rawObject(runtime);
-	BuiltIn_setId(sig, BUILTIN_BREAK);
-	Runtime_setReturnValue(runtime, sig);
-	return NULL;
-}
-
-
-static Object *continue_(Runtime *runtime
-	                   , Object *context
-	                   , Object *self
-	                   , int argc
-	                   , Object **argv){
-	if(argc != 0){
-		Runtime_throwString(runtime, context, "break does not accept arguments");
-	}
-	Object *sig = Runtime_rawObject(runtime);
-	BuiltIn_setId(sig, BUILTIN_CONTINUE);
-	Runtime_setReturnValue(runtime, sig);
-	return NULL;
-}
-
-
-static Object *return_(Runtime *runtime
-	                 , Object *context
-	                 , Object *caller
+static iObject *break_(iRuntime *runtime
+	                 , iObject *context
+	                 , iObject *self
 	                 , int argc
-	                 , Object **argv){
+	                 , iObject **argv){
+	if(argc != 0){
+		iRuntime_throwString(runtime, context, "break does not accept arguments");
+	}
+	iObject *sig = iRuntime_rawObject(runtime);
+	iBuiltin_setId(sig, iBUILTIN_BREAK);
+	iRuntime_setReturnValue(runtime, sig);
+	return NULL;
+}
+
+
+static iObject *continue_(iRuntime *runtime
+	                    , iObject *context
+	                    , iObject *self
+	                    , int argc
+	                    , iObject **argv){
+	if(argc != 0){
+		iRuntime_throwString(runtime, context, "break does not accept arguments");
+	}
+	iObject *sig = iRuntime_rawObject(runtime);
+	iBuiltin_setId(sig, iBUILTIN_CONTINUE);
+	iRuntime_setReturnValue(runtime, sig);
+	return NULL;
+}
+
+
+static iObject *return_(iRuntime *runtime
+	                  , iObject *context
+	                  , iObject *caller
+	                  , int argc
+	                  , iObject **argv){
 	assert(runtime);
-	assert(Object_isValid(context));
+	assert(iObject_isValid(context));
 
 	if(argc > 1){
-		Runtime_throwString(runtime, context, "return accepts only one parameter.");
+		iRuntime_throwString(runtime, context, "return accepts only one parameter.");
 	} else if(argc == 1){
-		Runtime_setReturnValue(runtime, argv[0]);
+		iRuntime_setReturnValue(runtime, argv[0]);
 		return argv[0];
 	} else {
-		Runtime_setReturnValue(runtime, NULL);
+		iRuntime_setReturnValue(runtime, NULL);
 	}
 	return NULL;
 }
 
-static Object *throw_(Runtime *runtime
-	                , Object *context
-	                , Object *caller
-	                , int argc
-	                , Object **argv){
+static iObject *throw_(iRuntime *runtime
+	                 , iObject *context
+	                 , iObject *caller
+	                 , int argc
+	                 , iObject **argv){
 	assert(runtime);
-	assert(Object_isValid(context));
+	assert(iObject_isValid(context));
 
 	if(argc != 1){
-		Runtime_throwString(runtime, context, "throw accepts exactly one parameter.");
+		iRuntime_throwString(runtime, context, "throw accepts exactly one parameter.");
 	}
-	Runtime_throw(runtime, context, argv[0]);
+	iRuntime_throw(runtime, context, argv[0]);
 	return NULL;
 }
 
 
-void ImpMisc_init(Object *self, Runtime *runtime){
+void iMisc_init(iObject *self, iRuntime *runtime){
 	assert(self);
-	Runtime_registerCMethod(runtime, self, "break", break_);
-	Runtime_registerCMethod(runtime, self, "continue", continue_);
-	Runtime_registerCMethod(runtime, self, "return", return_);
-	Runtime_registerCMethod(runtime, self, "throw", throw_);
+	iRuntime_registerCMethod(runtime, self, "break", break_);
+	iRuntime_registerCMethod(runtime, self, "continue", continue_);
+	iRuntime_registerCMethod(runtime, self, "return", return_);
+	iRuntime_registerCMethod(runtime, self, "throw", throw_);
 
-	Runtime_executeSourceInContext(runtime
+	iRuntime_executeSourceInContext(runtime
 		                         , "(def nil:asString 'nil')"
 		                         "\n(def nil:? {return 0})"
 		                         , runtime->root_scope);
-	runtime->nil = Object_getShallow(runtime->root_scope, "nil");
-	Object_reference(runtime->nil); // nil is eternal
+	runtime->nil = iObject_getShallow(runtime->root_scope, "nil");
+	iObject_reference(runtime->nil); // nil is eternal
 }

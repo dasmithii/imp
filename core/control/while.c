@@ -7,7 +7,6 @@
 #include <imp/builtin/general.h>
 #include <imp/builtin/importer.h>
 #include <imp/builtin/number.h>
-#include <imp/builtin/string.h>
 
 
 
@@ -16,31 +15,31 @@
 // control structures (in each file) because I'm inept.
 // Make sure to replicate any changes to this function
 // in the other files as well.
-static bool isZero(Runtime *runtime
-	             , Object *ctx
-	             , Object *obj){
+static bool isZero(iRuntime *runtime
+	             , iObject *ctx
+	             , iObject *obj){
 	if(!obj){
 		return true;
 	}
 
-	if(BuiltIn_id(obj) == BUILTIN_NUMBER){
-		return ImpNumber_getRaw(obj) == 0;
+	if(iBuiltin_id(obj) == iBUILTIN_NUMBER){
+		return iNumber_getRaw(obj) == 0;
 	}
 
-	if(Object_hasMethod(obj, "?")){
-		Object_reference(ctx);
-		Object_reference(obj);
-		Object *asBoolean = Runtime_callMethod(runtime
-			                                 , ctx
-			                                 , obj
-			                                 , "?", 0, NULL);
+	if(iObject_hasMethod(obj, "?")){
+		iObject_reference(ctx);
+		iObject_reference(obj);
+		iObject *asBoolean = iRuntime_callMethod(runtime
+			                                  , ctx
+			                                  , obj
+			                                  , "?", 0, NULL);
 
-		Object_unreference(ctx);
-		Object_unreference(obj);
-		return ImpNumber_getRaw(asBoolean) == 0;
+		iObject_unreference(ctx);
+		iObject_unreference(obj);
+		return iNumber_getRaw(asBoolean) == 0;
 	}
 
-	Runtime_throwString(runtime, ctx, "object not boolean");
+	iRuntime_throwString(runtime, ctx, "object not boolean");
 	return false;
 }
 
@@ -54,45 +53,45 @@ static bool isZero(Runtime *runtime
 // met, at which point, the corresponding executable is
 // executed. In the case that no conditions are met,
 // the final argument is executed. 
-Object *while_activate(Runtime *runtime
-	                 , Object *context
-	                 , Object *caller
-	                 , int argc
-	                 , Object **argv){
+iObject *while_activate(iRuntime *runtime
+	                  , iObject *context
+	                  , iObject *caller
+	                  , int argc
+	                  , iObject **argv){
 	assert(runtime);
-	assert(Object_isValid(context));
+	assert(iObject_isValid(context));
 
-	Object *condition = argv[0];
-	Object *step = argv[1];
+	iObject *condition = argv[0];
+	iObject *step = argv[1];
 
 	if(argc != 2){
-		Runtime_throwString(runtime, context, "while requires exactly 2 arguments");
+		iRuntime_throwString(runtime, context, "while requires exactly 2 arguments");
 	} 
 
-	if(BuiltIn_id(step) != BUILTIN_CLOSURE){
-		Runtime_throwString(runtime, context, "while step must be a closure");
+	if(iBuiltin_id(step) != iBUILTIN_CLOSURE){
+		iRuntime_throwString(runtime, context, "while step must be a closure");
 	}
 
 
 	for(;;){
 		// check condition
-		Object *c = condition;
-		if(Object_canBeActivated(c)){
-			c = Runtime_activateOn(runtime, context, condition, 0, NULL, Object_getDeep(context, "self"));
+		iObject *c = condition;
+		if(iObject_canBeActivated(c)){
+			c = iRuntime_activateOn(runtime, context, condition, 0, NULL, iObject_getDeep(context, "self"));
 		}
 		if(isZero(runtime, context, c)){
 			break;
 		}
 
 		// execute block
-		Object *stepR = Runtime_activateOn(runtime, context, step, 0, NULL, Object_getDeep(context, "self"));
+		iObject *stepR = iRuntime_activateOn(runtime, context, step, 0, NULL, iObject_getDeep(context, "self"));
 		if(stepR){
-			if(BuiltIn_id(stepR) == BUILTIN_BREAK){
+			if(iBuiltin_id(stepR) == iBUILTIN_BREAK){
 				break;
-			} else if(BuiltIn_id(stepR) == BUILTIN_CONTINUE) {
+			} else if(iBuiltin_id(stepR) == iBUILTIN_CONTINUE) {
 				continue;
 			} else {
-				Runtime_setReturnValue(runtime, stepR);
+				iRuntime_setReturnValue(runtime, stepR);
 			}
 			return stepR;
 		}

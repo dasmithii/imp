@@ -16,9 +16,9 @@
 
 
 
-bool ImpImporter_isValid(Object *self){
-	return Object_isValid(self) &&
-	       BuiltIn_id(self) == BUILTIN_IMPORTER;
+bool iImporter_isValid(iObject *self){
+	return iObject_isValid(self) &&
+	       iBuiltin_id(self) == iBUILTIN_IMPORTER;
 }
 
 
@@ -75,7 +75,7 @@ unsigned long hash(unsigned char *str) {
 }
 
 
-static void *fileToDL(Runtime *runtime, char *path, Object *context){
+static void *fileToDL(iRuntime *runtime, char *path, iObject *context){
 
 	// TODO: if cache is loaded, dump it
 	assert(runtime);
@@ -83,7 +83,7 @@ static void *fileToDL(Runtime *runtime, char *path, Object *context){
 
 	char *code = readFile(path);
 	if(!code){
-		Runtime_throwFormatted(runtime, context, "failed to read file: '%s'", path);
+		iRuntime_throwFormatted(runtime, context, "failed to read file: '%s'", path);
 	}
 	unsigned long checksum = hash((unsigned char*) code);
 	free(code);
@@ -97,13 +97,13 @@ static void *fileToDL(Runtime *runtime, char *path, Object *context){
 		// ensure that cache directory is set up
 		sprintf(buf, "mkdir -p %s/cache", runtime->root);
 		if(system(buf)){
-			Runtime_throwString(runtime, context, "failed to make .so cache dir");
+			iRuntime_throwString(runtime, context, "failed to make .so cache dir");
 		}
 
 		// compile .so file
 		sprintf(buf, "gcc -std=c99 -Wall -Wextra -g -I /usr/local/imp/headers -shared -o %s -fPIC %s /usr/local/imp/imp.so", dest, path);
 		if(system(buf)){
-			Runtime_throwFormatted(runtime, context, "failed to build '%s'", dest);
+			iRuntime_throwFormatted(runtime, context, "failed to build '%s'", dest);
 		}
 	}
 	return dlopen(dest, RTLD_LAZY);
@@ -154,21 +154,21 @@ static bool endswith(char *whole, char *part){
 // An internal module consists primarily of one .c file and 
 // the headers it includes. Soon, multi-file modules will
 // be supported. But for now, this is the way.
-static void importInternalModuleTo(Runtime *runtime
+static void importInternalModuleTo(iRuntime *runtime
 	                             , char *path
-	                             , Object *context){
-	Object_reference(context);
+	                             , iObject *context){
+	iObject_reference(context);
 
 	// read source file
 	char *code = readFile(path);
 	if(!code){
-		Runtime_throwFormatted(runtime, context, "failed to read file: %s", path);
+		iRuntime_throwFormatted(runtime, context, "failed to read file: %s", path);
 	}
 
 	// load dynamic library
 	void *so = fileToDL(runtime, path, context);
 	if(!so){
-		Runtime_throwString(runtime, context, "failed to dlopen");
+		iRuntime_throwString(runtime, context, "failed to dlopen");
 	}
 
 	// where module will be imported to within <context>
@@ -177,7 +177,7 @@ static void importInternalModuleTo(Runtime *runtime
 
 	// prefix denoting exported functions
 	char prefix[128]; *prefix = 0;
-	sprintf(prefix, "Object *%s_", importName);
+	sprintf(prefix, "iObject *%s_", importName);
 	const int prefixLen = strlen(prefix);
 
 	// scan through code, loading each symbol prefixed with
@@ -204,30 +204,30 @@ static void importInternalModuleTo(Runtime *runtime
 		char full_[64]; *full_ = 0;
 		char *full = full_;  // full symbol
 		strcat(full, prefix);
-		full += strlen("Object *");
+		full += strlen("iObject *");
 		strcat(full, wopre);
 
 		// load module-level function
 		void *sym = dlsym(so, full);
 		if(!sym){
-			Runtime_throwFormatted(runtime, context, "failed to find symbol '%s'", full);
+			iRuntime_throwFormatted(runtime, context, "failed to find symbol '%s'", full);
 		}
 
 		if((*wopre >= 'a' && *wopre <= 'z') || *wopre == '_'){
 			if(strcmp(wopre, "activate") == 0){
-				Object_registerCActivator(context, sym);
+				iObject_registerCActivator(context, sym);
 			} else {
 				// special cases
 				if(strcmp(wopre, "clone") == 0){
-					Runtime_registerCMethod(runtime, context, "~", sym);
+					iRuntime_registerCMethod(runtime, context, "~", sym);
 				} else if(strcmp(wopre, "copy") == 0){
-					Runtime_registerCMethod(runtime, context, "$", sym);
+					iRuntime_registerCMethod(runtime, context, "$", sym);
 				} else {
-					Runtime_registerCMethod(runtime, context, wopre, sym);
+					iRuntime_registerCMethod(runtime, context, wopre, sym);
 				}
 			}
 			if(endswith(wopre, "onImport")){
-				Runtime_callMethod(runtime, context, context, "onImport", 0, NULL);
+				iRuntime_callMethod(runtime, context, context, "onImport", 0, NULL);
 			}
 		} else if(*wopre >= 'A' && *wopre <= 'Z'){
 			// load method (and its base object, if not yet loaded)
@@ -242,52 +242,52 @@ static void importInternalModuleTo(Runtime *runtime
 				baseKey[i] = wopre[i];
 			}
 
-			Object *baseObj;
+			iObject *baseObj;
 
-			if(Object_hasKeyShallow(context, baseKey)){
-				baseObj = Object_getShallow(context, baseKey);
+			if(iObject_hasKeyShallow(context, baseKey)){
+				baseObj = iObject_getShallow(context, baseKey);
 			} else{
-				baseObj = Runtime_make(runtime, Object);
-				Object_putShallow(context, baseKey, baseObj);
+				baseObj = iRuntime_MAKE(runtime, Object);
+				iObject_putShallow(context, baseKey, baseObj);
 			} 
 
 			assert(baseObj);
 
 			char *afterBase = wopre + strlen(baseKey) + 1;
 			if(strcmp(afterBase, "activate") == 0){
-				Object_registerCActivator(baseObj, sym);
+				iObject_registerCActivator(baseObj, sym);
 			} else {
-				Runtime_registerCMethod(runtime, baseObj, afterBase, sym);
+				iRuntime_registerCMethod(runtime, baseObj, afterBase, sym);
 			}
 
 			if(endswith(wopre, "onImport")){
-				Runtime_callMethod(runtime, context, baseObj, "onImport", 0, NULL);
+				iRuntime_callMethod(runtime, context, baseObj, "onImport", 0, NULL);
 			}
 		} else {
-			Runtime_throwString(runtime, context, "importer: BAD SYMBOL");
+			iRuntime_throwString(runtime, context, "importer: BAD SYMBOL");
 		}
 	}
 
 
 	// dlclose(so); TODO:? make it so module_ctx destructor calls dlclose
-	Object_unreference(context);
+	iObject_unreference(context);
 	free(code);
 } 
       
 
-static void importRegularModuleTo(Runtime *runtime
+static void importRegularModuleTo(iRuntime *runtime
 	                            , char *path
-	                            , Object *context){
+	                            , iObject *context){
 	assert(runtime);
-	assert(Object_isValid(context));
+	assert(iObject_isValid(context));
 	assert(path);
-	Runtime_executeFileInContext(runtime, path, context);
+	iRuntime_executeFileInContext(runtime, path, context);
 }
 
 
-static void importPackageTo(Runtime *runtime
+static void importPackageTo(iRuntime *runtime
 	                      , char *path
-	                      , Object *context){
+	                      , iObject *context){
 	DIR *d;
 	struct dirent *dir;
 	d = opendir(path);
@@ -299,7 +299,7 @@ static void importPackageTo(Runtime *runtime
 				getNameOfImport(submoduleName, dir->d_name);
 				sprintf(submodulePath, "%s/%s", path, dir->d_name);
 				removeModuleFileExtention(submodulePath);
-				Object_putShallow(context, submoduleName, Imp_import(runtime, submodulePath, context));
+				iObject_putShallow(context, submoduleName, i_import(runtime, submodulePath, context));
 			}
 		}
 		closedir(d);
@@ -307,17 +307,17 @@ static void importPackageTo(Runtime *runtime
 }
 
 
-static Object *importWithoutUsingCache(Runtime *runtime, char *modulePath, Object *context){ // module should not have file extention
+static iObject *importWithoutUsingCache(iRuntime *runtime, char *modulePath, iObject *context){ // module should not have file extention
 	assert(runtime);
 	assert(modulePath);
 
 	if(*modulePath == 0){
-		Runtime_throwString(runtime, context, "cannot import empty string.");
+		iRuntime_throwString(runtime, context, "cannot import empty string.");
 	}
 
 	// Create import context.
-	Object *r = Runtime_make(runtime, Object);
-	Object_reference(r); // permanent reference (modules aren't ever collected)
+	iObject *r = iRuntime_MAKE(runtime, Object);
+	iObject_reference(r); // permanent reference (modules aren't ever collected)
 
 	char buf[128]; // buffer for trying different extentions
 
@@ -362,74 +362,74 @@ static Object *importWithoutUsingCache(Runtime *runtime, char *modulePath, Objec
 		return r;
 	}
 
-	Runtime_throwFormatted(runtime, context, "failed to import '%s' (path does not exist)", modulePath);
+	iRuntime_throwFormatted(runtime, context, "failed to import '%s' (path does not exist)", modulePath);
 	return NULL;
 }
 
 
-Object *Imp_import(Runtime *runtime, char *modulePath, Object *context){
+iObject *i_import(iRuntime *runtime, char *modulePath, iObject *context){
 	if(runtime->imports){
-		Object *cached = Object_getShallow(runtime->imports, modulePath);
+		iObject *cached = iObject_getShallow(runtime->imports, modulePath);
 		if(cached){
 			return cached;
 		}
 	} else {
-		runtime->imports = Runtime_rawObject(runtime);
-		Object_reference(runtime->imports);
+		runtime->imports = iRuntime_rawObject(runtime);
+		iObject_reference(runtime->imports);
 	}
-	Object *r = importWithoutUsingCache(runtime, modulePath, context);
-	Object_putShallow(runtime->imports, modulePath, r);
+	iObject *r = importWithoutUsingCache(runtime, modulePath, context);
+	iObject_putShallow(runtime->imports, modulePath, r);
 	return r;
 }
 
 
-static Object *activate_(Runtime *runtime
-	                   , Object *context
-	                   , Object *caller
+static iObject *activate_(iRuntime *runtime
+	                   , iObject *context
+	                   , iObject *caller
 	                   , int argc
-	                   , Object **argv){
+	                   , iObject **argv){
 	assert(runtime);
-	assert(Object_isValid(context));
+	assert(iObject_isValid(context));
 
 	if(argc != 1 && argc != 2){
-		Runtime_throwString(runtime, context, "import requires one or two arguments.");
-	} else if(!ImpString_isValid(argv[0])){
-		Runtime_throwString(runtime, context, "import requires a string as its first argument.");
+		iRuntime_throwString(runtime, context, "import requires one or two arguments.");
+	} else if(!iString_isValid(argv[0])){
+		iRuntime_throwString(runtime, context, "import requires a string as its first argument.");
 	}
 
-	char *modulePath = ImpString_getRaw(argv[0]);
-	Object *module = Imp_import(runtime, modulePath, context);
+	char *modulePath = iString_getRaw(argv[0]);
+	iObject *module = i_import(runtime, modulePath, context);
 
 	if(argc == 1){ //
 		char importName[32];
 		getNameOfImport(importName, modulePath);
-		Object_putShallow(context, importName, module);
+		iObject_putShallow(context, importName, module);
 		return module;
 	} else { // copy module contents to specified
-		Object *dest = argv[1];
+		iObject *dest = argv[1];
 
 		// check that to-context import is possible
 		for(int i = 0; i < module->slotCount; i++){
-			Slot *slot = module->slots + i;
-			if(Slot_isPrimitive(slot)){
+			iSlot *slot = module->slots + i;
+			if(iSlot_isPrimitive(slot)){
 				if(strcmp(slot->key, "__onImport") != 0  &&     
 			       strcmp(slot->key, "__referenceCount") != 0){
-			       	Runtime_throwFormatted(runtime, context, "failed to import '%s' into context (has internal method)", modulePath);
+			       	iRuntime_throwFormatted(runtime, context, "failed to import '%s' into context (has internal method)", modulePath);
 				}
-			} else if(Object_hasKeyShallow(dest, slot->key) &&
-				      slot->data != Object_getShallow(module, slot->key)){
-				Runtime_throwFormatted(runtime, context, "failed to import '%s' into context because of conflict '%s'", modulePath, slot->key);
+			} else if(iObject_hasKeyShallow(dest, slot->key) &&
+				      slot->data != iObject_getShallow(module, slot->key)){
+				iRuntime_throwFormatted(runtime, context, "failed to import '%s' into context because of conflict '%s'", modulePath, slot->key);
 			}
 		}
 
 		// it is; transfer
 		for(int i = 0; i < module->slotCount; i++){
-			Slot *slot = module->slots + i;
-			if(Slot_isPrimitive(slot)){
+			iSlot *slot = module->slots + i;
+			if(iSlot_isPrimitive(slot)){
 				continue;
 			}
 			if(strcmp(slot->key, "#") != 0){
-				Object_putShallow(dest, slot->key, Slot_object(slot));
+				iObject_putShallow(dest, slot->key, iSlot_object(slot));
 			}
 		}
 
@@ -438,10 +438,10 @@ static Object *activate_(Runtime *runtime
 }
 
 
-void ImpImporter_init(Object *self, Runtime *runtime){
+void iImporter_init(iObject *self, iRuntime *runtime){
 	assert(self);
-	BuiltIn_setId(self, BUILTIN_IMPORTER);
-	runtime->imports = Runtime_make(runtime, Object);
-	Object_putShallow(runtime->root_scope, "imports", runtime->imports);
-	Object_registerCActivator(self, activate_);
+	iBuiltin_setId(self, iBUILTIN_IMPORTER);
+	runtime->imports = iRuntime_MAKE(runtime, Object);
+	iObject_putShallow(runtime->root_scope, "imports", runtime->imports);
+	iObject_registerCActivator(self, activate_);
 }
