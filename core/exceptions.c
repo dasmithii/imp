@@ -6,6 +6,7 @@
 #include <imp/runtime.h>
 #include <imp/object.h>
 #include <imp/builtin/string.h>
+#include <imp/builtin/general.h>
 
 
 
@@ -73,6 +74,14 @@ Object *exceptions_throw(Runtime *runtime
 		                                , "asString"
 		                                , 0
 		                                , NULL);
-	fprintf(stderr, "Uncaught exception: %s.\n", ImpString_getRaw(asString));
+	Object *sfile = Object_getDeep(context, "_FILE");
+	if(sfile){
+		if(BuiltIn_id(sfile) != BUILTIN_STRING){
+			Runtime_throwString(runtime, context, "_FILE should be string");
+		}
+		fprintf(stderr, "Uncaught exception in '%s': %s.\n", ImpString_getRaw(sfile), ImpString_getRaw(asString));
+	} else {
+		fprintf(stderr, "Uncaught exception: %s.\n", ImpString_getRaw(asString));
+	}
 	exit(1);
 }

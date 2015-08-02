@@ -281,15 +281,7 @@ static void importRegularModuleTo(Runtime *runtime
 	assert(runtime);
 	assert(Object_isValid(context));
 	assert(path);
-
-	char *code = readFile(path);
-	if(!code){
-		Runtime_throwFormatted(runtime, context, "failed to read file '%s'", path);
-	}
-
-	Runtime_executeSourceInContext(runtime, code, context);
-
-	free(code);
+	Runtime_executeFileInContext(runtime, path, context);
 }
 
 
