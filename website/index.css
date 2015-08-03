@@ -3,18 +3,54 @@
 }
 
 body {
-	text-align: center;
-	padding-top: 1cm;
+	background-color: #E0FFFF;
 }
 
-table#layout {
-	width: 22cm;
-	background: green;
+div#box {
+	text-align: left;
+	padding-top: 1cm;
+	max-width: 16.5cm;
 	margin: 0 auto;
 }
 
-#menu {
-	text-align: right;
-	width: 5cm;
-	background: red;
+div#header {
+	width: 100%;
+	text-align: center;
+}
+
+/*
+#F1ECA6
+#A6F1C6
+#A6ABF1
+#F1A6D0
+*/
+textarea#repl {
+	width: 92%;
+	height: 3cm;
+}
+
+a#license-info {
+	font-size: 9pt;
+}
+
+
+button {
+	height: .8cm;
+}
+
+
+input {
+	width: 10cm;
+	height: .8cm;
+	border-radius: .1cm;
+	font-size: 12pt;
+}
+
+
+a.subtle {
+	text-decoration: none;
+}
+
+a.subtle:hover {
+	color: red;
 }
