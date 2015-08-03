@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "general.h"
 #include "number.h"
@@ -168,10 +169,10 @@ static iObject *hashCode_(iRuntime *runtime
 	iObject *r = iRuntime_cloneField(runtime, "Number");
 
 	// some prime numbers
-	const unsigned long p1 = 54059; //
-	const unsigned long p2 = 13;
-	const unsigned long p3 = 961748941;
-	unsigned long hash = 86969;
+	const uint64_t p1 = 54059; //
+	const uint64_t p2 = 13;
+	const uint64_t p3 = 961748941;
+	uint64_t hash = 86969;
 
 	// raw string
 	const char *str = iString_getRaw(self);
@@ -181,7 +182,9 @@ static iObject *hashCode_(iRuntime *runtime
 		str++;
 	}
 
-	iNumber_setRaw(r, (double) (hash % p3));
+	hash = hash % p3;
+
+	iNumber_setRaw(r, *((double*) &hash));
 	return r;
 } 
 

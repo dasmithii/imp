@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "../c.h"
@@ -628,10 +629,9 @@ static iObject *hashCode_(iRuntime *runtime
 		iRuntime_throwString(runtime, context, "#:hashCode does not accept arguments");
 	}
 
-	iObject *r = iRuntime_cloneField(runtime, "Number");
-	const unsigned long constant = 2147483647;
-	const unsigned long address  = (unsigned long) &self;
-	iNumber_setRaw(r, (double) (constant ^ address));
+	iObject *r = iRuntime_MAKE(runtime, Number);
+	uint64_t hc = 2147483647 ^ ((uint64_t) &self);
+	iNumber_setRaw(r, *((double*) &hc));
 	return r;
 } 
 
@@ -800,7 +800,7 @@ void iBase_init(iObject *self, iRuntime *runtime){
 	iRuntime_registerPrivelegedCMethod(runtime, self, "def", def_);
 	iRuntime_registerPrivelegedCMethod(runtime, self, "set", set_);
 
-	iRuntime_registerCMethod(runtime, self, "hashCode", hashCode_);
+	iRuntime_registerCMethod(runtime, self, "_hashCode", hashCode_);
 
 	iRuntime_registerCMethod(runtime, self, "_markRecursively", markRecursively_);
 }

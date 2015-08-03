@@ -142,6 +142,7 @@ iObject *iRuntime_rawObject(iRuntime *self){
 
 void iRuntime_init(iRuntime *self, char *root, int argc, char **argv){
 	assert(self);
+	assert(sizeof(double) == 8); // we assume for hashCode methods...
 
 	self->root = root;
 	self->argc = argc;
@@ -560,5 +561,18 @@ iObject *iRuntime_callMethod(iRuntime *runtime
 	}
 	iRuntime_throwFormatted(runtime, context, "method '%s' does not exist", methodName);
 	return NULL;
+}
+
+
+uint64_t iRuntime_hashCodeOf(iRuntime *runtime, iObject *context, iObject *object){
+	iObject *hco = iRuntime_callMethod(runtime
+		                             , context
+		                             , object
+		                             , "_hashCode"
+		                             , 0, NULL);
+	if(iBuiltin_id(hco) != iBUILTIN_NUMBER){
+		iRuntime_throwString(runtime, context, "_hashCode method did not return number");
+	}
+	return *((uint64_t*) iObject_getDataDeep(hco, "__data"));
 }
 

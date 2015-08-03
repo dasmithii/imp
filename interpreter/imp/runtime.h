@@ -72,6 +72,9 @@ iObject *iRuntime_executeInContext(iRuntime *runtime
 	                             , iParseNode node);
 
 
+uint64_t iRuntime_hashCodeOf(iRuntime *runtime, iObject *context, iObject *object);
+
+
 
 //// return value 'register'
 void iRuntime_setReturnValue(iRuntime *self, iObject *value);

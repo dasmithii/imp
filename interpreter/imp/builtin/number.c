@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 #include <math.h>
 
@@ -576,9 +577,8 @@ static iObject *hashCode_(iRuntime *runtime
 	}
 
 	iObject *r = iRuntime_cloneField(runtime, "Number");
-	const unsigned long constant = 654188429;
-	const unsigned long raw = (unsigned long) iNumber_getRaw(self);
-	iNumber_setRaw(r, (double) ((constant ^ raw)));
+	uint64_t hc = 654188429 ^ ((uint64_t) iNumber_getRaw(self));
+	iNumber_setRaw(r, *((double*) &hc));
 	return r;
 } 
 
