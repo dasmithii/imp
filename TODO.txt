@@ -10,7 +10,6 @@ BIG:
      - Cleanup referenced objects and mallocs left behind on throw->catch
        transitions.
      - Make 'finally' part.
-     - Remove built-in throw.
  + REPL.
      - Print command output if not null.
      - Cleanup after CTRL-C. As of now, every interupt leaks memory.

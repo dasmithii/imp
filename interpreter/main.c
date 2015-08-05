@@ -16,7 +16,7 @@ static void iargs(char *message){
 }
 
 
-int main (int argc, char **argv){
+int main(int argc, char **argv){
 	char *root = "/usr/local/imp";
 	int c;
 	opterr = 0;
@@ -36,7 +36,7 @@ int main (int argc, char **argv){
 			}
 			return 1;
 		default:
-			abort ();
+			abort();
 		}
 	}
 

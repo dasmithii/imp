@@ -102,7 +102,7 @@ static void onsigint(int sig){
 
 
 
-void Imp_launchREPL(){
+void Imp_launchREPL(void){
 	const char *const prefix = "(exceptions:try {";
 	const char *const postfix = "} {io:writeLine 'Uncaught exception:' (@:at 0) '!!!'})";
 	const size_t prefixLen = strlen(prefix);
@@ -236,7 +236,7 @@ void Imp_remove(char *id){
 }
 
 
-void Imp_printEnvironment(){
+void Imp_printEnvironment(void){
 	printf("\n\tImp environment:"
 	     "\n\t\troot:     %s"
 	     "\n\t\tversion:  %s"
@@ -244,7 +244,7 @@ void Imp_printEnvironment(){
 }
 
 
-void Imp_printUsage(){
+void Imp_printUsage(void){
 	const char *const intro = 
 	"\tImp - the programming language.";
 

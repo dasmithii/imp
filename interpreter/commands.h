@@ -4,14 +4,14 @@
 
 
 
-void Imp_printUsage();
+void Imp_printUsage(void);
 void Imp_useRoot(char *path);
-void Imp_launchREPL();
+void Imp_launchREPL(void);
 void Imp_executeFile(char *path, int argc, char **argv);
 void Imp_fetch(char *source);
 void Imp_index(char *dest, char *src);
 void Imp_remove(char *id);
-void Imp_printEnvironment();
+void Imp_printEnvironment(void);
 
 
 
