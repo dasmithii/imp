@@ -9,7 +9,67 @@
 	<body>
 		<div id="box">
 			<h1><a class='subtle' href='/'>Imp</a>/tutorial.</h1>
-			<p>To be continued...</p>
+
+
+
+			<!-- CLI -->
+			<span id='cli' class='pointer'>The CLI</span>
+
+			<p>Once you've installed <code>imp</code> go ahead and run <code>imp help</code> to display a list of commands including <code>imp</code> and <code>imp &ltfilepath&gt</code>, which, respectively, initiate a REPL and interpret a file. Other commands exist; however, none are required at this point in the tutorial. We will delve deeper below.</p>
+
+
+
+
+			<!-- BASICS -->
+			<span id='basics' class='pointer'>The Basics</span>
+			<p>Syntactically, Imp is quite simple. Object fields are accessed via the colon operator. Expressions are fully parenthesized. And when parenthesis are replaced by curly braces, we have a code block. Similarly, square brackets represent object literals.</p>
+
+			<p>Below is the Imp-specific version of software's greatest cliche.</p>
+
+			<pre>(import 'core/io')
+(io:writeLine 'Hello, world!')</pre>
+
+			<p>The following would produce identical output.</p>
+
+			<pre>(import 'core/io')
+(def sayHello {
+	(io:writeLine 'Hello, world!')
+})
+(sayHello)</pre>
+
+			<p>This is because all we have done is define and execute a function.</p>
+
+			<p>Now, in redundantly object-oriented form, we define a Greater pseudo-type with two methods. The first is '~', which constructs a greater object targeting whoever is specified via argument 0 to the function. The second method is 'greet', which, when called, says hello to its target.</p>
+
+			<pre>(import 'core/io')
+
+(def Greeter [
+	~ {
+		(return [
+			# Greeter
+			target (@:at 0)
+		])
+	}
+
+	greet {
+		(io:writeLine 'Hello,' self:target '!')
+	}
+])
+
+(def g (Greeter:~ 'Jeff'))
+
+(g:greet)</pre>
+
+		
+			<p>Each of these samples are valid programs. Feel free to try them on your machine before moving on.</p>
+
+
+
+
+			<!-- CONTROL STRUCTURES -->
+
+			<span id='control-structures' class='pointer'>Control Structures</span>
+			<p>Standard libraries are found in <code>core/*</code>, by the way. If statements, while loops, and the like, specifically, are under <code>core/control</code>. For general access, use <code>(import 'core/control' self)</code>. That will import all control structures to your calling scope.</p>
 		</div>
 	</body>
 </html>

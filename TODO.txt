@@ -113,4 +113,5 @@ MAYBE:
  + Make number type handle infinite precision integers?, binary,
    and hex, as well as the existing double. Magic.
 
+ + Replace def with := and set with =
 

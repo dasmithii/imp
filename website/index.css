@@ -54,3 +54,30 @@ a.subtle {
 a.subtle:hover {
 	color: red;
 }
+
+
+pre {
+	padding-left: .7cm;
+	padding-top: .2cm;
+	padding-bottom: .2cm;
+	background-color: white;
+}
+
+
+code {
+	background-color: white;
+	padding-left: .1cm;
+	padding-right: .1cm;
+	white-space: nowrap;
+}
+
+
+span.pointer {
+	position: absolute;
+	left: 2cm;
+	z-index: -23;
+}
+
+p {
+	background-color: #E0FFFF;
+}
