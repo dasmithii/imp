@@ -26,6 +26,15 @@ SMALL:
    calling _markRecursively method.
  + Do something to ensure doubles are 64 bits. We assume this in our
    hashCode methods.
+ + Permit in-file C code blocks.
+
+
+DATA STRUCTURES:
+
+ + Hashmap
+   - make it store keys and check for equality.
+ + Set
+ + BST
 
 
 

@@ -65,6 +65,7 @@ pre {
 
 
 code {
+	border-radius: .25cm;
 	background-color: white;
 	padding-left: .1cm;
 	padding-right: .1cm;

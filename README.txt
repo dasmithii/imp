@@ -26,13 +26,13 @@ Tutorial
 
     This is because, in imp, curly braces define code blocks, 
     and because our code block contains only one statement, 
-    parenthesis are implied.
+    parenthesis are implied. 
 
 
 
                        Object Literals
 
-    Arbitrary objects can be formed by surrounding key-value
+    Arbitrary objects are formed by surrounding key-value
     pairs with hard brackets:
 
       >  (def someObject [
@@ -53,12 +53,10 @@ Tutorial
 
                       The Object System
 
-    Imp is dynamic and duck-typed (meaning that there are no
-    compile-time distinctions between object types, and that,
-    instead, objects are permitted wherever they are capable of
-    going). So, essentially, there exists only one type: the
-    object, which contains arbitrary fields that are themselves 
-    nested objects (except in the case of built-in data).
+    Imp is dynamic and duck-typed. There are no compile-time
+    distinctions between objects, which contain arbitrary
+    string keys that map to nested objects (except in the case
+    of built-in data).
 
     Object fields are accessible via the colon operator and are
     most conveniently managed with the built-in 'def', 'set', 
@@ -74,88 +72,39 @@ Tutorial
     Exceptions are thrown when code attempts to access fields
     and methods that do not exist. For example:
 
-      >  (def myObject (#:~))         # Create new object.
+      >  (def myObject [])         # Create new object.
       >  (myObject:nonExistentMethod) # Error!
 
     Methods are defined and called as follows:
 
-      >  (def myObject (#:~))
-      >  (def myObject:greeting 'Hi,')
+      >  (def myObject [greeting 'Hi,'])
       >  (def myObject:greet {
             (io:writeLine self:greeting (@:get 0) '!')
          })
       >  (myObject:greet)
 
-    The 'self' variable is injected into block scope. Likewise
-    is the '@' arguments variable, an array of arbitrary
+    The 'self' variable is injected into scope. Likewise is
+    the '@' arguments variable, an array of arbitrary
     length.
 
     The symbols '#' and '~' stand for "base object" and
     "clone", respectively. The former contains all sorts of
-    functions
-    built in to the Imp interpreter. And the latter is a 
-    primitive operation in prototype-oriented programming. You
-    will see it often.
+    functions built in to the Imp interpreter. And the latter
+    is a primitive operation in prototype-oriented programming.
+    You will see it often.
 
     A select few symbols are used to represent common
     operations. Besides '#' and '~', there is '$', for example,
-    which can be read as "value". It is short for 'copy'. And
-    because all Imp objects are reference objects, (obj:$) is
-    often necessary.
+    which can be read as "value" or "copy", and because all Imp
+    objects are reference types, (obj:$) is often necessary.
 
-
-
-                 Special and Internal Slots
-
-    Where many languages have reserved keywords, imp has a
-    reserved keyword space, which comes in two parts.
-
-    Anything prefixed with a single underscore is considered
-    'special' and should be handled with care. The _collect
-    method, for example, is activated upon garbage collection
-    of the specific object. _mark is activated during the mark
-    phase of mark & sweep garbage collection. Then their is
-    _each and _begin and others. The interpreter and standard
-    library have the power to access and activate these 
-    special slots, so don't make slots special unless you 
-    intend on capitalizing on something like a foreach loop,
-    iterators, or activat-able objects.
-    
-    Double underscore prefixes are indicative of internal 
-    slots which, in function, are no different than special
-    slots. However their is a key difference: internal slots
-    store internal data, rather than objects. Accordingly, one
-    cannot access them from within the Imp interpreter. Only C
-    functions can access them. Regardless of access, though,
-    all slot names of an object can be listed as follows:
-
-      >  (io:writeLine (someObject:slotNames))
-    
-
-
-
-Object Activation
-
-    The process of object activation, whether in a function call
-    or macro expansion, is as follows:
-
-      1. If object has an '_activate' field, that field is
-         executed as a method on its parent object.
-
-      2. If object has an '__activate' (double underscore)
-         internal field, it is assumed that this field points to
-         a C function, which is executed with the arguments: (1)
-         runtime, (2) context, (3) calling object, (4) argc, and
-         (5) argv.
-
-      3. An error is thrown. Object cannot be activated.
- 
 
 
 
 Installation
 
-    Note: Windows is not supported.
+    Note: Windows is not supported. Linux probably isn't
+    either. I've only tested on my Mac thus far.
     
     1. Clone this repository.
     2. Enter root directory.
@@ -167,39 +116,28 @@ Installation
 
 
 
-Disclaimer
+Status
 
-    Note that Imp remains in early-stage development. The
-    language, though usable, is incomplete and quite rough
-    around the edges. There are many bugs; documentation is
-    scarce; and API changes ought to be expected. Accordingly, 
-    serious projects should choose a more mature language to
-    work with. No guarantee here (see LICENSE.txt).
+    Despite being slow and in need of space-optimization, the
+    interpreter is functional. It is also extensible (via .c
+    file imports). However, this early stage leaves us with a
+    scarcity of modules. Therefor many expectedly-trivial
+    Imp programs will require programmers to write C code. 
+
+    What we HAVE: garbage collection, control structures,
+    object literals, function blocks, function calls, variable
+    definitions, an I/O library, some basic data structures,
+    string manipulation functions, math stuff. Check /core for
+    the standard library.
+
+    What we DON'T have: networking, graphics, and mostly
+    everything else.
 
 
 
 
-Manifesto 
+Etymology 
 
     The word "imp" is defined as "a mischievous child" and 
     doubles as the acronym: I Make Programs. It is also a 
-    substring of "simple". 
-
-    I hope that users of Imp will write code with this etymology
-    in mind. Mess with language internals if you'd like. And
-    please, don't worry about breaking things, because to hyper-
-    focus on "idioms" and "best practices" is to abandon your 
-    potential as as programmer. To look to others for hints is
-    fine, but intellectual dependence is no good. So think like
-    a child and play around. Code instinctively. Experiment!
-    That's how learning is done. Things are more fun that way,
-    too.
-
-    Mistakes are inevitably made, of course. However, if you
-    trust yourself, eventually you may deserve to be trusted.
-    Contrarily, self-doubt brings about nothing but hesitance 
-    and mediocrity. And so, like a young bird, you must 
-    take a faithful leap. Only in the hands of gravity will you
-    realize your true potential - flight (or not). I encourage
-    you to take your leap if you haven't already.
-
+    substring of "simple". That's the best I could do.

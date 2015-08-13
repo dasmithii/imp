@@ -20,9 +20,8 @@ Anecdote (name explanation)
     a new life. Dust clears, injuries heal, and he grows
     self-aware. He understands, over time, how
     "close enough" only applies to horseshoes and 
-    hand-grenades. Because walls are equivalent to neither
-    horseshoes nor hand-grenades, his collision, as he
-    learns, means little in the larger scheme of things.
+    hand-grenades. Because walls are equivalent to neither,
+    his collision, as he learns, matters not.
 
     The imp skirted death, just barely, and now he is
     free, having escaped with many lifetimes worth of
