@@ -130,8 +130,8 @@ Status
     string manipulation functions, math stuff. Check /core for
     the standard library.
 
-    What we DON'T have: networking, graphics, and mostly
-    everything else.
+    What we DON'T have: networking, graphics, concurrency, and
+    mostly everything else.
 
 
 
