@@ -48,7 +48,7 @@ iObject *iRuntime_simpleClone(iRuntime *self, iObject *base);
 iObject *iRuntime_cloneField(iRuntime *self, char *name);
 
 // T should be Object/Number/String/Vector/Closure/Route
-#define iRuntime_MAKE(R, T) iRuntime_clone(R, R->T)
+#define iRuntime_MAKE(R, T) iRuntime_clone(R, (R)->T)
 
 
 //// code execution

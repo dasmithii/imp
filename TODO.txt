@@ -1,9 +1,3 @@
-URGENT:
- + Fix REPL 'def' calls. They are broken because of the 
-   injected try/catch.
-
-
-
 BIG:
  + Concurrency.
  + Exceptions.

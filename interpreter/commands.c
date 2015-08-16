@@ -10,6 +10,7 @@
 #include <setjmp.h>
 
 #include <imp/runtime.h>
+#include <imp/c.h>
 
 #include "commands.h"
 #include "version.h"
@@ -101,21 +102,49 @@ static void onsigint(int sig){
 }
 
 
+static bool esc = false;
+
+static iObject *activator_(iRuntime *runtime
+	                     , iObject *context
+	                     , iObject *self
+	                     , int argc
+	                     , iObject **argv){
+	char *command = NULL;
+
+	for(;;){
+		if(isatty(fileno(stdin))){
+			printf(" > ");
+		}
+
+		if(!readCommand(&command)){
+			esc = true;
+			break;
+		}
+		iRuntime_executeSource(runtime, command);
+	}
+
+	if(command){
+		free(command);
+	}
+	return NULL;
+}
+
 
 void Imp_launchREPL(void){
-	const char *const prefix = "(exceptions:try {";
-	const char *const postfix = "} {io:writeLine 'Uncaught exception:' (@:at 0) '!!!'})";
-	const size_t prefixLen = strlen(prefix);
-	const size_t postfixLen = strlen(postfix);
-
-
-	volatile iRuntime runtime;
+	iRuntime runtime;
 	iRuntime_init((iRuntime*) &runtime, root, 0, NULL);
+
+	iObject *block = iRuntime_MAKE(&runtime, Closure);
+	iRuntime_registerCMethod(&runtime
+	                       , block
+                           , "_activate"
+                           , activator_);
+
 
 	iRuntime_executeSource((iRuntime*) &runtime, "(import 'core/exceptions')");
 	iRuntime_executeSource((iRuntime*) &runtime, "(import 'core/io')");
+	iObject_putShallow((&runtime)->root_scope, "_repl", block);
 
-	volatile char *volatile command = NULL;
 
 	if(isatty(fileno(stdin))){
 		printf("\n"
@@ -129,31 +158,20 @@ void Imp_launchREPL(void){
 	}
 
 	for(;;){
-		if(isatty(fileno(stdin))){
-			printf(" > ");
-		}
-
 		if(!setjmp(intbuf)){
-			if(!readCommand((char**) &command)){
+
+			iRuntime_executeSource((iRuntime*)&runtime, ""
+				"(exceptions:try {"
+				"	(_repl)"
+	    		"} {io:writeLine 'Uncaught exception:' (@:at 0) '!!!'})");
+
+			if(esc){
 				break;
 			}
-
-			char *inTry = malloc(prefixLen + postfixLen + strlen((char*)command) + 1);
-			if(!inTry){
-				abort();
-			}
-			sprintf(inTry, "%s%s%s", prefix, command, postfix);
-			iRuntime_executeSource((iRuntime*)&runtime, inTry);
 		}
  
 		// TODO: check for exceptions
 		// TODO: print output if not null
-	}
-
-	// TODO: clean runtime
-
-	if(command){
-		free((void*)command);
 	}
 }
 
