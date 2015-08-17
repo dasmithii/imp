@@ -267,18 +267,20 @@ void Imp_printUsage(void){
 	"\tImp - the programming language.";
 
 	const char *const usage = 
-	"\tusage:"
-	"\n\t	imp ---------------------- Launch REPL."
-	"\n\t	imp <path> --------------- Interpret file."
-	"\n\t	imp index <path> <as> ---- Include local module in registry."
-	"\n\t	imp remove <id> ---------- Remove package from registry."
-	"\n\t	imp install <id> --------- Install project globally."
-	"\n\t	imp help ----------------- Display this text."
-	"\n\t	imp environment ---------- Check version and stuff.";
+	"\tcommands:"
+	"\n\t	--------------------------- Launch REPL."
+	"\n\t	<path> -------------------- Interpret file."
+	"\n\t	-i, --index <module> ------ Include local module in registry."
+	"\n\t	-u, --unindex <module> ---- Remove package from registry."
+	"\n\t	-h, --help ---------------- Display this text."
+	"\n\t	-v, --version ------------- Check version and stuff.";
 
 	const char *const options = 
-		"\toptions:"
-	"\n\t	-r <path> ---------------- Specify package registry location.";
+	"\toptions:"
+	"\n\t	-r, --root <path> --------- Specify package registry location."
+	"\n\t	-f, --from-root ----------- Prefix given filepath with ${root}/index."
+	"\n\t	-d, --destination <x> ----- Specify index/<x> destination.";
+
 
 	printf("\n%s\n\n%s\n\n%s\n\n", intro, usage, options);
 }

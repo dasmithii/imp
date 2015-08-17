@@ -176,7 +176,7 @@ install:
 	@$(CC) $(CFLAGS) $(INCLUDES) -fPIC -shared -o $(IMP_ROOT)/imp.so `find $(INTERPRETER_PATH)/imp -name "*.c" -type f`
 	
 	@echo "Indexing standard library..."
-	@imp index core $(SOURCE_PATH)/core
+	@imp -i $(SOURCE_PATH)/core -d core
 	
 
 

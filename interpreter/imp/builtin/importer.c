@@ -319,7 +319,7 @@ static iObject *importWithoutUsingCache(iRuntime *runtime, char *modulePath, iOb
 	iObject *r = iRuntime_MAKE(runtime, Object);
 	iObject_reference(r); // permanent reference (modules aren't ever collected)
 
-	char buf[128]; // buffer for trying different extentions
+	char buf[256]; // buffer for trying different extentions
 
 	// Try importing local package.
 	if(isDirectory(modulePath)){
