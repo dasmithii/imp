@@ -103,10 +103,10 @@ Tutorial
 
 Installation
 
-    Note: Windows is not supported. Linux probably isn't
-    either. I've only tested on my Mac thus far.
+    Note: I've only compiled on my Mac thus far. No promises
+    (yet).
     
-    1. Clone this repository.
+    1. Clone this repository, or, download a release.
     2. Enter root directory.
     3. `make release`
     4. `make install`
