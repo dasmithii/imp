@@ -114,6 +114,12 @@ Installation
     `imp` will now be available in your command line.
 
 
+    Note 2: releases are (and will always be) signed by my
+    gpg key, which is available here:
+
+      https://gist.github.com/dasmithii/2028b1d6ae6870c6c7f2
+
+
 
 
 Status
