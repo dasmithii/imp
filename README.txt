@@ -8,7 +8,6 @@ OVERVIEW
 
 
 
-
 TUTORIAL
 
     Above, we import the standard 'io' module and call its 
@@ -48,7 +47,6 @@ TUTORIAL
                  field 'I am a field'
              ]
          ])
-
 
 
                       The Object System
@@ -99,7 +97,6 @@ TUTORIAL
 
 
 
-
 INSTALLATION
 
       >  git clone git@github.com:dasmithii/imp.git
@@ -108,7 +105,6 @@ INSTALLATION
       >  make install
 
     `imp` will now be available on your command line.
-
 
 
 
